@@ -1287,8 +1287,6 @@
 
 <div id="notif-area"></div>
 
-<div id="fps-counter" style="position:fixed;top:12px;right:12px;padding:6px 10px;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);font-family:'Courier Prime',monospace;font-size:11px;color:#88ff88;pointer-events:none;z-index:999;">FPS: <span id="fps-value">60</span></div>
-
 <div id="bodily-meters" style="display:none;">
   <div class="bm-wrap">
     <div class="bm-label">Piss 💛</div>
@@ -7839,13 +7837,13 @@ function updateFishingMinigame(dt){
   const zoneRight=fg.zone.left+fg.zone.width;
   const inZone=(fg.cursor>=fg.zone.left&&fg.cursor<=zoneRight);
   
-  // Progress: goes UP when in zone, NEVER goes down (easier mode)
+  // Progress: goes UP when in zone, goes DOWN 3x faster when out of zone
   if(inZone){
     fg.inZoneTime+=dt;
     fg.outZoneTime=Math.max(0,fg.outZoneTime-dt);
   } else {
     fg.outZoneTime+=dt;
-    // Progress no longer drains - easier mode!
+    fg.inZoneTime=Math.max(0,fg.inZoneTime-dt*3.0); // Drain 3x faster than fill
   }
   
   const progress=Math.min(100,(fg.inZoneTime/fg.requiredTime)*100);
@@ -8320,23 +8318,10 @@ function updateDay(dt){
 // ─── MAIN LOOP ─────────────────────────────────────────────────────────────────
 const clock=new THREE.Clock();
 let elapsed=0;
-let fpsFrames=0;
-let fpsTime=0;
 function animate(){
   requestAnimationFrame(animate);  // single rAF call — no duplicate at bottom
   const dt=Math.min(clock.getDelta(),.05);
   elapsed+=dt;
-  
-  // FPS counter update
-  fpsFrames++;
-  fpsTime+=dt;
-  if(fpsTime>=0.5){
-    const fps=Math.round(fpsFrames/fpsTime);
-    const fpsEl=document.getElementById('fps-value');
-    if(fpsEl) fpsEl.textContent=fps;
-    fpsFrames=0;
-    fpsTime=0;
-  }
 
   waterMat.uniforms.uTime.value=elapsed;
   waterMat.uniforms.uCamPos.value.copy(camera.position);
