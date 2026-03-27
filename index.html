@@ -7697,12 +7697,6 @@ function updateBobberPhysics(dt){
   bobberGroup.rotation.x+=dt*4;
   updateLine(Game.bobberPos);
 
-  // Land collision check
-  const terrH=getTerrainHeight(Game.bobberPos.x,Game.bobberPos.z);
-  if(terrH>0.08&&Game.bobberPos.y<=terrH+0.1){
-    showNotif('Land!','#ff8844');
-    clearLine(); Game.state='idle'; return;
-  }
   // Water collision (sea level y≈0, keep bobber visible above waves)
   if(Game.bobberPos.y<=0.12){
     Game.bobberInFlight=false;
@@ -7714,6 +7708,13 @@ function updateBobberPhysics(dt){
     }
     Game.bobberPos.y=0.12;
     bobberGroup.position.copy(Game.bobberPos);
+    
+    // Land collision check at FINAL position (after snap)
+    const terrH=getTerrainHeight(Game.bobberPos.x,Game.bobberPos.z);
+    if(terrH>0.08){
+      showNotif('Bobber landed on shore — reel in and try again.','#ff8844');
+      clearLine(); Game.state='idle'; return;
+    }
     
     Game.bobberVelocity.set(0,0,0);
     bobberGroup.rotation.x=0;
