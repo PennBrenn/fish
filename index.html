@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>fih🥀</title>
+<title>fishing simulator but you have to piss and are gay</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -22,11 +22,7 @@
   .stat { display:flex; justify-content:space-between; gap:12px; font-size:10px; margin:2px 0; color:#99aabb; }
   .stat span:last-child { color:var(--cream); font-weight:700; }
 
-  /* CONTROLS */
-  #controls-panel { position:fixed; top:12px; right:12px; padding:8px 12px; font-size:9px; color:rgba(180,200,220,0.7); line-height:1.8; transform-origin:top right; }
-  #controls-panel .key { color:var(--accent); font-weight:700; }
-  #controls-panel h3 { color:var(--accent); font-size:9px; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
-
+  
   /* POWER BAR */
   #cast-power-bar { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); width:280px; display:none; flex-direction:column; align-items:center; gap:6px; padding:12px 18px; }
   #cast-power-bar label { font-size:10px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
@@ -111,7 +107,7 @@
   #rod-shop .dismiss { font-size:11px; letter-spacing:2px; color:rgba(200,200,220,0.4); margin-top:6px; }
 
   /* NOTIFICATIONS */
-  #notif-area { position:fixed; top:50%; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
+  #notif-area { position:fixed; top:20px; right:20px; display:flex; flex-direction:column; align-items:flex-end; gap:8px; pointer-events:none; }
   .notif { background:rgba(10,20,35,0.9); border:1px solid var(--border); padding:8px 18px; font-size:13px; color:var(--cream); animation:notifPop .25s ease; white-space:nowrap; }
   @keyframes notifPop { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
@@ -150,13 +146,12 @@
 
   /* VHS OVERLAY */
   #vhs-overlay { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:993; }
-  #vhs-scanlines { position:absolute; inset:0; background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events:none; }
-  #vhs-flicker { position:absolute; inset:0; background:transparent; opacity:0; pointer-events:none; animation:vhsFlicker 0.15s infinite; }
-  @keyframes vhsFlicker { 0%,100%{opacity:0;} 50%{opacity:0.02;background:rgba(255,255,255,0.02);} }
-  #vhs-chroma { position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:0; }
+  #vhs-scanlines { display:block; opacity:0.15; }
+  #vhs-flicker { display:block; opacity:0.08; }
+  #vhs-chroma { display:block; opacity:0.05; }
 
   /* PILE */
-  #pile-panel { position:fixed; bottom:16px; left:220px; padding:12px 14px; max-width:240px; display:none; }
+  #pile-panel { position:fixed; bottom:35px; left:220px; padding:12px 14px; max-width:240px; display:none; }
   #pile-panel h3 { font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:6px; }
   #pile-emojis { font-size:18px; line-height:1.5; word-break:break-all; max-height:80px; overflow:hidden; }
 
@@ -179,7 +174,7 @@
   #breach-qte { animation:qteGlow 1s ease-in-out infinite; }
 
   /* LINE */
-  #line-indicator { position:fixed; bottom:70px; right:230px; padding:12px 16px; display:none; font-size:11px; }
+  #line-indicator { position:fixed; bottom:170px; right:230px; padding:12px 16px; display:none; font-size:11px; }
   #depth-bar-wrap { width:100px; height:5px; background:rgba(255,255,255,0.08); border:1px solid var(--border); margin-top:4px; }
   #depth-fill { height:100%; width:0%; background:var(--gold); transition:width .3s; }
   
@@ -260,30 +255,32 @@
   <div id="vhs-chroma"></div>
 </div>
 
-<div id="main-menu" style="position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0a0806 0%,#1a1410 50%,#0a0806 100%);z-index:10000;opacity:1;transition:opacity 0.5s;">
-  <div style="text-align:center;">
-    <div style="font-family:'Playfair Display',serif;font-size:72px;color:var(--gold);margin-bottom:10px;text-shadow:0 4px 12px rgba(0,0,0,0.8),0 0 40px rgba(201,168,76,0.3);animation:titleFloat 3s ease-in-out infinite;">
-      🎣 THE LAKE
+<div id="main-menu" style="position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:transparent;z-index:10000;opacity:1;transition:opacity 0.5s;">
+  <div id="menu-bg-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(12px);"></div>
+  <div style="text-align:center;position:relative;z-index:1;">
+    <div style="font-family:'Playfair Display',serif;font-size:52px;color:var(--gold);margin-bottom:6px;text-shadow:0 4px 12px rgba(0,0,0,0.8),0 0 40px rgba(201,168,76,0.3);animation:titleFloat 3s ease-in-out infinite;line-height:1.2;">
+      fishing simulator<br><span style="font-size:22px;color:rgba(201,168,76,0.6);letter-spacing:4px;">but you have to piss and are gay</span>
     </div>
-    <div style="font-family:'Playfair Display',serif;font-size:20px;color:rgba(201,168,76,0.5);margin-bottom:50px;letter-spacing:6px;">
-      A Fishing Experience
+    <div style="font-family:'Playfair Display',serif;font-size:14px;color:rgba(201,168,76,0.35);margin-bottom:20px;letter-spacing:6px;">
+      STILLWATER LAKE
+    </div>
+    <div style="font-family:'Courier Prime',monospace;font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:30px;letter-spacing:1px;line-height:1.4;">
+      Sponsored by: A little useless bread to the left (tm)<br>
+      Chris is gay and lives with sam (tm)
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:14px;color:rgba(201,168,76,0.35);margin-bottom:40px;letter-spacing:6px;">
+      A DEEPLY IMPORTANT EXPERIENCE
     </div>
     
-    <div style="display:flex;flex-direction:column;gap:15px;margin-bottom:40px;">
-      <button onclick="startNewGame()" class="main-menu-btn" style="animation-delay:0.1s;">
-        <span style="font-size:18px;">⚓</span> NEW GAME
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:40px;">
+      <button onclick="openMultiplayerMenu()" class="main-menu-btn" style="animation-delay:0.1s;">
+        MULTIPLAYER
       </button>
-      <button onclick="continueGame()" class="main-menu-btn" id="continue-btn" style="animation-delay:0.2s;">
-        <span style="font-size:18px;">📖</span> CONTINUE
+      <button onclick="startNewGame()" class="main-menu-btn" style="animation-delay:0.2s;">
+        SINGLEPLAYER
       </button>
       <button onclick="openMainMenuSettings()" class="main-menu-btn" style="animation-delay:0.3s;">
-        <span style="font-size:18px;">⚙️</span> SETTINGS
-      </button>
-      <button onclick="showCredits()" class="main-menu-btn" style="animation-delay:0.4s;">
-        <span style="font-size:18px;">ℹ️</span> ABOUT
-      </button>
-      <button onclick="openMultiplayerMenu()" class="main-menu-btn" style="animation-delay:0.5s;">
-        <span style="font-size:18px;">🌐</span> MULTIPLAYER
+        SETTINGS
       </button>
     </div>
     
@@ -359,7 +356,7 @@
   <div class="stat"><span>Best</span><span id="best-weight">—</span></div>
   <div class="stat"><span>Total lbs</span><span id="total-weight">0.0</span></div>
   <div class="stat"><span>Casts</span><span id="cast-count">0</span></div>
-  <div class="stat"><span>Perfect Casts ⭐</span><span id="perfect-count">0</span></div>
+  <div class="stat"><span>Perfect Casts</span><span id="perfect-count">0</span></div>
   <div class="stat"><span>Species</span><span id="species-count">0</span></div>
   <div class="stat"><span>Times Pissed</span><span id="piss-count">0</span></div>
   <div class="stat"><span>Times Shat</span><span id="shit-count">0</span></div>
@@ -367,19 +364,6 @@
   <div class="stat"><span>Rods</span><span id="rod-count">1</span></div>
 </div>
 
-<div id="controls-panel" class="panel">
-  <h3>Controls</h3>
-  <span class="key">WASD</span> Move<br>
-  <span class="key">CLICK+HOLD</span> Cast power<br>
-  <span class="key">SPACE</span> Hook / dismiss<br>
-  <span class="key">R</span> Reel / Pin<br>
-  <span class="key">F</span> Punch fish<br>
-  <span class="key">ESC</span> Pause<br>
-  <span class="key">C</span> Encyclopedia<br>
-  <span class="key">P</span> Piss 💛<br>
-  <span class="key">O</span> Shit 💩<br>
-  <span class="key">G</span> Fart 💨
-</div>
 
 <div id="xp-panel" class="panel" style="position:fixed;top:16px;right:230px;padding:10px 16px;display:flex;flex-direction:column;gap:4px;">
   <div style="font-size:10px;letter-spacing:2px;color:var(--gold);">LEVEL <span id="player-level">1</span></div>
@@ -389,40 +373,37 @@
   <div style="font-size:9px;color:rgba(200,220,230,0.6);"><span id="player-xp">0</span>/<span id="xp-next">100</span> XP</div>
 </div>
 
-<div id="weather-panel" class="panel" style="position:fixed;bottom:130px;left:16px;padding:8px 14px;font-size:12px;">
+<div id="weather-panel" class="panel" style="position:fixed;bottom:180px;left:16px;padding:8px 14px;font-size:12px;">
   <div style="color:var(--gold);font-size:10px;letter-spacing:2px;">WEATHER</div>
   <div id="weather-display" style="font-size:14px;margin-top:4px;">☀️ CLEAR</div>
-  <div id="bait-display" style="font-size:10px;color:#88aa88;margin-top:6px;">Bait: 🪱 Worm</div>
+  <div id="bait-display" style="font-size:10px;color:#88aa88;margin-top:6px;">Bait: Worm</div>
 </div>
 
-<div id="status-panel" class="panel" style="position:fixed;bottom:200px;left:16px;padding:8px 14px;display:none;max-width:180px;">
+<div id="status-panel" class="panel" style="position:fixed;bottom:230px;left:16px;padding:8px 14px;display:none;max-width:180px;">
   <div style="color:#ffaa00;font-size:10px;letter-spacing:2px;">STATUS EFFECTS</div>
   <div id="status-list" style="font-size:11px;margin-top:4px;line-height:1.6;"></div>
 </div>
 
-<div id="line-tension-panel" class="panel" style="position:fixed;bottom:70px;right:230px;padding:10px 16px;display:none;">
+<div id="line-tension-panel" class="panel" style="position:fixed;bottom:130px;right:230px;padding:10px 16px;display:none;">
   <div style="font-size:10px;letter-spacing:2px;color:#ffaa00;margin-bottom:4px;">LINE TENSION</div>
   <div style="width:100px;height:10px;background:rgba(0,0,0,0.5);border:1px solid var(--border);">
     <div id="tension-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4aff4a,#ffaa00,#ff8800);transition:width 0.1s;"></div>
   </div>
 </div>
 
-<div id="pause-menu" class="panel" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;align-items:center;gap:12px;padding:40px 60px;border:2px solid var(--gold);z-index:300;background:linear-gradient(135deg,#1a1410,#2a1a10);backdrop-filter:blur(10px);min-width:400px;">
-  <h2 style="font-family:'Playfair Display',serif;font-size:42px;color:var(--gold);margin-bottom:5px;text-shadow:0 2px 8px rgba(0,0,0,0.6);">⏸️ PAUSED</h2>
-  <div style="font-size:11px;color:rgba(200,210,230,0.5);margin-bottom:20px;letter-spacing:2px;">THE LAKE</div>
+<div id="pause-menu" class="panel" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;align-items:center;gap:12px;padding:40px 60px;border:2px solid var(--gold);z-index:300;background:rgba(8,12,20,0.85);backdrop-filter:blur(16px);min-width:420px;">
+  <h2 style="font-family:'Playfair Display',serif;font-size:36px;color:var(--gold);margin-bottom:5px;text-shadow:0 2px 8px rgba(0,0,0,0.6);">PAUSED</h2>
+  <div style="font-size:11px;color:rgba(200,210,230,0.5);margin-bottom:20px;letter-spacing:2px;">FISHING SIMULATOR</div>
   
   <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
     <button onclick="togglePause()" class="pause-menu-btn" style="background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);">
-      <span style="font-size:16px;">▶️</span> RESUME <span style="opacity:0.5;font-size:11px;margin-left:auto;">ESC</span>
-    </button>
-    <button onclick="saveGame()" class="pause-menu-btn">
-      <span style="font-size:16px;">💾</span> SAVE GAME
-    </button>
-    <button onclick="loadGame()" class="pause-menu-btn">
-      <span style="font-size:16px;">📂</span> LOAD GAME
+      RESUME <span style="opacity:0.5;font-size:11px;margin-left:auto;">ESC</span>
     </button>
     <button onclick="openGraphicsSettings()" class="pause-menu-btn">
-      <span style="font-size:16px;">⚙️</span> GRAPHICS
+      GRAPHICS
+    </button>
+    <button onclick="returnToMenuPrompt()" class="pause-menu-btn" style="border-color:rgba(200,80,80,0.4);color:#ff8888;">
+      RETURN TO MENU
     </button>
   </div>
   
@@ -432,10 +413,114 @@
     <div style="font-size:10px;color:rgba(200,210,230,0.4);margin-top:4px;text-align:center;">Mouse Sensitivity: <span id="sens-value">1.0</span></div>
   </div>
   
-  <div style="margin-top:15px;font-size:10px;color:rgba(200,210,230,0.4);text-align:center;line-height:1.6;">
-    <div style="margin-bottom:6px;">⌨️ Quick Keys:</div>
-    <div>I - Inventory • K - Tackle Box • C - Encyclopedia</div>
-    <div>M - Maintenance • N - Radio • T - Sit</div>
+    <div style="font-size:11px;color:var(--gold);margin-bottom:8px;letter-spacing:2px;">CONTROLS</div>
+    <div style="font-size:10px;color:rgba(200,210,230,0.5);line-height:1.8;columns:2;column-gap:20px;">
+      <div><span style="color:var(--gold);">WASD</span> Move</div>
+      <div><span style="color:var(--gold);">SHIFT</span> Sprint</div>
+      <div><span style="color:var(--gold);">MOUSE</span> Look</div>
+      <div><span style="color:var(--gold);">CLICK+HOLD</span> Cast</div>
+      <div><span style="color:var(--gold);">SPACE</span> Hook/Dismiss</div>
+      <div><span style="color:var(--gold);">R</span> Reel/Pin</div>
+      <div><span style="color:var(--gold);">F</span> Punch</div>
+      <div><span style="color:var(--gold);">P</span> Piss</div>
+      <div><span style="color:var(--gold);">O</span> Shit</div>
+      <div><span style="color:var(--gold);">G</span> Fart</div>
+      <div><span style="color:var(--gold);">B</span> Boat</div>
+      <div><span style="color:var(--gold);">L</span> Flesh Light</div>
+      <div><span style="color:var(--gold);">E</span> Eat Bait</div>
+      <div><span style="color:var(--gold);">V</span> Drink Water</div>
+    </div>
+  </div>
+  
+  <div style="margin-top:15px;padding:15px;background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.2);border-radius:4px;width:100%;">
+    <div style="font-size:11px;color:var(--gold);margin-bottom:8px;letter-spacing:1px;">SENSITIVITY</div>
+    <input type="range" min="0.5" max="2" step="0.1" value="1" id="sens-slider" style="width:100%;"/>
+    <div style="font-size:10px;color:rgba(200,210,230,0.4);margin-top:4px;text-align:center;">Mouse Sensitivity: <span id="sens-value">1.0</span></div>
+  </div>
+  
+  <div style="margin-top:15px;padding:15px;background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.2);border-radius:4px;width:100%;">
+    <div style="font-size:11px;color:var(--gold);margin-bottom:8px;letter-spacing:2px;">CONTROLS</div>
+    <div style="font-size:10px;color:rgba(200,210,230,0.5);line-height:1.8;columns:2;column-gap:20px;">
+      <div><span style="color:var(--gold);">WASD</span> Move</div>
+      <div><span style="color:var(--gold);">SHIFT</span> Sprint</div>
+      <div><span style="color:var(--gold);">MOUSE</span> Look</div>
+      <div><span style="color:var(--gold);">CLICK+HOLD</span> Cast</div>
+      <div><span style="color:var(--gold);">SPACE</span> Hook/Dismiss</div>
+      <div><span style="color:var(--gold);">R</span> Reel/Pin</div>
+      <div><span style="color:var(--gold);">F</span> Punch</div>
+      <div><span style="color:var(--gold);">P</span> Piss</div>
+      <div><span style="color:var(--gold);">O</span> Shit</div>
+      <div><span style="color:var(--gold);">G</span> Fart</div>
+      <div><span style="color:var(--gold);">B</span> Boat</div>
+      <div><span style="color:var(--gold);">L</span> Flesh Light</div>
+      <div><span style="color:var(--gold);">Tab</span> Leaderboard</div>
+      <div><span style="color:var(--gold);">ESC</span> Pause</div>
+      <div><span style="color:var(--gold);">I</span> Inventory</div>
+      <div><span style="color:var(--gold);">K</span> Tackle</div>
+      <div><span style="color:var(--gold);">C</span> Encyclopedia</div>
+      <div><span style="color:var(--gold);">M</span> Maintenance</div>
+      <div><span style="color:var(--gold);">N</span> Radio</div>
+      <div><span style="color:var(--gold);">X</span> Beer</div>
+      <div><span style="color:var(--gold);">E</span> Eat</div>
+      <div><span style="color:var(--gold);">V</span> Drink</div>
+    </div>
+  </div>
+  
+  <button onclick="closeGraphicsSettings()" style="margin-top:20px;padding:10px 30px;width:100%;background:var(--ui-bg);color:var(--gold);border:1px solid var(--border);cursor:pointer;font-family:'Courier Prime',monospace;">BACK</button>
+</div>
+
+<div id="instructions" class="panel" style="display:none;">
+  <h3>Controls</h3>
+  <span class="key">WASD</span> Move<br>
+  <span class="key">Shift</span> Sprint<br>
+  <span class="key">CLICK</span> Cast<br>
+  <span class="key">SPACE</span> Hook set<br>
+  <span class="key">R</span> Reel<br>
+  <span class="key">F</span> Punch<br>
+  <span class="key">P</span> Piss<br>
+  <span class="key">O</span> Shit<br>
+  <span class="key">G</span> Fart<br>
+  <span class="key">B</span> Boat<br>
+  <span class="key">L</span> Flesh Light<br>
+  <span class="key">Tab</span> Leaderboard<br>
+  <span class="key">ESC</span> Pause<br>
+  <span class="key">I</span> Inventory<br>
+  <span class="key">K</span> Tackle Box<br>
+  <span class="key">C</span> Encyclopedia<br>
+  <span class="key">M</span> Maintenance<br>
+  <span class="key">N</span> Radio<br>
+  <span class="key">X</span> Beer<br>
+  <span class="key">E</span> Eat Bait<br>
+  <div style="text-align:center;font-size:11px;color:rgba(200,210,230,0.5);margin-top:10px;">Press I to close • Click item for actions</div>
+</div>
+
+<!-- Menu list bar at bottom -->
+<div id="menu-bar" style="position:fixed;bottom:0;left:0;right:0;height:24px;background:rgba(8,16,28,0.75);backdrop-filter:blur(6px);border-top:1px solid rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;gap:16px;font-family:'Courier Prime',monospace;font-size:9px;color:rgba(200,220,240,0.7);z-index:150;pointer-events:none;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="color:var(--gold);">ESC</span><span>Pause</span>
+    <span style="color:var(--gold);">I</span><span>Inventory</span>
+    <span style="color:var(--gold);">K</span><span>Tackle</span>
+    <span style="color:var(--gold);">C</span><span>Encyclopedia</span>
+    <span style="color:var(--gold);">M</span><span>Maintenance</span>
+    <span style="color:var(--gold);">N</span><span>Radio</span>
+    <span style="color:var(--gold);">X</span><span>Beer</span>
+    <span style="color:var(--gold);">E</span><span>Eat</span>
+    <span style="color:var(--gold);">L</span><span>Cooler</span>
+    <span style="color:var(--gold);">H</span><span>Phone</span>
+    <span style="color:var(--gold);">J</span><span>Journal</span>
+    <span style="color:var(--gold);">Q</span><span>Smoke</span>
+    <span style="color:var(--gold);">V</span><span>Drink</span>
+    <span style="color:var(--gold);">Y</span><span>Answer</span>
+    <span style="color:var(--gold);">F1</span><span>Watch</span>
+    <span style="color:var(--gold);">Tab</span><span>Leaderboard</span>
+    <span style="color:var(--gold);">T</span><span>Chest</span>
+    <span style="color:var(--gold);">U</span><span>Anchor</span>
+    <span style="color:var(--gold);">B</span><span>Boat</span>
+    <span style="color:var(--gold);">1-3</span><span>Tools</span>
+    <span style="color:var(--gold);">4-7</span><span>Campfire</span>
+    <span style="color:var(--gold);">Shift+Z</span><span>Scatter</span>
+    <span style="color:var(--gold);">W</span><span>Worm</span>
+    <span style="color:var(--gold);">Shift</span><span>Sprint</span>
   </div>
 </div>
 
@@ -690,9 +775,9 @@
 </style>
 
 <div id="tackle-box-ui" class="panel" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;width:500px;padding:20px 30px;border:2px solid #8b4513;z-index:300;">
-  <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:#d4a574;margin-bottom:15px;">🎣 Tackle Box</h2>
+  <h2 style="font-family:'Playfair Display',serif;font-size:24px;color:#d4a574;margin-bottom:15px;">Tackle Box</h2>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;">
-    <button onclick="selectBait('worm')" class="bait-btn">🪱 Worm</button>
+    <button onclick="selectBait('worm')" class="bait-btn">Worm</button>
     <button onclick="selectBait('minnow')" class="bait-btn">🐟 Minnow</button>
     <button onclick="selectBait('cheese')" class="bait-btn">🧀 Cheese</button>
     <button onclick="selectBait('corn')" class="bait-btn">🌽 Corn</button>
@@ -723,54 +808,37 @@
 
 <div id="atmosphere-panel" class="panel" style="position:fixed;bottom:380px;left:16px;padding:8px 14px;font-size:11px;max-width:160px;">
   <div style="color:#88aacc;font-size:10px;letter-spacing:2px;margin-bottom:6px;">ATMOSPHERE</div>
-  <div id="mosquito-count" style="margin:3px 0;display:none;">🦟 Mosquitoes: <span>0</span></div>
-  <div id="fog-indicator" style="margin:3px 0;display:none;">🌫️ Fog: <span>0</span>%</div>
-  <div id="campfire-status" style="margin:3px 0;display:none;">🔥 Fire: <span>0</span>%</div>
-  <div id="stillness-bonus" style="margin:3px 0;">🧘 Stillness: <span>1.0</span>x</div>
+  <div id="mosquito-count" style="margin:3px 0;display:none;">Mosquitoes: <span>0</span></div>
+  <div id="fog-indicator" style="margin:3px 0;display:none;">Fog: <span>0</span>%</div>
+  <div id="campfire-status" style="margin:3px 0;display:none;">Fire: <span>0</span>%</div>
+  <div id="stillness-bonus" style="margin:3px 0;">Stillness: <span>1.0</span>x</div>
 </div>
 
-<div id="analog-dashboard" style="position:fixed;bottom:20px;right:20px;width:620px;height:360px;background:linear-gradient(135deg,#4a3a28,#3a2a18);border:4px solid #2a1a08;border-radius:8px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.6),inset 0 2px 4px rgba(255,255,255,0.1);font-family:'Courier Prime',monospace;">
-  <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:16px;color:#d4a574;letter-spacing:3px;text-shadow:2px 2px 4px rgba(0,0,0,0.8);font-family:'Permanent Marker',cursive;">VITAL SIGNS</div>
-  
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:30px;">
-    <div class="gauge-container">
-      <canvas id="gauge-hunger" width="120" height="120"></canvas>
-      <div class="gauge-label">HUNGER</div>
-    </div>
-    <div class="gauge-container">
-      <canvas id="gauge-thirst" width="120" height="120"></canvas>
-      <div class="gauge-label">THIRST</div>
-    </div>
-    <div class="gauge-container">
-      <canvas id="gauge-fatigue" width="120" height="120"></canvas>
-      <div class="gauge-label">FATIGUE</div>
-    </div>
-    <div class="gauge-container">
-      <canvas id="gauge-stress" width="120" height="120"></canvas>
-      <div class="gauge-label">STRESS</div>
-    </div>
+<div id="analog-dashboard" style="position:fixed;bottom:20px;right:20px;width:200px;background:rgba(8,16,28,0.8);border:1px solid rgba(201,168,76,0.25);border-radius:6px;padding:10px 12px;backdrop-filter:blur(8px);font-family:'Courier Prime',monospace;">
+  <div style="font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;text-align:center;">VITAL SIGNS</div>
+  <div id="vital-sliders" style="display:flex;flex-direction:column;gap:4px;">
+    <div class="vital-row"><span class="vital-label">HUNGER</span><div class="vital-track"><div id="vital-hunger" class="vital-fill" style="width:50%;background:#ff8844;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">THIRST</span><div class="vital-track"><div id="vital-thirst" class="vital-fill" style="width:50%;background:#44aaff;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">FATIGUE</span><div class="vital-track"><div id="vital-fatigue" class="vital-fill" style="width:0%;background:#aaaaaa;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">STRESS</span><div class="vital-track"><div id="vital-stress" class="vital-fill" style="width:50%;background:#ff4444;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">WARMTH</span><div class="vital-track"><div id="vital-warmth" class="vital-fill" style="width:100%;background:#ffaa44;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">SUGAR</span><div class="vital-track"><div id="vital-sugar" class="vital-fill" style="width:50%;background:#ff66aa;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">SOBER</span><div class="vital-track"><div id="vital-sobriety" class="vital-fill" style="width:100%;background:#44ff88;"></div></div></div>
+    <div class="vital-row"><span class="vital-label">PISS</span><div class="vital-track"><div id="vital-piss" class="vital-fill" style="width:0%;background:var(--piss);"></div></div></div>
+    <div class="vital-row"><span class="vital-label">SHIT</span><div class="vital-track"><div id="vital-shit" class="vital-fill" style="width:0%;background:var(--shit);"></div></div></div>
   </div>
-  
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:15px;">
-    <div class="gauge-container">
-      <canvas id="gauge-warmth" width="120" height="120"></canvas>
-      <div class="gauge-label">WARMTH</div>
-    </div>
-    <div class="gauge-container">
-      <canvas id="gauge-sugar" width="120" height="120"></canvas>
-      <div class="gauge-label">BLOOD SUGAR</div>
-    </div>
-    <div class="gauge-container">
-      <canvas id="gauge-sobriety" width="120" height="120"></canvas>
-      <div class="gauge-label">SOBRIETY</div>
-    </div>
-  </div>
-  
-  <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:9px;color:#8a6a4a;letter-spacing:1px;">Press E:Eat V:Drink X:Beer 7:Rest</div>
+  <div style="font-size:7px;color:rgba(200,210,230,0.35);margin-top:4px;text-align:center;">X:Beer E:Eat V:Drink</div>
+  <canvas id="gauge-hunger" width="1" height="1" style="display:none;"></canvas>
+  <canvas id="gauge-thirst" width="1" height="1" style="display:none;"></canvas>
+  <canvas id="gauge-fatigue" width="1" height="1" style="display:none;"></canvas>
+  <canvas id="gauge-stress" width="1" height="1" style="display:none;"></canvas>
+  <canvas id="gauge-warmth" width="1" height="1" style="display:none;"></canvas>
+  <canvas id="gauge-sugar" width="1" height="1" style="display:none;"></canvas>
+  <canvas id="gauge-sobriety" width="1" height="1" style="display:none;"></canvas>
 </div>
 
-<div id="clock-panel" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);width:180px;height:180px;background:#3a2a1a;border:6px solid #2a1a0a;border-radius:50%;box-shadow:0 4px 16px rgba(0,0,0,0.8),inset 0 2px 8px rgba(255,255,255,0.05);">
-  <canvas id="analog-clock" width="180" height="180"></canvas>
+<div id="clock-panel" style="display:none;">
+  <canvas id="analog-clock" width="1" height="1"></canvas>
 </div>
 
 <style>
@@ -801,22 +869,10 @@
   50% {opacity:0.7;transform:translateX(2px);}
 }
 
-#fly-overlay {
-  position:fixed;
-  font-size:20px;
-  pointer-events:none;
-  z-index:999;
-  transition:left 0.3s,top 0.3s;
-}
-
-.water-droplet {
-  position:fixed;
-  background:rgba(100,150,200,0.4);
-  border-radius:50%;
-  pointer-events:none;
-  z-index:998;
-  box-shadow:inset 0 0 3px rgba(255,255,255,0.5);
-}
+.vital-row { display:flex; align-items:center; gap:6px; }
+.vital-label { font-size:7px; letter-spacing:1px; color:rgba(200,210,230,0.5); width:40px; text-align:right; flex-shrink:0; }
+.vital-track { flex:1; height:6px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+.vital-fill { height:100%; border-radius:3px; transition:width 0.3s; }
 
 #sunburn-filter {
   position:fixed;
@@ -830,7 +886,6 @@
 }
 </style>
 
-<div id="fly-overlay" style="display:none;">🪰</div>
 <div id="water-droplets-container"></div>
 <div id="sunburn-filter"></div>
 
@@ -1016,13 +1071,13 @@
   <div class="fish-name" id="catch-name">Bass</div>
   <div class="fish-weight" id="catch-weight">2.4 lb</div>
   <div class="multi-catch" id="catch-multi" style="display:none"></div>
-  <div class="fish-record" id="catch-record" style="display:none">⭐ NEW RECORD!</div>
+  <div class="fish-record" id="catch-record" style="display:none">NEW RECORD!</div>
   <div class="dismiss">press any key to continue</div>
 </div>
 
 <div id="rod-shop" class="panel">
-  <h2>🎣 ROD FOUND!</h2>
-  <div class="fish-emoji" id="shop-rod-emoji">🎣</div>
+  <h2>ROD FOUND!</h2>
+  <div class="fish-emoji" id="shop-rod-emoji">ROD</div>
   <div id="shop-rod-name" class="rod-desc">Ultra Bass Destroyer 3000</div>
   <div id="shop-rod-power" class="rod-power">Total Rods: 2 → Fish Multiplier: x4</div>
   <div class="dismiss">press any key to continue</div>
@@ -1030,12 +1085,34 @@
 
 <div id="crosshair"></div>
 
-<canvas id="minimap-canvas" width="90" height="90"></canvas>
+<!-- Lure position indicator: shows arrow pointing to bobber when offscreen -->
+<div id="lure-indicator" style="position:fixed;display:none;z-index:200;pointer-events:none;font-family:'Courier Prime',monospace;">
+  <div id="lure-arrow" style="font-size:24px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.6);"></div>
+  <div id="lure-dist-label" style="font-size:10px;color:rgba(255,215,0,0.8);text-align:center;"></div>
+</div>
+<!-- Fishing hint bar -->
+<div id="fishing-hint" style="position:fixed;bottom:180px;left:50%;transform:translateX(-50%);padding:8px 20px;background:rgba(8,16,28,0.85);border:1px solid rgba(201,168,76,0.3);border-radius:4px;font-family:'Courier Prime',monospace;font-size:12px;color:rgba(200,220,240,0.9);display:none;z-index:201;text-align:center;backdrop-filter:blur(4px);letter-spacing:1px;white-space:nowrap;"></div>
+
+<!-- Rod maintenance minigame -->
+<div id="maintenance-ui" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;width:400px;padding:24px 30px;background:rgba(8,16,28,0.95);border:2px solid #ff8844;border-radius:8px;z-index:500;font-family:'Courier Prime',monospace;backdrop-filter:blur(8px);">
+  <div style="text-align:center;color:#ff8844;font-size:10px;letter-spacing:3px;margin-bottom:12px;">ROD MAINTENANCE</div>
+  <div style="color:rgba(200,220,240,0.7);font-size:11px;margin-bottom:10px;text-align:center;">Move mouse to scrape rust off. Don't go too fast or you'll break the rod!</div>
+  <canvas id="maintenance-canvas" width="360" height="100" style="border:1px solid rgba(255,136,68,0.3);border-radius:4px;cursor:crosshair;display:block;margin:0 auto;"></canvas>
+  <div style="display:flex;justify-content:space-between;margin-top:10px;">
+    <div style="font-size:10px;color:rgba(200,220,240,0.5);">Progress: <span id="maint-progress" style="color:#88dd88;">0</span>%</div>
+    <div style="font-size:10px;color:rgba(200,220,240,0.5);">Speed: <span id="maint-speed" style="color:#ffd700;">OK</span></div>
+    <div style="font-size:10px;color:rgba(200,220,240,0.5);">Rod HP: <span id="maint-hp" style="color:#44aaff;">100</span>%</div>
+  </div>
+  <div id="maint-warning" style="text-align:center;font-size:12px;color:#ff4444;margin-top:8px;display:none;">TOO FAST! SLOW DOWN!</div>
+  <div style="text-align:center;font-size:9px;color:rgba(200,220,240,0.3);margin-top:8px;">Press M or ESC to close</div>
+</div>
+
+<canvas id="minimap-canvas" width="180" height="180"></canvas>
 <div id="time-display">Dawn</div>
 
 <div id="notif-area"></div>
 
-<div id="bodily-meters">
+<div id="bodily-meters" style="display:none;">
   <div class="bm-wrap">
     <div class="bm-label">Piss 💛</div>
     <div class="bm-bar-bg"><div id="piss-fill" style="width:0%"></div></div>
@@ -1046,13 +1123,13 @@
   </div>
 </div>
 
-<div id="rods-panel" class="panel">
-  <h3>Your Rods 🎣</h3>
-  <div id="rod-icons">🎣</div>
+<div id="rods-panel" class="panel" style="position:fixed;bottom:30px;right:12px;padding:8px 10px;text-align:right;transform-origin:bottom right;">
+  <h3>Your Rods</h3>
+  <div id="rod-icons">|</div>
   <div id="rod-multiplier">×1 fish per cast</div>
 </div>
 
-<div id="catch-log" class="panel">
+<div id="catch-log" class="panel" style="position:fixed;bottom:80px;right:12px;padding:8px 10px;max-width:180px;max-height:150px;overflow:hidden;transform-origin:bottom right;">
   <h3>Catch Log</h3>
   <div id="log-entries"></div>
 </div>
@@ -1060,13 +1137,6 @@
 <div id="pile-panel" class="panel">
   <h3>On the Dock 🐟</h3>
   <div id="pile-emojis"></div>
-</div>
-
-<div id="instructions" class="panel">
-  <span>CLICK</span> lock mouse &nbsp; <span>P</span> piss &nbsp; <span>O</span> shit &nbsp; <span>G</span> fart<br>
-  <span>HOLD CLICK</span> cast &nbsp; <span>SPACE</span> hook set &nbsp; <span>HOLD R</span> reel &nbsp; <span>F</span> punch<br>
-  Aim your cast with the mouse — watch for nibbles then STRIKE!<br>
-  Find <span>🎣</span> rods scattered around — more rods = exponential fish!
 </div>
 
 <div id="bait-shop" class="panel">
@@ -1100,6 +1170,14 @@
 <div id="chat-bubbles-container"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSRPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSRShader.js"></script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 'use strict';
@@ -1281,8 +1359,7 @@ const ROD_TYPES = [
   { name:'God Wand Supreme',       emoji:'🪄', bonus:'Everything ×10?',      color:0xffaa00 },
   { name:'Selfie Stick',           emoji:'🤳', bonus:'Instagram fish pics',  color:0xff69b4 },
   { name:'Pool Noodle',            emoji:'🏊', bonus:'Float mechanics',      color:0x00ffff },
-  { name:'Flyswatter',             emoji:'🪰', bonus:'Bug catching mode',    color:0x888888 },
-  { name:'Golf Club',              emoji:'⛳', bonus:'Fore! Random angle',  color:0x228b22 },
+    { name:'Golf Club',              emoji:'⛳', bonus:'Fore! Random angle',  color:0x228b22 },
   { name:'Broomstick',             emoji:'🧹', bonus:'Witch stats +10',     color:0x8b4513 },
   { name:'Lightsaber',             emoji:'⚔️', bonus:'Force fish summoning',color:0x00ff00 },
   { name:'Plunger',                emoji:'🚽', bonus:'Sucks fish up',       color:0x8b0000 },
@@ -1408,7 +1485,39 @@ const ACHIEVEMENTS = [
   {id:'rival',name:'Rivalry',desc:'Steal a fish from the rival',emoji:'😠',check:()=>false},
   {id:'underwater',name:'Submariner',desc:'Spend 30 seconds underwater',emoji:'🤿',check:()=>false},
   {id:'7rods',name:'Rod Collector',desc:'Collect all 7 normal rods',emoji:'🎣',check:()=>Game.rods>=7},
-  {id:'encyclopedia',name:'Pokémon Master',desc:'Fill encyclopedia to 50%',emoji:'📚',check:()=>Object.keys(Game.encyclopedia).length>=25}
+  {id:'encyclopedia',name:'Pokémon Master',desc:'Fill encyclopedia to 50%',emoji:'📚',check:()=>Object.keys(Game.encyclopedia).length>=25},
+  
+  // NEW ACHIEVEMENTS
+  {id:'firstCatch',name:'First Blood',desc:'Catch your first fish',emoji:'🐟',check:()=>Game.caughtCount>=1},
+  {id:'catch100',name:'Century Club',desc:'Catch 100 fish',emoji:'💯',check:()=>Game.caughtCount>=100},
+  {id:'catch500',name:'Fish Master',desc:'Catch 500 fish',emoji:'🏆',check:()=>Game.caughtCount>=500},
+  {id:'catch1000',name:'Legendary Fisher',desc:'Catch 1000 fish',emoji:'👑',check:()=>Game.caughtCount>=1000},
+  {id:'cast100',name:'Casting Pro',desc:'Make 100 casts',emoji:'🎣',check:()=>Game.castCount>=100},
+  {id:'cast500',name:'Casting Master',desc:'Make 500 casts',emoji:'⭐',check:()=>Game.castCount>=500},
+  {id:'perfect50',name:'Perfectionist',desc:'Land 50 perfect casts',emoji:'🎯',check:()=>Game.perfectCasts>=50},
+  {id:'lvl20',name:'Fishing Legend',desc:'Reach level 20',emoji:'🌟',check:()=>Game.playerLevel>=20},
+  {id:'lvl50',name:'God Tier',desc:'Reach level 50',emoji:'✨',check:()=>Game.playerLevel>=50},
+  {id:'weight1000',name:'Heavy Hauler',desc:'Catch total 1000 lbs of fish',emoji:'⚖️',check:()=>Game.totalWeight>=1000},
+  {id:'weight5000',name:'Titanic Haul',desc:'Catch total 5000 lbs of fish',emoji:'🏔️',check:()=>Game.totalWeight>=5000},
+  {id:'weight10000',name:'Mythic Fisher',desc:'Catch total 10000 lbs of fish',emoji:'🌍',check:()=>Game.totalWeight>=10000},
+  {id:'piss10',name:'Piss Professional',desc:'Piss 10 times',emoji:'💛',check:()=>Game.pissCount>=10},
+  {id:'piss50',name:'Golden Legend',desc:'Piss 50 times',emoji:'👑',check:()=>Game.pissCount>=50},
+  {id:'shit10',name:'Shit Happens',desc:'Shit 10 times',emoji:'💩',check:()=>Game.shitCount>=10},
+  {id:'shit50',name:'Poop Master',desc:'Shit 50 times',emoji:'🚽',check:()=>Game.shitCount>=50},
+  {id:'punch10',name:'Brawler',desc:'Punch 10 fish',emoji:'👊',check:()=>Game.punchCount>=10},
+  {id:'punch50',name:'Boxer',desc:'Punch 50 fish',emoji:'🥊',check:()=>Game.punchCount>=50},
+  {id:'day7',name:'Week Warrior',desc:'Survive 7 days',emoji:'📅',check:()=>Game.dayCount>=7},
+  {id:'day30',name:'Month Master',desc:'Survive 30 days',emoji:'🗓️',check:()=>Game.dayCount>=30},
+  {id:'species10',name:'Explorer',desc:'Discover 10 species',emoji:'🔍',check:()=>Game.seenSpecies.size>=10},
+  {id:'species25',name:'Naturalist',desc:'Discover 25 species',emoji:'🌿',check:()=>Game.seenSpecies.size>=25},
+  {id:'species40',name:'Biologist',desc:'Discover 40 species',emoji:'🧬',check:()=>Game.seenSpecies.size>=40},
+  {id:'big500',name:'Big Game Hunter',desc:'Catch a fish over 500 lbs',emoji:'🦈',check:()=>Game.highScores.biggestFish>=500},
+  {id:'big2000',name:'Monster Hunter',desc:'Catch a fish over 2000 lbs',emoji:'🐋',check:()=>Game.highScores.biggestFish>=2000},
+  {id:'allRods',name:'Rod Master',desc:'Collect all rods',emoji:'🎣',check:()=>Game.rods>=Game.maxRods},
+  {id:'drinker',name:'Thirsty Fisher',desc:'Drink 10 beverages',emoji:'🍺',check:()=>Game.beersConsumed>=10},
+  {id:'drunk',name:'Party Animal',desc:'Drink 50 beverages',emoji:'🎉',check:()=>Game.beersConsumed>=50},
+  {id:'lucky',name:'Lucky Day',desc:'Catch 3 legendary fish',emoji:'🍀',check:()=>Game.encyclopedia && Object.values(Game.encyclopedia).filter(f=>f.rarity==='legendary').length>=3},
+  {id:'trash',name:'Trash Collector',desc:'Catch 10 trash items',emoji:'🗑️',check:()=>Game.encyclopedia && Object.values(Game.encyclopedia).filter(f=>f.category==='trash').length>=10}
 ];
 
 FISH_DB.forEach(f=>{
@@ -1457,6 +1566,61 @@ const BEVERAGES = [
   {name:'Energy Drink',emoji:'⚡',pissAdd:0.4,effect:'jittery'},
   {name:'Mystery Flask',emoji:'🍶',pissAdd:0.5,effect:'regret'}
 ];
+
+// Beer pickup system
+const BEER_LOCATIONS = [
+  [-10,-40],[35,-18],[5,-55],[70,-75],[-30,-20],[55,-30],[0,5],[-18,-70]
+];
+let beerObjects = [];
+
+function spawnBeerAtLocation(x,z){
+  const beerGeo = new THREE.BoxGeometry(0.15,0.2,0.15);
+  const beerMat = new THREE.MeshStandardMaterial({color:0x8B4513,roughness:0.3,metalness:0.7,envMap:envMap});
+  const beer = new THREE.Mesh(beerGeo, beerMat);
+  beer.position.set(x,0.1,z);
+  beer.castShadow = true;
+  beer.userData = {type:'beer',collected:false};
+  scene.add(beer);
+  beerObjects.push(beer);
+}
+
+function initializeBeerSpawns(){
+  BEER_LOCATIONS.forEach(([x,z]) => spawnBeerAtLocation(x,z));
+}
+
+function checkBeerPickup(){
+  const pickupRadius = 1.5;
+  beerObjects.forEach((beer,index) => {
+    if(beer.userData.collected) return;
+    const dist = camera.position.distanceTo(beer.position);
+    if(dist < pickupRadius){
+      // Add to inventory
+      if(!Game.inventory) Game.inventory = [];
+      Game.inventory.push({
+        id:'beer-'+Date.now(),
+        name:'Warm Beer',
+        emoji:'🍺',
+        type:'consumable',
+        action:() => drinkBeverage(BEVERAGES[0])
+      });
+      beer.userData.collected = true;
+      scene.remove(beer);
+      beerObjects.splice(index,1);
+      showNotif('🍺 Picked up Warm Beer! Press I to open inventory and drink','#ffd700');
+      updateInventoryDisplay();
+      // Respawn after delay
+      setTimeout(() => {
+        const loc = BEER_LOCATIONS[Math.floor(Math.random()*BEER_LOCATIONS.length)];
+        spawnBeerAtLocation(loc[0],loc[1]);
+      }, 30000 + Math.random()*30000); // 30-60 seconds
+    }
+  });
+}
+
+function updateInventoryDisplay(){
+  if(!Game.inventoryOpen) return;
+  renderInventory();
+}
 
 const TERRIBLE_RODS = [
   {name:'Bluetooth Rod', emoji:'📱', type:'bluetooth', syncTime:8, disconnectChance:0.4, cost:400},
@@ -1536,7 +1700,7 @@ const Game = {
   catchLog:[], catchPile:[], seenSpecies:new Set(),
   bobberAnimT:0, ripples:[], splashes:[],
   birds:[], fishSchools:[],
-  moveKeys:{w:false,a:false,s:false,d:false},
+  moveKeys:{w:false,a:false,s:false,d:false,Shift:false},
   locked:false,
   dayTime:0.25,
   rods:1,
@@ -1608,6 +1772,9 @@ const Game = {
   bluetoothSyncProgress:0,
   tapeRecoiling:false,
   engineRunning:false,
+  fleshLightActive:false,
+  fleshLightMesh:null,
+  fleshLightGlow:null,
   treasureChests:[],
   nestingSafeLevel:0,
   greaseFilter:0,
@@ -1705,10 +1872,7 @@ const Game = {
   beerCans:[],
   floppingFish:[],
   scatteredTackle:[],
-  flyPosition:{x:0,y:0},
-  flyTarget:{x:0,y:0},
-  flyActive:false,
-  sunburn:0,
+    sunburn:0,
   ants:[],
   spiderWebProgress:0,
   waterDroplets:[],
@@ -1779,8 +1943,148 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=0.85;
 
+// ─── POST-PROCESSING COMPOSER ─────────────────────────────────────────────────────
+const composer = new THREE.EffectComposer(renderer);
+const renderPass = new THREE.RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+// Bloom Effect for glowing elements (gold UI, sun/moon)
+const bloomPass = new THREE.UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  1.5,  // strength
+  0.4,  // radius
+  0.85  // threshold
+);
+composer.addPass(bloomPass);
+
+// Color Grading Shader for warm sunset aesthetic
+const colorGradeShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    uTime: { value: 0 },
+    uWarmth: { value: 0.3 },
+    uContrast: { value: 1.1 },
+    uSaturation: { value: 1.2 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float uTime;
+    uniform float uWarmth;
+    uniform float uContrast;
+    uniform float uSaturation;
+    varying vec2 vUv;
+    
+    vec3 rgb2hsv(vec3 c) {
+      vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+      vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+      vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+      float d = q.x - min(q.w, q.y);
+      float e = 1.0e-10;
+      return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+    }
+    
+    vec3 hsv2rgb(vec3 c) {
+      vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+      vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+      return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
+    
+    void main() {
+      vec4 color = texture2D(tDiffuse, vUv);
+      
+      // Apply warmth (shift towards orange/golden tones)
+      vec3 hsv = rgb2hsv(color.rgb);
+      hsv.x = mod(hsv.x + uWarmth * 0.05, 1.0);
+      hsv.y *= uSaturation;
+      color.rgb = hsv2rgb(hsv);
+      
+      // Apply contrast
+      color.rgb = (color.rgb - 0.5) * uContrast + 0.5;
+      
+      // Subtle time-based animation
+      float pulse = sin(uTime * 0.5) * 0.02 + 1.0;
+      color.rgb *= pulse;
+      
+      gl_FragColor = color;
+    }
+  `
+};
+
+const colorGradePass = new THREE.ShaderPass(colorGradeShader);
+composer.addPass(colorGradePass);
+
+// Screen Space Reflections will be added after water is created
+
+// Depth of Field (Bokeh) for cinematic focus on bobber
+const bokehPass = new THREE.BokehPass(scene, camera, {
+  focus: 10.0,
+  aperture: 0.025,
+  maxblur: 0.01,
+  width: window.innerWidth,
+  height: window.innerHeight
+});
+composer.addPass(bokehPass);
+
+// Final output pass
+const copyPass = new THREE.ShaderPass(THREE.CopyShader);
+copyPass.renderToScreen = true;
+composer.addPass(copyPass);
+
 const scene=new THREE.Scene();
 scene.fog=new THREE.FogExp2(0x1a3a5a,0.013);
+
+// Dynamic fog system
+let dynamicFog = {
+  baseColor: new THREE.Color(0x1a3a5a),
+  baseDensity: 0.013,
+  dayColor: new THREE.Color(0x2a4a6a),
+  nightColor: new THREE.Color(0x0a1a3a),
+  sunsetColor: new THREE.Color(0x3a2a5a)
+};
+
+function updateDynamicFog(dayTime) {
+  // Calculate fog color based on time of day
+  let fogColor;
+  
+  if (dayTime < 0.25) {
+    // Night to dawn
+    fogColor = dynamicFog.nightColor.clone().lerp(dynamicFog.dayColor, dayTime * 4);
+  } else if (dayTime < 0.4) {
+    // Day
+    fogColor = dynamicFog.dayColor;
+  } else if (dayTime < 0.6) {
+    // Day to sunset
+    fogColor = dynamicFog.dayColor.clone().lerp(dynamicFog.sunsetColor, (dayTime - 0.4) * 5);
+  } else if (dayTime < 0.75) {
+    // Sunset
+    fogColor = dynamicFog.sunsetColor;
+  } else {
+    // Sunset to night
+    fogColor = dynamicFog.sunsetColor.clone().lerp(dynamicFog.nightColor, (dayTime - 0.75) * 4);
+  }
+  
+  // Update fog color and density
+  scene.fog.color.copy(fogColor);
+  
+  // Fog density varies with time - thicker at night and dawn
+  let densityMultiplier = 1.0;
+  if (dayTime < 0.25 || dayTime > 0.75) {
+    densityMultiplier = 1.5; // Night - thicker fog
+  } else if (dayTime > 0.4 && dayTime < 0.6) {
+    densityMultiplier = 0.7; // Day - thinner fog
+  } else {
+    densityMultiplier = 1.2; // Dawn/dusk - moderate fog
+  }
+  
+  scene.fog.density = dynamicFog.baseDensity * densityMultiplier;
+}
 
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.01,800);
 camera.position.set(0,1.7,0);
@@ -1811,14 +2115,52 @@ const skyMat=new THREE.ShaderMaterial({
       vec3 dir=normalize(vD);
       float t=dir.y*.5+.5;
       float night=1.-smoothstep(.2,.7,uDay);
+      
+      // Enhanced sunset gradient calculation
+      float sunsetStart=0.65;
+      float sunsetEnd=0.85;
+      float sunriseStart=0.15;
+      float sunriseEnd=0.35;
+      
+      float sunsetProgress=0.;
+      if(uDay>=sunsetStart&&uDay<=sunsetEnd){
+        sunsetProgress=(uDay-sunsetStart)/(sunsetEnd-sunsetStart);
+      } else if(uDay>=sunriseStart&&uDay<=sunriseEnd){
+        sunsetProgress=1.-(uDay-sunriseStart)/(sunriseEnd-sunriseStart);
+      }
+      
+      // Dynamic sunset colors based on progress
+      vec3 sunsetLow=mix(vec3(.85,.25,.04),vec3(.95,.35,.08),sunsetProgress);
+      vec3 sunsetMid=mix(vec3(.9,.55,.15),vec3(.98,.65,.25),sunsetProgress);
+      vec3 sunsetHigh=mix(vec3(1.,.75,.3),vec3(1.,.85,.4),sunsetProgress);
+      
+      // Base sky colors
       vec3 zenith=mix(vec3(.15,.38,.82),vec3(.005,.015,.05),night);
       vec3 horizon=mix(vec3(.50,.72,.98),vec3(.02,.06,.15),night);
+      
+      // Enhanced sunset blending
       float dusk=smoothstep(.6,.78,uDay)+smoothstep(.22,.08,uDay);
-      vec3 duskLow=vec3(.85,.25,.04);
-      vec3 duskMid=vec3(.9,.55,.15);
       vec3 col=mix(horizon,zenith,pow(t,.55));
-      col=mix(col,duskLow,(1.-t)*dusk*.8);
-      col=mix(col,duskMid,pow(max(0.,1.-t-.3),2.)*dusk*.5);
+      
+      // Multi-layer sunset gradient
+      if(sunsetProgress>0.){
+        // Lower atmosphere - intense sunset colors
+        col=mix(col,sunsetLow,(1.-t)*sunsetProgress*1.2);
+        
+        // Mid atmosphere - gradient transition
+        float midFactor=pow(max(0.,1.-t-.2),1.5)*sunsetProgress*0.8;
+        col=mix(col,sunsetMid,midFactor);
+        
+        // Upper atmosphere - subtle sunset glow
+        float highFactor=pow(max(0.,t-.4),2.)*sunsetProgress*0.4;
+        col=mix(col,sunsetHigh,highFactor);
+        
+        // Add atmospheric scattering effect
+        float scatter=pow(1.-t,3.)*sunsetProgress*0.3;
+        col+=vec3(1.,.4,.1)*scatter;
+      }
+      
+      // Sun rendering
       float sa=uDay*6.28318-1.5708;
       vec3 sunDir=normalize(vec3(cos(sa),.4,-.3));
       float sunDot=max(dot(dir,sunDir),0.);
@@ -1826,13 +2168,21 @@ const skyMat=new THREE.ShaderMaterial({
       col+=vec3(1.,.95,.8)*pow(sunDot,64.)*2.*sunVis;
       col+=vec3(1.,.7,.3)*pow(sunDot,8.)*.3*sunVis;
       col+=vec3(.8,.4,.15)*pow(sunDot,3.)*.15*dusk;
+      
+      // Enhanced sunset clouds
       vec2 cloudUv=dir.xz/(dir.y+.15)*8.;
       float clouds=fbm(cloudUv+uTime*.015);
       float cloud2=fbm(cloudUv*1.5-uTime*.01+50.);
       float cloudMask=smoothstep(.42,.7,clouds)*.7+smoothstep(.5,.75,cloud2)*.3;
       cloudMask*=smoothstep(.0,.3,t);
       vec3 cloudCol=mix(vec3(.9,.92,.95),vec3(.12,.14,.18),night);
-      cloudCol=mix(cloudCol,vec3(1.,.6,.25),dusk*.5*pow(max(0.,1.-t),2.));
+      
+      // Sunset cloud coloring
+      if(sunsetProgress>0.){
+        cloudCol=mix(cloudCol,vec3(1.,.6,.25),sunsetProgress*pow(max(0.,1.-t),2.));
+        cloudCol=mix(cloudCol,vec3(1.,.8,.4),sunsetProgress*pow(max(0.,1.-t-.3),3.)*0.5);
+      }
+      
       col=mix(col,cloudCol,cloudMask*.65);
       gl_FragColor=vec4(col,1.);}`
 });
@@ -1930,12 +2280,35 @@ const waterMat=new THREE.ShaderMaterial({
       float foamLine=foam(vWorldPos.xz,uTime)*smoothstep(60.,15.,dist)*.3*(1.+sunVis*.5);
       col+=vec3(.7,.8,.9)*foamLine;
       col=mix(col,col*vec3(.85,.92,1.05),night*.3);
+      
+      // Enhanced reflection for SSR - increase fresnel effect
+      float reflectionStrength = fr * 0.9;
+      vec3 skyReflection = mix(deep, vec3(.4,.6,.8), (1.-night)*0.7);
+      col = mix(col, skyReflection, reflectionStrength);
+      
       gl_FragColor=vec4(col,.88);}`,
   transparent:true,side:THREE.DoubleSide
 });
 const water = new THREE.Mesh(new THREE.PlaneGeometry(600, 600, 150, 150), waterMat);
 water.rotation.x = -Math.PI / 2;
 scene.add(water);
+
+// Add Screen Space Reflections for water
+const ssrPass = new THREE.SSRPass({
+  renderer,
+  scene,
+  camera,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  opacity: 0.8,
+  maxDistance: 100,
+  thickness: 0.1
+});
+composer.insertPass(ssrPass, 2); // Insert after color grading, before DoF
+
+// Make water reflective for SSR
+water.material.defines = { USE_SSR: true };
+water.material.needsUpdate = true;
 
 // ─── WORLD BUILDERS ────────────────────────────────────────────────────────────
 function makeIsland(cx,cz,radius,height,col,trees=true){
@@ -1947,9 +2320,9 @@ function makeIsland(cx,cz,radius,height,col,trees=true){
     p.setZ(i,z+Math.cos(z*.5+x*.2)*.6);
   }
   geo.computeVertexNormals();
-  const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:col}));
+  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:col,roughness:0.8,metalness:0.0,envMap:envMap}));
   m.position.set(cx,height*.5-.4,cz); m.castShadow=true; m.receiveShadow=true; scene.add(m);
-  const beach=new THREE.Mesh(new THREE.CylinderGeometry(radius+.5,radius+1.5,.15,14),new THREE.MeshLambertMaterial({color:0xd4b87a}));
+  const beach=new THREE.Mesh(new THREE.CylinderGeometry(radius+.5,radius+1.5,.15,14),new THREE.MeshStandardMaterial({color:0xd4b87a,roughness:0.6,metalness:0.0,envMap:envMap}));
   beach.position.set(cx,.04,cz); beach.receiveShadow=true; scene.add(beach);
   if(trees){const tc=Math.floor(radius*.8+2);for(let t=0;t<tc;t++){const a=(t/tc)*Math.PI*2,r2=radius*.3+Math.random()*radius*.5;makeTree(cx+Math.cos(a)*r2,height-.2,cz+Math.sin(a)*r2);}}
 }
@@ -1962,14 +2335,14 @@ function makeTree(x,by,z,s=1){
   const leafSet=leafColors[Math.floor(Math.random()*leafColors.length)];
   const trunkH=(1.3+Math.random()*1.5)*s;
   const lean=(Math.random()-0.5)*0.15;
-  const tk=new THREE.Mesh(new THREE.CylinderGeometry(.10*s,.16*s,trunkH,5+Math.floor(Math.random()*3)),new THREE.MeshLambertMaterial({color:trunkCol}));
+  const tk=new THREE.Mesh(new THREE.CylinderGeometry(.10*s,.16*s,trunkH,5+Math.floor(Math.random()*3)),new THREE.MeshStandardMaterial({color:trunkCol,roughness:0.8,metalness:0.0,envMap:envMap}));
   tk.position.y=trunkH*.5; tk.rotation.z=lean; tk.castShadow=true; g.add(tk);
   const layers=2+Math.floor(Math.random()*2);
   for(let l=0;l<layers;l++){
     const leafSize=(1.6-l*.35+Math.random()*0.3)*s;
     const leafH=(2.2-l*.25+Math.random()*0.4)*s;
     const sides=5+Math.floor(Math.random()*4);
-    const fl=new THREE.Mesh(new THREE.ConeGeometry(leafSize,leafH,sides),new THREE.MeshLambertMaterial({color:leafSet[l%leafSet.length]}));
+    const fl=new THREE.Mesh(new THREE.ConeGeometry(leafSize,leafH,sides),new THREE.MeshStandardMaterial({color:leafSet[l%leafSet.length],roughness:0.7,metalness:0.0,envMap:envMap}));
     fl.position.y=trunkH+l*leafH*.5; fl.castShadow=true; g.add(fl);
   }
   g.position.set(x,by,z); scene.add(g);
@@ -1980,7 +2353,7 @@ function makeRock(x,y,z,s=1){
   const p=geo.attributes.position;
   for(let i=0;i<p.count;i++){p.setX(i,p.getX(i)*(.8+Math.random()*.4));p.setY(i,p.getY(i)*(.6+Math.random()*.3));p.setZ(i,p.getZ(i)*(.8+Math.random()*.4));}
   geo.computeVertexNormals();
-  const m=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x606878}));
+  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x606878,roughness:0.9,metalness:0.1,envMap:envMap}));
   m.position.set(x,y,z);m.rotation.set(Math.random(),Math.random(),Math.random());m.castShadow=true;scene.add(m);
 }
 
@@ -2107,8 +2480,20 @@ for(let i=0;i<terrainPos.count;i++){
 }
 terrainGeo.computeVertexNormals();
 
+// ─── ENVIRONMENT MAP FOR PBR ─────────────────────────────────────────────────────
+const envMapGenerator = new THREE.CubeTextureLoader();
+const envMap = envMapGenerator.load([
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // right
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // left
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // top
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // bottom
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', // front
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='  // back
+]);
+scene.environment = envMap;
+
 // ─── BIOME VERTEX COLORS (smoothstep blended) ────────────────────────────────
-const terrainMat=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
+const terrainMat=new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:0.8,metalness:0.0,envMap:envMap});
 const colors=new Float32Array(terrainPos.count*3);
 for(let i=0;i<terrainPos.count;i++){
   const h=terrainPos.getZ(i);
@@ -2191,8 +2576,8 @@ makeIsland(25,-80,14,3.5,0x284e2a,true);
 // ─── DOCKS SYSTEM ──────────────────────────────────────────────────────────────
 function makeDock(px,pz,width=2.4,depth=3,hasExtras=true){
   const g=new THREE.Group();
-  const pm=new THREE.MeshLambertMaterial({color:0x6a4a2a});
-  const lm=new THREE.MeshLambertMaterial({color:0x3a2010});
+  const pm=new THREE.MeshStandardMaterial({color:0x6a4a2a,roughness:0.7,metalness:0.1,envMap:envMap});
+  const lm=new THREE.MeshStandardMaterial({color:0x3a2010,roughness:0.8,metalness:0.0,envMap:envMap});
   const planks=Math.floor(width/.24);
   for(let i=0;i<planks;i++){
     const p=new THREE.Mesh(new THREE.BoxGeometry(.22,.06,depth),pm);
@@ -2205,7 +2590,7 @@ function makeDock(px,pz,width=2.4,depth=3,hasExtras=true){
     pl.position.set(x,-.7,z);pl.castShadow=true;g.add(pl);
   });
   if(hasExtras){
-    const sm=new THREE.MeshLambertMaterial({color:0x5a3015});
+    const sm=new THREE.MeshStandardMaterial({color:0x5a3015,roughness:0.6,metalness:0.1,envMap:envMap});
     for(let z=-.5;z>=-depth+.5;z-=.6){
       [-width/2-.1,width/2+.1].forEach(x=>{
         const po=new THREE.Mesh(new THREE.BoxGeometry(.05,.55,.05),sm);
@@ -2218,7 +2603,7 @@ function makeDock(px,pz,width=2.4,depth=3,hasExtras=true){
     });
     const lp=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,1.2,6),sm);
     lp.position.set(-width/2+.1,.72,-.5);g.add(lp);
-    const lb=new THREE.Mesh(new THREE.BoxGeometry(.18,.22,.18),new THREE.MeshBasicMaterial({color:0xffcc66}));
+    const lb=new THREE.Mesh(new THREE.BoxGeometry(.18,.22,.18),new THREE.MeshStandardMaterial({color:0xffcc66,roughness:0.3,metalness:0.2,envMap:envMap,emissive:0xffcc66,emissiveIntensity:0.2}));
     lb.position.set(-width/2+.1,1.4,-.5);g.add(lb);
   }
   g.position.set(px,.0,pz);
@@ -2270,11 +2655,11 @@ function spawnRodPickups(){
     if(i>=ROD_TYPES.length) return;
     const type=ROD_TYPES[i];
     const g=new THREE.Group();
-    const rod=new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,.9,6),new THREE.MeshLambertMaterial({color:type.color}));
+    const rod=new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,.9,6),new THREE.MeshStandardMaterial({color:type.color,roughness:0.4,metalness:0.1,envMap:envMap}));
     rod.rotation.z=Math.PI/6; g.add(rod);
-    const orb=new THREE.Mesh(new THREE.SphereGeometry(.18,10,10),new THREE.MeshBasicMaterial({color:type.color,transparent:true,opacity:.7}));
+    const orb=new THREE.Mesh(new THREE.SphereGeometry(.18,10,10),new THREE.MeshStandardMaterial({color:type.color,transparent:true,opacity:.7,roughness:0.2,metalness:0.3,envMap:envMap}));
     orb.position.y=.4; g.add(orb);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(.22,.03,6,16),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.5}));
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.22,.03,6,16),new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.5,roughness:0.1,metalness:0.6,envMap:envMap}));
     ring.position.y=.4; ring.rotation.x=Math.PI/2; g.add(ring);
     g.position.set(x,.6,z);
     scene.add(g);
@@ -2285,7 +2670,7 @@ spawnRodPickups();
 
 // ─── FISHING ROD (held) ────────────────────────────────────────────────────────
 const heldRodGroup=new THREE.Group();
-const rodBodyMat=new THREE.MeshLambertMaterial({color:0x7a4a1a});
+const rodBodyMat=new THREE.MeshStandardMaterial({color:0x7a4a1a,roughness:0.4,metalness:0.1,envMap:envMap});
 
 function rebuildHeldRods(){
   while(heldRodGroup.children.length>0) heldRodGroup.remove(heldRodGroup.children[0]);
@@ -2293,24 +2678,30 @@ function rebuildHeldRods(){
   const rodColors=[0x7a4a1a,0x5a3010,0x8a5a2a,0x4a2808,0x6a3a18,0x9a6a3a,0x3a2010];
   const reelColors=[0x505560,0x606878,0x404850,0x707888,0x585a68,0x383840,0x4a4c58];
   for(let i=0;i<n;i++){
-    const offset=(i-(n-1)/2)*0.18;
+    // Arrange rods in a fan pattern facing outward
+    const angle = (i - (n-1)/2) * 0.3; // Spread angle between rods
+    const radius = 0.15; // Distance from center
+    
+    const x = Math.sin(angle) * radius;
+    const y = Math.cos(angle) * radius * 0.3;
+    
     const rodCol=rodColors[i%rodColors.length];
     const lenVar=1.6+Math.sin(i*2.7)*0.3;
     const thickVar=0.010+Math.sin(i*1.3)*0.004;
     const rodBody=new THREE.Mesh(
       new THREE.CylinderGeometry(thickVar,thickVar+0.012,lenVar,8),
-      new THREE.MeshLambertMaterial({color:rodCol})
+      new THREE.MeshStandardMaterial({color:rodCol,roughness:0.4,metalness:0.1,envMap:envMap})
     );
-    rodBody.rotation.z=Math.PI/2.4;
-    rodBody.position.set(.28+offset,-.2+Math.abs(offset)*.3,-.2);
+    rodBody.rotation.z=Math.PI/2.4 + angle;
+    rodBody.position.set(.28+x,-.2+y,-.2);
     heldRodGroup.add(rodBody);
     const reelCol=reelColors[i%reelColors.length];
-    const reel=new THREE.Mesh(new THREE.TorusGeometry(.04+Math.sin(i)*0.015,.018,6,12),new THREE.MeshLambertMaterial({color:reelCol}));
-    reel.position.set(.18+offset,-.22,-.25); reel.rotation.y=Math.PI/2;
+    const reel=new THREE.Mesh(new THREE.TorusGeometry(.04+Math.sin(i)*0.015,.018,6,12),new THREE.MeshStandardMaterial({color:reelCol,roughness:0.3,metalness:0.5,envMap:envMap}));
+    reel.position.set(.18+x,-.22+y,-.25); reel.rotation.y=Math.PI/2;
     heldRodGroup.add(reel);
     // Rod tip
     const tip=new THREE.Mesh(new THREE.SphereGeometry(0.008,4,4),new THREE.MeshBasicMaterial({color:0xff4444}));
-    tip.position.set(.28+offset+Math.cos(Math.PI/2.4)*lenVar*0.5,-.2+Math.abs(offset)*.3+Math.sin(Math.PI/2.4)*lenVar*0.5,-.2);
+    tip.position.set(.28+x+Math.cos(Math.PI/2.4+angle)*lenVar*0.5,-.2+y+Math.sin(Math.PI/2.4+angle)*lenVar*0.5,-.2);
     heldRodGroup.add(tip);
   }
 }
@@ -2320,26 +2711,104 @@ scene.add(camera);
 
 // ─── LINE & BOBBER ─────────────────────────────────────────────────────────────
 let lineMesh=null,bobberGroup=null;
+
+// ─── NEW FISHING LINE SYSTEM ───────────────────────────────────────────────────────
+let newLineMesh=null;
+let newLineActive=false;
 function getRodTip(){return camera.localToWorld(new THREE.Vector3(.7,.55,-1.15));}
 function spawnLine(to){
   if(lineMesh){scene.remove(lineMesh);lineMesh=null;}
-  lineMesh=new THREE.Line(new THREE.BufferGeometry().setFromPoints([getRodTip(),to.clone()]),
-    new THREE.LineBasicMaterial({color:0xd4c890,transparent:true,opacity:.65}));
+  // Thicker visible line using a thin cylinder instead of Line (LineBasicMaterial linewidth is clamped to 1 on most GPUs)
+  const tip=getRodTip();
+  const dir=new THREE.Vector3().subVectors(to,tip);
+  const len=dir.length();
+  const geo=new THREE.CylinderGeometry(0.015,0.015,len,4,1);
+  geo.rotateX(Math.PI/2);
+  geo.translate(0,0,len/2);
+  const mat=new THREE.MeshBasicMaterial({color:0xd4c890,transparent:true,opacity:0.75});
+  lineMesh=new THREE.Mesh(geo,mat);
+  lineMesh.position.copy(tip);
+  lineMesh.lookAt(to);
   scene.add(lineMesh);
 }
 function updateLine(to){
   if(!lineMesh)return;
-  const p=lineMesh.geometry.attributes.position,t=getRodTip();
-  p.setXYZ(0,t.x,t.y,t.z);p.setXYZ(1,to.x,to.y,to.z);p.needsUpdate=true;
+  // Rebuild the cylinder to match current rod-tip → target
+  scene.remove(lineMesh);
+  const tip=getRodTip();
+  const dir=new THREE.Vector3().subVectors(to,tip);
+  const len=dir.length();
+  const geo=new THREE.CylinderGeometry(0.015,0.015,len,4,1);
+  geo.rotateX(Math.PI/2);
+  geo.translate(0,0,len/2);
+  lineMesh.geometry.dispose();
+  lineMesh.geometry=geo;
+  lineMesh.position.copy(tip);
+  lineMesh.lookAt(to);
+  scene.add(lineMesh);
 }
 function spawnBobber(pos){
   if(bobberGroup){scene.remove(bobberGroup);bobberGroup=null;}
   const g=new THREE.Group();
-  g.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(.065,10,10),new THREE.MeshLambertMaterial({color:0xcc1818})),{position:{x:0,y:.04,z:0}}));
-  g.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(.065,10,10),new THREE.MeshLambertMaterial({color:0xeeeeee})),{position:{x:0,y:-.04,z:0}}));
-  const stick=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.18,5),new THREE.MeshLambertMaterial({color:0xdd2222}));
+  g.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(.065,10,10),new THREE.MeshStandardMaterial({color:0xcc1818,roughness:0.6,metalness:0.1,envMap:envMap})),{position:{x:0,y:.04,z:0}}));
+  g.add(Object.assign(new THREE.Mesh(new THREE.SphereGeometry(.065,10,10),new THREE.MeshStandardMaterial({color:0xeeeeee,roughness:0.5,metalness:0.2,envMap:envMap})),{position:{x:0,y:-.04,z:0}}));
+  const stick=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,.18,5),new THREE.MeshStandardMaterial({color:0xdd2222,roughness:0.7,metalness:0.0,envMap:envMap}));
   stick.position.y=.14; g.add(stick);
   g.position.copy(pos); scene.add(g); bobberGroup=g;
+  
+  // Create new fishing line when bobber spawns
+  createNewLine();
+}
+
+// ─── NEW FISHING LINE FUNCTIONS ─────────────────────────────────────────────────────
+function createNewLine(){
+  if(newLineMesh) return; // Already exists
+  
+  const lineGeo = new THREE.BufferGeometry();
+  const lineMat = new THREE.LineBasicMaterial({
+    color: 0xd4c890,
+    linewidth: 3,
+    transparent: true,
+    opacity: 0.8
+  });
+  
+  newLineMesh = new THREE.Line(lineGeo, lineMat);
+  newLineMesh.frustumCulled = false; // Always render
+  scene.add(newLineMesh);
+  newLineActive = true;
+}
+
+function updateNewLine(){
+  if(!newLineActive || !bobberGroup) return;
+  
+  const rodTip = getRodTip();
+  const bobberPos = bobberGroup.position.clone();
+  
+  // Create line points from rod tip to bobber
+  const points = [
+    rodTip,
+    bobberPos
+  ];
+  
+  const positions = new Float32Array(points.length * 3);
+  points.forEach((point, i) => {
+    positions[i * 3] = point.x;
+    positions[i * 3 + 1] = point.y;
+    positions[i * 3 + 2] = point.z;
+  });
+  
+  newLineMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  newLineMesh.geometry.attributes.position.needsUpdate = true;
+}
+
+function removeNewLine(){
+  if(newLineMesh){
+    scene.remove(newLineMesh);
+    newLineMesh.geometry.dispose();
+    newLineMesh.material.dispose();
+    newLineMesh = null;
+  }
+  newLineActive = false;
 }
 
 // ─── FISH SCHOOLS ──────────────────────────────────────────────────────────────
@@ -2349,7 +2818,7 @@ for(let i=0;i<10;i++){
   const ft=FISH_DB[Math.floor(Math.random()*8)];
   const members=[];
   for(let j=0;j<cnt;j++){
-    const m=new THREE.Mesh(new THREE.ConeGeometry(.07+Math.random()*.04,.3+Math.random()*.12,5),new THREE.MeshLambertMaterial({color:ft.color}));
+    const m=new THREE.Mesh(new THREE.ConeGeometry(.07+Math.random()*.04,.3+Math.random()*.12,5),new THREE.MeshStandardMaterial({color:ft.color,roughness:0.4,metalness:0.1,envMap:envMap}));
     m.geometry.rotateZ(-Math.PI/2);
     m.position.set(Math.cos(a)*dist+(Math.random()-.5)*3,-0.3-Math.random()*.7,Math.sin(a)*dist+(Math.random()-.5)*3);
     scene.add(m);
@@ -2511,41 +2980,25 @@ const vhsMat=new THREE.ShaderMaterial({
 
     void main(){
       vec2 uv=vUv;
-      // --- Fisheye lens distortion ---
       vec2 center=uv-0.5;
-      float dist=length(center);
-      float barrel=1.0+dist*dist*0.25;
-      vec2 fishUv=center*barrel+0.5;
 
-      // --- Tape warp & jitter ---
-      float w=sin(fishUv.y*12.0+uTime*1.5)*sin(fishUv.y*3.0+uTime*0.7)*0.0004;
-      fishUv.x+=w;
-      // Rare horizontal tracking glitch
-      float glitchLine=step(0.998,hash(vec2(floor(fishUv.y*120.0),floor(uTime*4.0))));
-      fishUv.x+=glitchLine*(hash(vec2(uTime,fishUv.y))-0.5)*0.02;
+      // --- Very subtle tape warp (barely noticeable) ---
+      float w=sin(uv.y*8.0+uTime*1.0)*0.00015;
+      uv.x+=w;
 
-      // --- Chromatic aberration ---
-      float aberration=0.002+sin(uTime*2.0)*0.001;
+      // --- Minimal chromatic aberration ---
+      float aberration=0.0008;
       vec2 dir=normalize(center)*aberration;
-      float r=texture2D(tDiffuse,fishUv+dir).r;
-      float g=texture2D(tDiffuse,fishUv).g;
-      float b=texture2D(tDiffuse,fishUv-dir).b;
+      float r=texture2D(tDiffuse,uv+dir).r;
+      float g=texture2D(tDiffuse,uv).g;
+      float b=texture2D(tDiffuse,uv-dir).b;
       vec3 col=vec3(r,g,b);
 
-      // --- Posterization with dithering ---
-      float posterLevels=16.0;
-      float ditherAmount=hash(vUv*uResolution+fract(uTime))*0.1;
-      col=floor((col+ditherAmount)*posterLevels)/posterLevels;
-
-      // --- Color desaturation & warm tint ---
+      // --- Very subtle warm tint only ---
       float lum=dot(col,vec3(0.299,0.587,0.114));
-      col=mix(vec3(lum),col,0.86);
-      col.r*=1.05;
-      col.b*=0.92;
-
-      // Clamp for edge of fisheye
-      float mask=step(0.0,fishUv.x)*step(fishUv.x,1.0)*step(0.0,fishUv.y)*step(fishUv.y,1.0);
-      col*=mask;
+      col=mix(vec3(lum),col,0.94);
+      col.r*=1.02;
+      col.b*=0.96;
 
       gl_FragColor=vec4(col,1.0);
     }
@@ -2715,13 +3168,17 @@ function updateWeather(dt){
   if(Game.weatherTimer>120){
     Game.weatherTimer=0;
     const roll=Math.random();
-    if(roll<0.3) Game.weather='clear';
-    else if(roll<0.5) Game.weather='rain';
-    else if(roll<0.65) Game.weather='storm';
-    else if(roll<0.68) startTornado();
+    if(roll<0.25) Game.weather='clear';
+    else if(roll<0.40) Game.weather='rain';
+    else if(roll<0.52) Game.weather='storm';
+    else if(roll<0.55) startTornado();
+    else if(roll<0.70){
+      Game.weather='fog';
+      showNotif('FOG WARNING: Visibility decreasing!','#aaccee');
+    }
     else Game.weather='cloudy';
     
-    if(Game.weather!=='tornado') showNotif('🌤️ Weather changed to: '+Game.weather.toUpperCase(),'#88aaff');
+    if(!['tornado','fog'].includes(Game.weather)) showNotif('Weather changed to: '+Game.weather.toUpperCase(),'#88aaff');
   }
   
   if(Game.weather==='rain'){
@@ -2732,9 +3189,14 @@ function updateWeather(dt){
     Game.stormActive=true;
     if(Math.random()<0.5*dt) spawnRainDrop();
     if(Math.random()<0.1*dt) triggerScreenShake(.03,.2);
+  } else if(Game.weather==='fog'){
+    Game.fogDensity=Math.min(1,(Game.fogDensity||0)+dt*0.3);
+    if(scene.fog) scene.fog.far=Math.max(20,120-Game.fogDensity*80);
   } else{
     Game.rainIntensity=Math.max(0,Game.rainIntensity-dt*0.3);
     Game.stormActive=false;
+    Game.fogDensity=Math.max(0,(Game.fogDensity||0)-dt*0.2);
+    if(scene.fog&&scene.fog.far<120) scene.fog.far=Math.min(120,scene.fog.far+dt*10);
   }
 }
 
@@ -2913,6 +3375,7 @@ function fishEscapeBrawl(){
 function openTackleBox(){
   Game.tackleBoxOpen=true;
   document.getElementById('tackle-box-ui').style.display='block';
+  if(document.pointerLockElement) document.exitPointerLock();
   showNotif('🎣 Rummaging through tackle box...','#88aaff');
 }
 
@@ -3042,9 +3505,144 @@ function degradeEquipment(dt){
 }
 
 function maintainRod(){
-  Game.lineDurability=100;
-  Game.reelCondition=100;
-  showNotif('🔧 Rod maintained! Line and reel good as new','#88dd88');
+  const ui=document.getElementById('maintenance-ui');
+  if(ui.style.display==='block'){
+    closeMaintenance();
+    return;
+  }
+  if(Game.lineDurability>=95&&Game.reelCondition>=95){
+    showNotif('Rod is already in good shape!','#88dd88');
+    return;
+  }
+  ui.style.display='block';
+  Game.paused=true;
+  if(document.pointerLockElement) document.exitPointerLock();
+  Game.locked=false;
+  
+  // Init maintenance minigame state
+  Game.maint={
+    particles:[],
+    progress:0,
+    rodHP:100,
+    speed:0,
+    lastX:0,
+    lastY:0,
+    scraping:false,
+    done:false
+  };
+  // Generate rust particles on the canvas
+  const cv=document.getElementById('maintenance-canvas');
+  const ctx=cv.getContext('2d');
+  for(let i=0;i<80;i++){
+    Game.maint.particles.push({
+      x:Math.random()*360,
+      y:Math.random()*100,
+      r:3+Math.random()*5,
+      scraped:false,
+      color:`hsl(${15+Math.random()*20},${60+Math.random()*30}%,${30+Math.random()*20}%)`
+    });
+  }
+  drawMaintenanceCanvas();
+  
+  cv.onmousemove=function(e){
+    if(!Game.maint||Game.maint.done) return;
+    const rect=cv.getBoundingClientRect();
+    const mx=((e.clientX-rect.left)/rect.width)*360;
+    const my=((e.clientY-rect.top)/rect.height)*100;
+    const dx=mx-Game.maint.lastX;
+    const dy=my-Game.maint.lastY;
+    Game.maint.speed=Math.sqrt(dx*dx+dy*dy);
+    Game.maint.lastX=mx;
+    Game.maint.lastY=my;
+    
+    // Check speed — too fast damages rod
+    const warning=document.getElementById('maint-warning');
+    if(Game.maint.speed>25){
+      warning.style.display='block';
+      document.getElementById('maint-speed').textContent='TOO FAST!';
+      document.getElementById('maint-speed').style.color='#ff4444';
+      Game.maint.rodHP=Math.max(0,Game.maint.rodHP-Game.maint.speed*0.15);
+    } else{
+      warning.style.display='none';
+      document.getElementById('maint-speed').textContent='OK';
+      document.getElementById('maint-speed').style.color='#88dd88';
+    }
+    
+    // Scrape particles near cursor
+    let scraped=0;
+    Game.maint.particles.forEach(p=>{
+      if(p.scraped) return;
+      const dist=Math.sqrt((p.x-mx)**2+(p.y-my)**2);
+      if(dist<12&&Game.maint.speed>2&&Game.maint.speed<=25){
+        p.scraped=true;
+        scraped++;
+      }
+    });
+    
+    const total=Game.maint.particles.length;
+    const done=Game.maint.particles.filter(p=>p.scraped).length;
+    Game.maint.progress=Math.round((done/total)*100);
+    
+    document.getElementById('maint-progress').textContent=Game.maint.progress;
+    document.getElementById('maint-hp').textContent=Math.round(Game.maint.rodHP);
+    document.getElementById('maint-hp').style.color=Game.maint.rodHP>60?'#44aaff':Game.maint.rodHP>30?'#ffaa44':'#ff4444';
+    
+    drawMaintenanceCanvas();
+    
+    // Check completion
+    if(Game.maint.progress>=90&&!Game.maint.done){
+      Game.maint.done=true;
+      if(Game.maint.rodHP>0){
+        const repairAmount=Game.maint.rodHP;
+        Game.lineDurability=Math.min(100,Game.lineDurability+repairAmount*0.8);
+        Game.reelCondition=Math.min(100,Game.reelCondition+repairAmount*0.8);
+        showNotif('Rod maintained! Line: '+Math.round(Game.lineDurability)+'% Reel: '+Math.round(Game.reelCondition)+'%','#88dd88');
+      } else{
+        showNotif('You broke the rod during maintenance!','#ff4040');
+      }
+      setTimeout(closeMaintenance,800);
+    }
+    if(Game.maint.rodHP<=0&&!Game.maint.done){
+      Game.maint.done=true;
+      showNotif('You broke the rod! Be more careful next time.','#ff4040');
+      setTimeout(closeMaintenance,800);
+    }
+  };
+}
+
+function drawMaintenanceCanvas(){
+  const cv=document.getElementById('maintenance-canvas');
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,360,100);
+  // Draw rod background
+  ctx.fillStyle='#4a3018';
+  ctx.fillRect(20,35,320,30);
+  ctx.fillStyle='#5a3a1a';
+  ctx.fillRect(20,38,320,24);
+  // Draw reel
+  ctx.fillStyle='#888';
+  ctx.beginPath();ctx.arc(80,50,12,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#666';
+  ctx.beginPath();ctx.arc(80,50,6,0,Math.PI*2);ctx.fill();
+  // Draw particles (rust)
+  Game.maint.particles.forEach(p=>{
+    if(p.scraped) return;
+    ctx.fillStyle=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+  });
+  // Progress bar at bottom
+  ctx.fillStyle='rgba(0,0,0,0.3)';
+  ctx.fillRect(0,92,360,8);
+  ctx.fillStyle='#88dd88';
+  ctx.fillRect(0,92,360*Game.maint.progress/100,8);
+}
+
+function closeMaintenance(){
+  document.getElementById('maintenance-ui').style.display='none';
+  const cv=document.getElementById('maintenance-canvas');
+  cv.onmousemove=null;
+  Game.maint=null;
+  Game.paused=false;
 }
 
 function updateBaitFreshness(dt){
@@ -3105,24 +3703,8 @@ function playRadioBroadcast(){
   setTimeout(()=>playRadioBroadcast(),30000+Math.random()*60000);
 }
 
-// ─── MOSQUITO SYSTEM ───────────────────────────────────────────────────────────
-function updateMosquitoes(dt){
-  const moving=keys.w||keys.a||keys.s||keys.d;
-  
-  if(!moving&&Game.movementTimer===0){
-    Game.mosquitoes=Math.min(50,Game.mosquitoes+dt*2);
-    
-    if(Game.mosquitoes>10&&Math.random()<0.01){
-      showNotif('🦟 Mosquitoes are getting bad...','#888');
-    }
-    if(Game.mosquitoes>30&&Math.random()<0.005){
-      showNotif('🦟🦟🦟 MOSQUITO SWARM!','#ff8040');
-      triggerScreenShake(.02,.3);
-    }
-  } else if(moving){
-    Game.mosquitoes=Math.max(0,Game.mosquitoes-dt*5);
-  }
-}
+// ─── MOSQUITO SYSTEM (disabled) ────────────────────────────────────────────────
+function updateMosquitoes(dt){}
 
 // ─── CASSETTE & MUSIC ──────────────────────────────────────────────────────────
 function playCassette(tape){
@@ -3201,6 +3783,7 @@ function togglePhone(){
   Game.phoneOut=!Game.phoneOut;
   if(Game.phoneOut){
     document.getElementById('phone-ui').style.display='block';
+    if(document.pointerLockElement) document.exitPointerLock();
     showNotif('📱 Pulling out phone...','#88aaff');
     setTimeout(()=>showNotif('📵 No signal','#888888'),1500);
   } else{
@@ -3458,27 +4041,44 @@ function drinkLakeWater(){
 }
 
 function takeBeer(){
-  const beer=BEVERAGES[0];
-  drinkBeverage(beer);
-  Game.sobriety=Math.max(0,Game.sobriety-15);
-  Game.warmth=Math.min(100,Game.warmth+10);
-  
-  const can=new THREE.Mesh(
-    new THREE.CylinderGeometry(.05,.05,.12,8),
-    new THREE.MeshLambertMaterial({color:0xcccccc})
-  );
+  if(!Game.inventory || Game.inventory.length === 0){
+    showNotif('No beer in inventory! Find beer pickups around the lake','#ff8844');
+    return;
+  }
+  const beerItem = Game.inventory.find(item => item.name === 'Warm Beer');
+  if(beerItem){
+    drinkBeverage(BEVERAGES[0]);
+    // Create empty can and throw it
+    throwEmptyCan();
+    // Remove from inventory
+    const index = Game.inventory.indexOf(beerItem);
+    Game.inventory.splice(index, 1);
+    updateInventoryDisplay();
+    showNotif('🍺 Drank Warm Beer!','#ffd700');
+  } else {
+    showNotif('No beer in inventory! Find beer pickups around the lake','#ff8844');
+  }
+}
+
+function throwEmptyCan(){
+  const canGeo = new THREE.CylinderGeometry(0.03,0.03,0.08,8);
+  const canMat = new THREE.MeshLambertMaterial({color:0x666666});
+  const can = new THREE.Mesh(canGeo, canMat);
   can.position.copy(camera.position);
-  can.position.y=0.3;
-  can.rotation.set(Math.random(),Math.random(),Math.random());
+  can.position.y -= 0.5;
   scene.add(can);
   
-  const vel=new THREE.Vector3(
-    (Math.random()-.5)*2,
-    1+Math.random(),
-    (Math.random()-.5)*2
+  const vel = new THREE.Vector3(
+    (Math.random() - 0.5) * 2,
+    1 + Math.random(),
+    (Math.random() - 0.5) * 2
   );
   
-  Game.beerCans.push({mesh:can,vel,angVel:new THREE.Vector3(Math.random()*5,Math.random()*5,Math.random()*5)});
+  Game.beerCans.push({
+    mesh: can,
+    vel: vel,
+    angVel: new THREE.Vector3(Math.random() * 5, Math.random() * 5, Math.random() * 5)
+  });
 }
 
 function restAtCampfire(){
@@ -3509,48 +4109,10 @@ function updateSobrietyEffects(){
   return drunkMod;
 }
 
-// ─── CHARMING ANNOYANCES ───────────────────────────────────────────────────────
-function updateFly(dt){
-  if(!Game.flyActive&&Math.random()<0.001){
-    Game.flyActive=true;
-    Game.flyPosition={x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight};
-    Game.flyTarget={x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight};
-    showNotif('🪰 A fly landed on your screen','#888888');
-  }
-  
-  if(Game.flyActive){
-    const dx=Game.flyTarget.x-Game.flyPosition.x;
-    const dy=Game.flyTarget.y-Game.flyPosition.y;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    
-    if(dist<5||Math.random()<0.02){
-      Game.flyTarget={x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight};
-    }
-    
-    const speed=50*dt;
-    Game.flyPosition.x+=dx/dist*speed;
-    Game.flyPosition.y+=dy/dist*speed;
-    
-    if(Math.random()<0.005){
-      Game.flyActive=false;
-      showNotif('🪰 Fly flew away','#888888');
-    }
-  }
-}
 
 function updateSunburn(dt){
-  const isDaytime=Game.dayTime>0.25&&Game.dayTime<0.75;
-  const inDirectSun=isDaytime&&camera.position.y>1.5;
-  
-  if(inDirectSun){
-    Game.sunburn=Math.min(100,Game.sunburn+dt*2);
-    
-    if(Game.sunburn>80&&Math.random()<0.01){
-      showNotif('☀️ Getting really sunburned...','#ff6060');
-    }
-  } else{
-    Game.sunburn=Math.max(0,Game.sunburn-dt*0.5);
-  }
+  // Disabled — was causing unwanted red screen tint
+  Game.sunburn=0;
 }
 
 function spawnAnts(){
@@ -4344,9 +4906,7 @@ function rodFallsOver(){
 
 function loosePlankSound(){
   Game.loosePlankStep++;
-  if(Game.loosePlankStep%7===0){
-    showNotif('*CREAK*','#8a6a4a');
-  }
+  // Removed annoying *CREAK* notification spam
 }
 
 // ─── COSMIC HORROR ─────────────────────────────────────────────────────────────
@@ -4467,8 +5027,12 @@ function undeadFishReappears(){
 
 // ─── MY SUMMER CAR JANK ────────────────────────────────────────────────────────
 function tripOnDock(){
-  if(Math.random()<0.01&&(keys.w||keys.s)){
-    showNotif('🦶 TRIPPED ON DOCK EDGE!','#ff4040');
+  const walking=keys.w||keys.a||keys.s||keys.d;
+  if(walking){Game.continuousWalkTime=(Game.continuousWalkTime||0)+0.016;}else{Game.continuousWalkTime=0;}
+  if(Game.continuousWalkTime<30) return;
+  if(Math.random()<0.005&&(keys.w||keys.s)){
+    Game.continuousWalkTime=0;
+    showNotif('TRIPPED ON DOCK EDGE!','#ff4040');
     triggerScreenShake(.15,.8);
     
     camera.rotation.x=Math.PI/3;
@@ -4636,6 +5200,7 @@ function generateRoomCode(){
 
 function openMultiplayerMenu(){
   document.getElementById('mp-menu').style.display='block';
+  if(document.pointerLockElement) document.exitPointerLock();
 }
 
 function closeMultiplayerMenu(){
@@ -4881,6 +5446,16 @@ function handleGuestReceive(data){
   
   if(data.type==='remoteAction'){
     handleRemoteAction(data.id,data);
+  }
+  
+  if(data.type==='hostLeft'){
+    alert('The host has left the game. You will be returned to the menu.');
+    Game.paused=false;
+    document.getElementById('pause-menu').style.display='none';
+    document.getElementById('main-menu').style.display='flex';
+    document.getElementById('main-menu').style.opacity='1';
+    if(document.pointerLockElement) document.exitPointerLock();
+    Game.locked=false;
   }
 }
 
@@ -5194,24 +5769,41 @@ Press ESC to return
   alert(credits);
 }
 
-function checkContinueButton(){
-  const hasSave=localStorage.getItem('fishingGameSave');
-  const continueBtn=document.getElementById('continue-btn');
-  if(continueBtn){
-    continueBtn.style.opacity=hasSave?'1':'0.4';
-    continueBtn.style.cursor=hasSave?'pointer':'not-allowed';
+function returnToMenuPrompt(){
+  if(confirm('WARNING: All players will be kicked and you will lose all unsaved progress. Return to menu?')){
+    // Kick all multiplayer players
+    if(MP.isHost&&MP.peer){
+      Object.values(MP.connections).forEach(conn=>{
+        try{conn.send({type:'hostLeft'});}catch(e){}
+        conn.close();
+      });
+    }
+    Game.paused=false;
+    document.getElementById('pause-menu').style.display='none';
+    document.getElementById('main-menu').style.display='flex';
+    document.getElementById('main-menu').style.opacity='1';
+    if(document.pointerLockElement) document.exitPointerLock();
+    Game.locked=false;
   }
 }
 
 function togglePause(){
   Game.paused=!Game.paused;
   document.getElementById('pause-menu').style.display=Game.paused?'flex':'none';
-  if(!Game.paused) canvas.requestPointerLock();
+  if(Game.paused){
+    // Unlock mouse when pausing
+    if(document.pointerLockElement) document.exitPointerLock();
+    Game.locked=false;
+  } else{
+    // Lock mouse when unpausing
+    canvas.requestPointerLock();
+  }
 }
 
 // ─── GRAPHICS SETTINGS ─────────────────────────────────────────────────────────
 function openGraphicsSettings(){
   document.getElementById('graphics-menu').style.display='block';
+  if(document.pointerLockElement) document.exitPointerLock();
   syncGraphicsUI();
 }
 
@@ -5354,17 +5946,9 @@ function updatePostProcessing(){
 }
 
 function updateVignette(){
-  if(!Game.settings.vignette) return;
-  
-  const targetIntensity=Game.stress/100;
-  Game.graphicsState.vignetteIntensity+=(targetIntensity-Game.graphicsState.vignetteIntensity)*0.1;
-  
+  // Red tint removed — vignette disabled
   const vignetteEl=document.getElementById('vignette-overlay');
-  vignetteEl.style.opacity=Game.graphicsState.vignetteIntensity;
-  
-  if(Game.stress>80&&Math.random()<0.05){
-    vignetteEl.style.opacity=Math.random()*0.3+Game.graphicsState.vignetteIntensity;
-  }
+  vignetteEl.style.opacity=0;
 }
 
 function updateColorGrading(){
@@ -5492,6 +6076,7 @@ function toggleEncyclopedia(){
   panel.style.display=isOpen?'none':'block';
   
   if(!isOpen){
+    if(document.pointerLockElement) document.exitPointerLock();
     const list=document.getElementById('encyclopedia-list');
     list.innerHTML='';
     Object.entries(Game.encyclopedia).forEach(([name,data])=>{
@@ -5589,20 +6174,23 @@ function updateAtmosphereUI(){
   
   document.getElementById('stillness-bonus').querySelector('span').textContent=Game.stillnessBonus.toFixed(1);
   
+  // Update compact vital sliders
+  document.getElementById('vital-hunger').style.width=(Game.hunger)+'%';
+  document.getElementById('vital-thirst').style.width=(Game.thirst)+'%';
+  document.getElementById('vital-fatigue').style.width=(Game.fatigue)+'%';
+  document.getElementById('vital-stress').style.width=(Game.stress)+'%';
+  document.getElementById('vital-warmth').style.width=(Game.warmth)+'%';
+  document.getElementById('vital-sugar').style.width=(Game.bloodSugar)+'%';
+  document.getElementById('vital-sobriety').style.width=(Game.sobriety)+'%';
+  document.getElementById('vital-piss').style.width=(Game.pissLevel*100)+'%';
+  document.getElementById('vital-shit').style.width=(Game.shitLevel*100)+'%';
+  
   drawAnalogGauges();
   drawAnalogClock();
   updateCharmingUI();
 }
 
 function updateCharmingUI(){
-  const flyEl=document.getElementById('fly-overlay');
-  if(Game.flyActive){
-    flyEl.style.display='block';
-    flyEl.style.left=Game.flyPosition.x+'px';
-    flyEl.style.top=Game.flyPosition.y+'px';
-  } else{
-    flyEl.style.display='none';
-  }
   
   const dropletsContainer=document.getElementById('water-droplets-container');
   dropletsContainer.innerHTML='';
@@ -5980,18 +6568,29 @@ function drinkWarmBeverage(){
 function startPissing(){
   if(Game.isPissing||Game.pissLevel<.1) return;
   Game.isPissing=true;
+  Game._pissVariant=Math.random()<0.333?'white':'normal';
   sendAction('pissStart',{timestamp:Date.now()});
   checkSyncPiss();
 }
-function stopPissing(){Game.isPissing=false;}
+function stopPissing(){Game.isPissing=false;Game._pissVariant=undefined;}
 
 function spawnPissParticle(){
-  const m=new THREE.Mesh(new THREE.SphereGeometry(.04,4,4),
-    new THREE.MeshBasicMaterial({color:0xddc000,transparent:true,opacity:.85}));
-  const dir=new THREE.Vector3(0,-.3,-1).applyQuaternion(camera.quaternion).normalize();
-  m.position.copy(camera.position).addScaledVector(dir,.3);
-  scene.add(m);
-  Game.pissParts.push({mesh:m,life:0,maxLife:1.2,vel:dir.clone().multiplyScalar(6+Math.random())});
+  // 1/3 chance per piss session: white piss that shoots super far
+  if(Game._pissVariant===undefined) Game._pissVariant=Math.random()<0.333?'white':'normal';
+  const isWhite=Game._pissVariant==='white';
+  const color=isWhite?0xeeeeee:0xddc000;
+  const speed=isWhite?16+Math.random()*6:6+Math.random();
+  const size=isWhite?0.06:0.04;
+  const count=isWhite?3:1;
+  for(let i=0;i<count;i++){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(size,4,4),
+      new THREE.MeshBasicMaterial({color,transparent:true,opacity:.85}));
+    const spread=isWhite?(Math.random()-.5)*0.3:0;
+    const dir=new THREE.Vector3(spread,-.3+spread*0.5,-1).applyQuaternion(camera.quaternion).normalize();
+    m.position.copy(camera.position).addScaledVector(dir,.3);
+    scene.add(m);
+    Game.pissParts.push({mesh:m,life:0,maxLife:isWhite?2.0:1.2,vel:dir.clone().multiplyScalar(speed)});
+  }
 }
 
 function spawnShitParticle(){
@@ -6178,12 +6777,16 @@ document.addEventListener('keydown',e=>{
   if(e.code==='KeyB'){
     spawnPlayerBoat();
   }
+  if(e.code==='KeyL'){
+    toggleFleshLight();
+  }
   if(e.code==='KeyI'){
     Game.engineRunning=!Game.engineRunning;
     showNotif(Game.engineRunning?'🚗 Engine started':'🚗 Engine stopped','#88ddff');
   }
   if(e.code==='Escape'){
     e.preventDefault();
+    if(Game.maint){closeMaintenance();return;}
     if(Game.shopOpen){toggleBaitShop();return;}
     if(Game.rodOffer){declineRodOffer();return;}
     togglePause();
@@ -6287,6 +6890,7 @@ canvas.addEventListener('mousedown',e=>{
 canvas.addEventListener('mouseup',e=>{
   if(e.button!==0) return;
   if(Game.state==='casting') releaseCast();
+  // Don't clear line on mouseup - line should stay until reeled in with 'R' key
 });
 canvas.addEventListener('click',()=>{
   if(Game.state==='display') dismissCatch();
@@ -6297,8 +6901,17 @@ let yaw=0,pitch=0;
 document.addEventListener('pointerlockchange',()=>{
   Game.locked=document.pointerLockElement===canvas;
   const ov=document.getElementById('lock-overlay');
-  ov.style.opacity=Game.locked?'0':'1';
-  ov.style.pointerEvents=Game.locked?'none':'all';
+  const mainMenu=document.getElementById('main-menu');
+  const menuVisible=mainMenu&&mainMenu.style.display!=='none';
+  // Only show lock overlay if we're not in a menu and game hasn't started yet
+  if(Game.locked){
+    ov.style.opacity='0';
+    ov.style.pointerEvents='none';
+  } else if(!menuVisible&&!Game.paused){
+    // Don't show fullscreen overlay when exiting pause or during gameplay
+    ov.style.opacity='0';
+    ov.style.pointerEvents='none';
+  }
 });
 document.addEventListener('mousemove',e=>{
   if(!Game.locked) return;
@@ -6322,6 +6935,7 @@ function movePlayer(dt){
   if(Game.frozenTimer>0) return;
 
   let spd=5*dt;
+  if(keys.Shift) spd=25*dt; // Sprint
   const dir=new THREE.Vector3();
   const kb=Game.scrambledKeys;
   if(keys[kb.w]) dir.z-=1; if(keys[kb.s]) dir.z+=1;
@@ -6340,12 +6954,14 @@ function movePlayer(dt){
     const newX=camera.position.x+dir.x*spd;
     const newZ=camera.position.z+dir.z*spd;
 
-    // Per-axis water blocking
+    // Per-axis water blocking (allow movement on docks/islands even over water)
     const hX=getTerrainHeight(newX,camera.position.z);
     const hZ=getTerrainHeight(camera.position.x,newZ);
+    const dockX=getDockHeight(newX,camera.position.z);
+    const dockZ=getDockHeight(camera.position.x,newZ);
     let blocked=false;
-    if(hX>-.05) camera.position.x=newX; else blocked=true;
-    if(hZ>-.05) camera.position.z=newZ; else blocked=true;
+    if(hX>-.05||dockX!==null) camera.position.x=newX; else blocked=true;
+    if(hZ>-.05||dockZ!==null) camera.position.z=newZ; else blocked=true;
     if(blocked){
       const now=performance.now();
       if(now-Game.lastWaterNotifTime>5000){
@@ -6535,7 +7151,7 @@ function releaseCast(){
     Game.state='idle';Game.power=0;
     document.getElementById('cast-power-bar').style.display='none';
     document.getElementById('power-fill').style.width='0%';
-    showNotif('🎣 Lure hit land — cast into water!','#ff8844');
+    showNotif('Can\'t fish there — that\'s land! Aim at the water.','#ff8844');
     return;
   }
 
@@ -6930,7 +7546,15 @@ function brawlPunch(){
   document.getElementById('punch-count').textContent=Game.punchCount;
   document.getElementById('brawl-fish-hp').style.width=((Game.brawl.fishHP/Game.brawl.fishMaxHP)*100)+'%';
   triggerScreenShake(.06,.15);Game.brawl.impactFreeze=0.08;
-  showNotif(['💥 POW!','👊 SMACK!','💢 WHAM!','🔥 CRACK!'][Math.floor(Math.random()*4)],'#ffaa40');
+  showNotif(['POW!','SMACK!','WHAM!','CRACK!'][Math.floor(Math.random()*4)],'#ffaa40');
+  // Punch animation: lunge camera forward and flash
+  const punchFlash=document.createElement('div');
+  punchFlash.style.cssText='position:fixed;inset:0;background:rgba(255,200,100,0.3);pointer-events:none;z-index:999;transition:opacity 0.15s;';
+  document.body.appendChild(punchFlash);
+  const origFov=camera.fov;
+  camera.fov=origFov-5;camera.updateProjectionMatrix();
+  setTimeout(()=>{punchFlash.style.opacity='0';camera.fov=origFov;camera.updateProjectionMatrix();},80);
+  setTimeout(()=>punchFlash.remove(),200);
   if(Game.brawl.fishHP<=0) triggerFinisher();
 }
 
@@ -7130,10 +7754,12 @@ function landFish(){
 function clearLine(){
   if(lineMesh){scene.remove(lineMesh);lineMesh=null;}
   if(bobberGroup){scene.remove(bobberGroup);bobberGroup=null;}
+  removeNewLine(); // Remove the new fishing line
   Game.lineOut=false;
   document.getElementById('line-indicator').style.display='none';
   document.getElementById('depth-fill').style.width='0%';
 }
+
 function dismissCatch(){
   document.getElementById('catch-display').style.display='none';
   Game.state='idle';
@@ -7158,24 +7784,94 @@ function animateRod(t){
 // ─── MINIMAP ───────────────────────────────────────────────────────────────────
 const mmc=document.getElementById('minimap-canvas'),mmx=mmc.getContext('2d');
 function drawMinimap(){
-  mmx.clearRect(0,0,90,90);
-  mmx.fillStyle='#0a1420';mmx.fillRect(0,0,90,90);
-  const sc=90/180,ox=45,oz=45;
+  const width=180,height=180;
+  mmx.clearRect(0,0,width,height);
+  
+  // Draw water background
+  mmx.fillStyle='#0a1420';
+  mmx.fillRect(0,0,width,height);
+  
+  const sc=width/300,ox=width/2,oz=height/2;
+  const step=3; // Sample terrain every 3 pixels for performance
+  
+  // Draw actual terrain
+  for(let px=0;px<width;px+=step){
+    for(let pz=0;pz<height;pz+=step){
+      // Convert minimap pixel to world coordinates
+      const worldX=(px-ox)/sc;
+      const worldZ=(pz-oz)/sc;
+      const terrainH=getTerrainHeight(worldX,worldZ);
+      
+      if(terrainH>0){
+        // Land - color based on height
+        const brightness=Math.min(1,terrainH/10);
+        const green=Math.floor(40+brightness*60);
+        const brown=Math.floor(30+brightness*40);
+        mmx.fillStyle=`rgb(${brown},${green},30)`;
+        mmx.fillRect(px,pz,step,step);
+      } else if(terrainH>-0.1){
+        // Shallow water
+        mmx.fillStyle='#1a4020';
+        mmx.fillRect(px,pz,step,step);
+      }
+    }
+  }
+  
+  // Draw islands (larger terrain areas)
   [[-30,-20,8],[35,-18,5],[5,-55,12],[-50,-45,7],[55,-30,3.5],[60,-60,9],[-18,-70,4],[25,-80,14]].forEach(([cx,cz,r])=>{
-    mmx.fillStyle='#2a5030';mmx.beginPath();mmx.arc(ox+cx*sc,oz+cz*sc,Math.max(2,r*sc),0,Math.PI*2);mmx.fill();
+    mmx.fillStyle='#2a5030';
+    mmx.beginPath();
+    mmx.arc(ox+cx*sc,oz+cz*sc,Math.max(3,r*sc),0,Math.PI*2);
+    mmx.fill();
   });
-  mmx.fillStyle='#1a4020';mmx.fillRect(0,oz+10*sc,90,oz-10*sc);
+  
+  // Draw rods
   Game.rodObjects.forEach(r=>{
     if(r.collected) return;
-    mmx.fillStyle='#40d4ff';mmx.beginPath();mmx.arc(ox+r.pos.x*sc,oz+r.pos.z*sc,3,0,Math.PI*2);mmx.fill();
+    mmx.fillStyle='#40d4ff';
+    mmx.beginPath();
+    mmx.arc(ox+r.pos.x*sc,oz+r.pos.z*sc,4,0,Math.PI*2);
+    mmx.fill();
   });
+  
+  // Draw beer locations
+  const beerSpots=[[-10,-40],[35,-18],[5,-55],[70,-75],[-30,-20],[55,-30],[0,5],[-18,-70]];
+  beerSpots.forEach(([bx,bz])=>{
+    mmx.fillStyle='rgba(255,200,60,0.8)';
+    mmx.beginPath();
+    mmx.arc(ox+bx*sc,oz+bz*sc,3,0,Math.PI*2);
+    mmx.fill();
+  });
+  
+  // Draw player
   const px=ox+camera.position.x*sc,pz=oz+camera.position.z*sc;
-  mmx.fillStyle='#c9a84c';mmx.beginPath();mmx.arc(px,pz,3,0,Math.PI*2);mmx.fill();
-  mmx.strokeStyle='#c9a84c';mmx.lineWidth=1.5;
+  mmx.fillStyle='#c9a84c';
+  mmx.beginPath();
+  mmx.arc(px,pz,4,0,Math.PI*2);
+  mmx.fill();
+  
+  // Draw player direction
+  mmx.strokeStyle='#c9a84c';
+  mmx.lineWidth=2;
   const a=camera.rotation.y;
-  mmx.beginPath();mmx.moveTo(px,pz);mmx.lineTo(px+Math.sin(a)*-8,pz+Math.cos(a)*-8);mmx.stroke();
-  mmx.strokeStyle='rgba(201,168,76,0.4)';mmx.lineWidth=1;mmx.strokeRect(0,0,90,90);
-  mmx.fillStyle='rgba(64,212,255,0.8)';mmx.font='8px monospace';mmx.fillText('🎣 rods',2,88);
+  mmx.beginPath();
+  mmx.moveTo(px,pz);
+  mmx.lineTo(px+Math.sin(a)*-12,pz+Math.cos(a)*-12);
+  mmx.stroke();
+  
+  // Border
+  mmx.strokeStyle='rgba(201,168,76,0.4)';
+  mmx.lineWidth=1;
+  mmx.strokeRect(0,0,width,height);
+  
+  // Legend
+  mmx.fillStyle='rgba(64,212,255,0.8)';
+  mmx.font='9px monospace';
+  mmx.fillText('rods',4,height-4);
+  mmx.fillStyle='rgba(255,200,60,0.8)';
+  mmx.fillText('beer',45,height-4);
+  mmx.fillStyle='rgba(200,220,240,0.5)';
+  mmx.fillText('land',90,height-4);
 }
 
 // ─── DAY CYCLE ─────────────────────────────────────────────────────────────────
@@ -7185,6 +7881,9 @@ function updateDay(dt){
   const d=Game.dayTime;
   skyMat.uniforms.uDay.value=d;
   skyMat.uniforms.uTime.value=elapsed;
+  
+  // Update dynamic fog based on time of day
+  updateDynamicFog(d);
   waterMat.uniforms.uDay.value=d;
   causticsMat.uniforms.uDay.value=d;
   const sa=d*Math.PI*2-Math.PI/2;
@@ -7243,12 +7942,12 @@ function animate(){
   updateAmbientSounds();
   updateBodilyMeters(dt);
   updateBeerCans(dt);
+  checkBeerPickup();
   updateFloppingFish(dt);
   updateScatteredTackle(dt);
   updateSobrietyEffects();
   
-  updateFly(dt);
-  updateSunburn(dt);
+    updateSunburn(dt);
   updateAnts(dt);
   updateSpiderWeb(dt);
   updateWaterDroplets(dt);
@@ -7299,7 +7998,8 @@ function animate(){
   
   if(Math.random()<0.00005) wrongStars();
   if(Math.random()<0.00008) reflectionGlitch();
-  if(Math.random()<0.00004) phantomFishingLine();
+  // Disabled phantom fishing line to prevent double lines
+  // if(Math.random()<0.00004) phantomFishingLine();
   if(Math.random()<0.00003) timeAnomalyBroadcast();
   if(Math.random()<0.00006&&Game.seenSpecies.size>0) undeadFishReappears();
   
@@ -7329,11 +8029,46 @@ function animate(){
   checkRodPickups();
   randomJankEvent(elapsed);
   drawMinimap();
+  updateLureIndicator();
+  updateFishingHint();
+  if(lineMesh&&Game.lineOut&&bobberGroup) updateLine(Game.bobberPos);
   
   if(Game.isPissing&&Game.weather==='rain') checkAchievement('pissRain');
   checkAchievement('punch100');
   checkAchievement('perfectCast');
   checkAchievement('7rods');
+  
+  // New achievement checks
+  checkAchievement('firstCatch');
+  checkAchievement('catch100');
+  checkAchievement('catch500');
+  checkAchievement('catch1000');
+  checkAchievement('cast100');
+  checkAchievement('cast500');
+  checkAchievement('perfect50');
+  checkAchievement('lvl20');
+  checkAchievement('lvl50');
+  checkAchievement('weight1000');
+  checkAchievement('weight5000');
+  checkAchievement('weight10000');
+  checkAchievement('piss10');
+  checkAchievement('piss50');
+  checkAchievement('shit10');
+  checkAchievement('shit50');
+  checkAchievement('punch10');
+  checkAchievement('punch50');
+  checkAchievement('day7');
+  checkAchievement('day30');
+  checkAchievement('species10');
+  checkAchievement('species25');
+  checkAchievement('species40');
+  checkAchievement('big500');
+  checkAchievement('big2000');
+  checkAchievement('allRods');
+  checkAchievement('drinker');
+  checkAchievement('drunk');
+  checkAchievement('lucky');
+  checkAchievement('trash');
   
   updateUIDisplays();
   updateAtmosphereUI();
@@ -7394,6 +8129,7 @@ function animate(){
     bobberGroup.position.y=.04+Math.sin(Game.bobberAnimT*1.4)*.022+(biting?Math.sin(Game.bobberAnimT*14)*.1:0);
     bobberGroup.rotation.x=Math.sin(Game.bobberAnimT*2)*.12;
     updateLine(bobberGroup.position);
+    updateNewLine(); // Update the new fishing line
     Game.bobberPos.copy(bobberGroup.position);
     if(Math.random()<.04) spawnBubbles(Game.bobberPos,2);
   }
@@ -7556,18 +8292,34 @@ function animate(){
     godRayMat.uniforms.uIntensity.value=Game.settings.godrayIntensity;
   }
   
-  // Render scene + grade into VHS render target
-  renderer.setRenderTarget(vhsRT);
-  renderer.render(scene,camera);
-  renderer.autoClear=false;
-  renderer.render(gradeScene,gradeCamera);
-  renderer.autoClear=true;
-  renderer.setRenderTarget(null);
+  // Update post-processing uniforms
+  colorGradePass.uniforms.uTime.value = elapsed;
+  
+  // Update depth of field focus to track bobber when fishing
+  if (Game.lineOut && bobberGroup) {
+    const distance = camera.position.distanceTo(bobberGroup.position);
+    bokehPass.focus = distance;
+  } else {
+    bokehPass.focus = 10.0; // Default focus distance
+  }
+  
+  // Render scene through post-processing pipeline
+  composer.render();
+  
+  // Apply VHS effects on top if enabled
+  if (Game.settings.vhs) {
+    renderer.setRenderTarget(vhsRT);
+    renderer.render(scene,camera);
+    renderer.autoClear=false;
+    renderer.render(gradeScene,gradeCamera);
+    renderer.autoClear=true;
+    renderer.setRenderTarget(null);
 
-  // Apply VHS shader to screen
-  vhsMat.uniforms.tDiffuse.value=vhsRT.texture;
-  vhsMat.uniforms.uTime.value=elapsed;
-  renderer.render(vhsScene,vhsCamera);
+    // Apply VHS shader to screen
+    vhsMat.uniforms.tDiffuse.value=vhsRT.texture;
+    vhsMat.uniforms.uTime.value=elapsed;
+    renderer.render(vhsScene,vhsCamera);
+  }
 
   // Godrays on top
   if(Game.settings.godrays){
@@ -7657,14 +8409,69 @@ function spawnPlayerBoat(){
 }
 
 function exitBoat(){
+  // Find a valid landing spot (dock or above-water terrain)
+  const bx=Game.boatMesh.position.x, bz=Game.boatMesh.position.z;
+  const offsets=[[0,0],[2,0],[-2,0],[0,2],[0,-2],[2,2],[-2,2],[2,-2],[-2,-2],[3,0],[-3,0],[0,3],[0,-3]];
+  let landX=bx, landZ=bz, found=false;
+  for(const [ox,oz] of offsets){
+    const tx=bx+ox, tz=bz+oz;
+    const dH=getDockHeight(tx,tz);
+    const tH=getTerrainHeight(tx,tz);
+    if(dH!==null||tH>-0.05){
+      landX=tx; landZ=tz; found=true; break;
+    }
+  }
   Game.inBoat=false;
-  showNotif('🚶 Exited boat','#88ddff');
+  camera.position.x=landX;
+  camera.position.z=landZ;
+  const dockH=getDockHeight(landX,landZ);
+  const terrH=getTerrainHeight(landX,landZ);
+  camera.position.y=(dockH!==null?dockH:Math.max(0,terrH))+1.7;
+  Game.playerVelocityY=0;
+  showNotif('Exited boat','#88ddff');
   // Keep boat mesh in world
+}
+
+// ─── FLESH LIGHT SYSTEM ─────────────────────────────────────────────────────────
+function toggleFleshLight(){
+  Game.fleshLightActive = !Game.fleshLightActive;
+  
+  if(Game.fleshLightActive){
+    // Create flesh light (spotlight attached to camera)
+    const fleshLight = new THREE.SpotLight(0xffaa88, 2, 50, Math.PI/6, 0.5, 2);
+    fleshLight.position.set(0, 0, -1);
+    fleshLight.target = new THREE.Object3D();
+    fleshLight.target.position.set(0, 0, -10);
+    camera.add(fleshLight);
+    camera.add(fleshLight.target);
+    
+    Game.fleshLightMesh = fleshLight;
+    showNotif('🔦 Flesh Light ON', '#ffaa88');
+    
+    // Add some ambient glow effect
+    const glowLight = new THREE.PointLight(0xff8866, 0.5, 5);
+    glowLight.position.set(0.5, -0.2, 0);
+    camera.add(glowLight);
+    Game.fleshLightGlow = glowLight;
+    
+  } else {
+    // Remove flesh light
+    if(Game.fleshLightMesh){
+      camera.remove(Game.fleshLightMesh);
+      camera.remove(Game.fleshLightMesh.target);
+      Game.fleshLightMesh = null;
+    }
+    if(Game.fleshLightGlow){
+      camera.remove(Game.fleshLightGlow);
+      Game.fleshLightGlow = null;
+    }
+    showNotif('🔦 Flesh Light OFF', '#888888');
+  }
 }
 
 function updateBoat(dt){
   if(!Game.inBoat||!Game.boatMesh) return;
-  const spd=4*dt;
+  const spd=12*dt;
   const dir=new THREE.Vector3();
   const kb=Game.scrambledKeys;
   if(keys[kb.w]) dir.z-=1; if(keys[kb.s]) dir.z+=1;
@@ -7917,6 +8724,7 @@ function toggleBaitShop(){
   const el=document.getElementById('bait-shop');
   if(Game.shopOpen){
     el.style.display='block';
+    if(document.pointerLockElement) document.exitPointerLock();
     document.getElementById('shop-balance').textContent=Game.totalWeight.toFixed(1);
     renderShopItems();
   } else{
@@ -8300,8 +9108,8 @@ lockOverlay.addEventListener('click',()=>{
 });
 
 initializeStarterInventory();
+initializeBeerSpawns();
 initHeatmap();
-checkContinueButton();
 
 const sensSlider=document.getElementById('sens-slider');
 sensSlider.addEventListener('input',()=>{
@@ -8315,9 +9123,331 @@ window.addEventListener('resize',()=>{
   camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
+  composer.setSize(innerWidth,innerHeight);
+  
+  // Update post-processing passes that need size
+  bloomPass.setSize(innerWidth, innerHeight);
+  bokehPass.width = innerWidth;
+  bokehPass.height = innerHeight;
+  
+  // Update SSR pass if it exists
+  if (ssrPass) {
+    ssrPass.width = innerWidth;
+    ssrPass.height = innerHeight;
+  }
+  
   vhsRT.setSize(innerWidth,innerHeight);
   vhsMat.uniforms.uResolution.value.set(innerWidth,innerHeight);
 });
+
+// ─── BEFOREUNLOAD WARNING ────────────────────────────────────────────────────
+window.addEventListener('beforeunload',(e)=>{
+  const mainMenu=document.getElementById('main-menu');
+  if(mainMenu&&mainMenu.style.display!=='none') return;
+  e.preventDefault();
+  e.returnValue='WARNING: You will lose all progress and all players will be kicked!';
+});
+
+// Host-leave kick handling is in handleGuestReceive()
+
+// ─── CANCER STATIC EFFECT ─────────────────────────────────────────────────────
+Game.cancerLevel=0;
+Game.cancerCheckTimer=0;
+const cancerOverlay=document.createElement('canvas');
+cancerOverlay.id='cancer-static';
+cancerOverlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:998;opacity:0;transition:opacity 0.5s;';
+document.body.appendChild(cancerOverlay);
+
+function updateCancerStatic(dt){
+  Game.cancerCheckTimer+=dt;
+  if(Game.cancerCheckTimer>=60){
+    Game.cancerCheckTimer=0;
+    if(Math.random()<0.05){
+      Game.cancerLevel=Math.min(1,Game.cancerLevel+0.15);
+      showNotif('Something feels wrong...','#ff4444');
+    }
+  }
+  if(Game.cancerLevel>0){
+    const cv=document.getElementById('cancer-static');
+    cv.style.opacity=Game.cancerLevel*0.5;
+    cv.width=window.innerWidth/4;
+    cv.height=window.innerHeight/4;
+    const ctx=cv.getContext('2d');
+    const imgData=ctx.createImageData(cv.width,cv.height);
+    for(let i=0;i<imgData.data.length;i+=4){
+      const v=Math.random()*255;
+      imgData.data[i]=v;imgData.data[i+1]=v;imgData.data[i+2]=v;
+      imgData.data[i+3]=Math.random()*80*Game.cancerLevel;
+    }
+    ctx.putImageData(imgData,0,0);
+  }
+}
+
+// ─── SPINNING CAMERA BACKGROUND FOR MENU ─────────────────────────────────────
+let menuCameraAngle=0;
+function updateMenuCamera(dt){
+  const mainMenu=document.getElementById('main-menu');
+  if(!mainMenu||mainMenu.style.display==='none') return;
+  menuCameraAngle+=dt*0.15;
+  camera.position.set(Math.cos(menuCameraAngle)*20,8,Math.sin(menuCameraAngle)*20);
+  camera.lookAt(0,2,0);
+}
+
+// Patch animate to include new systems
+const _origAnimate=animate;
+// We need to hook into the render loop. Since animate already exists, let's patch the main loop.
+// The main loop calls movePlayer, updateDay, etc. Let's inject our updates into updatePostProcessing.
+const _origPostProcess=updatePostProcessing;
+updatePostProcessing=function(){
+  _origPostProcess();
+  updateCancerStatic(0.016);
+};
+
+// Hook menu camera into the animation loop before paused check
+const _origMovePlayer=movePlayer;
+movePlayer=function(dt){
+  updateMenuCamera(dt);
+  _origMovePlayer(dt);
+};
+
+// ─── LURE POSITION INDICATOR ─────────────────────────────────────────────────
+function updateLureIndicator(){
+  const el=document.getElementById('lure-indicator');
+  const arrow=document.getElementById('lure-arrow');
+  const distLabel=document.getElementById('lure-dist-label');
+  if(!Game.lineOut||!bobberGroup){
+    el.style.display='none';
+    return;
+  }
+  // Project bobber world position to screen
+  const pos=Game.bobberPos.clone();
+  pos.project(camera);
+  const hw=window.innerWidth/2, hh=window.innerHeight/2;
+  const sx=(pos.x*hw)+hw;
+  const sy=(-pos.y*hh)+hh;
+  const dist=camera.position.distanceTo(Game.bobberPos);
+  
+  // Check if bobber is behind camera
+  if(pos.z>1){
+    // Behind camera - show arrow at edge pointing in direction
+    el.style.display='block';
+    const angle=Math.atan2(sy-hh,sx-hw);
+    const edgeX=hw+Math.cos(angle+Math.PI)*Math.min(hw-40,300);
+    const edgeY=hh+Math.sin(angle+Math.PI)*Math.min(hh-40,200);
+    el.style.left=edgeX+'px';
+    el.style.top=edgeY+'px';
+    arrow.textContent='◄ LURE';
+    distLabel.textContent=Math.round(dist)+' ft';
+    return;
+  }
+  
+  // If on screen, show small marker
+  const onScreen=sx>20&&sx<window.innerWidth-20&&sy>20&&sy<window.innerHeight-20;
+  if(onScreen){
+    el.style.display='block';
+    el.style.left=(sx-10)+'px';
+    el.style.top=(sy-30)+'px';
+    arrow.textContent='▼';
+    distLabel.textContent=Math.round(dist)+' ft';
+  } else{
+    // Off-screen: clamp to edge with arrow
+    el.style.display='block';
+    const cx=Math.max(30,Math.min(window.innerWidth-30,sx));
+    const cy=Math.max(30,Math.min(window.innerHeight-30,sy));
+    el.style.left=cx+'px';
+    el.style.top=cy+'px';
+    const angle=Math.atan2(sy-hh,sx-hw);
+    const arrows=['→','↗','↑','↖','←','↙','↓','↘'];
+    const idx=Math.round(((angle+Math.PI)/(Math.PI*2))*8)%8;
+    arrow.textContent=arrows[idx]+' LURE';
+    distLabel.textContent=Math.round(dist)+' ft';
+  }
+}
+
+// ─── FISHING HINTS ───────────────────────────────────────────────────────────
+function updateFishingHint(){
+  const el=document.getElementById('fishing-hint');
+  let hint='';
+  
+  if(Game.state==='idle'&&!Game.lineOut){
+    hint='HOLD LEFT CLICK to charge cast, release to throw';
+  } else if(Game.state==='casting'){
+    hint='Release LEFT CLICK to cast — aim with mouse';
+  } else if(Game.state==='waiting'){
+    hint='Waiting for a bite... watch for nibbles';
+  } else if(Game.state==='bite'){
+    hint='FISH ON! Press SPACE to set the hook!';
+  } else if(Game.state==='hookset'){
+    hint='Press SPACE when needle is in the GREEN zone!';
+  } else if(Game.state==='reeling'){
+    hint='HOLD R to reel — keep cursor in the green zone!';
+  } else if(Game.state==='fighting'){
+    hint='Keep the bar in the sweet spot! Hold R to reel in!';
+  } else if(Game.state==='brawling'){
+    hint='WASD to dodge, F to punch, R to pin, SPACE to parry!';
+  } else if(Game.state==='finisher'){
+    hint='Press E to execute the finisher!';
+  } else if(Game.state==='display'){
+    hint='Press any key to continue';
+  }
+  
+  if(hint){
+    el.textContent=hint;
+    el.style.display='block';
+  } else{
+    el.style.display='none';
+  }
+}
+
+// Land detection is handled in releaseCast() directly
+
+// ─── INVENTORY POINTER UNLOCK ────────────────────────────────────────────────
+const _origToggleInventory=toggleInventory;
+toggleInventory=function(){
+  _origToggleInventory();
+  if(Game.inventoryOpen){
+    if(document.pointerLockElement) document.exitPointerLock();
+  } else{
+    canvas.requestPointerLock();
+  }
+};
+
+// ─── PLAYERS ON MINIMAP ──────────────────────────────────────────────────────
+const _origDrawMinimap=drawMinimap;
+drawMinimap=function(){
+  _origDrawMinimap();
+  // Draw remote players on minimap
+  const width=180,height=180;
+  const sc=width/300,ox=width/2,oz=height/2;
+  if(typeof MP!=='undefined'&&MP.remotePlayers){
+    Object.entries(MP.remotePlayers).forEach(([id,rp])=>{
+      if(!rp||!rp.mesh) return;
+      const rpx=ox+rp.mesh.position.x*sc;
+      const rpz=oz+rp.mesh.position.z*sc;
+      if(rpx>0&&rpx<width&&rpz>0&&rpz<height){
+        mmx.fillStyle='#ff6688';
+        mmx.beginPath();mmx.arc(rpx,rpz,3,0,Math.PI*2);mmx.fill();
+      }
+    });
+  }
+  // Legend for players
+  mmx.fillStyle='rgba(255,102,136,0.8)';
+  mmx.font='9px monospace';
+  mmx.fillText('players',135,height-4);
+};
+
+// ─── IMPROVED BOAT MODEL ─────────────────────────────────────────────────────
+const _origSpawnBoat=spawnPlayerBoat;
+spawnPlayerBoat=function(){
+  if(Game.inBoat){
+    exitBoat();
+    return;
+  }
+  if(Game.boatMesh){
+    scene.remove(Game.boatMesh);
+    Game.boatMesh=null;
+  }
+  const g=new THREE.Group();
+  
+  // Hull - curved using lathe geometry for a real boat shape
+  const hullShape=new THREE.Shape();
+  hullShape.moveTo(-0.9,0);
+  hullShape.quadraticCurveTo(-1.0,0.2,-0.85,0.35);
+  hullShape.lineTo(0.85,0.35);
+  hullShape.quadraticCurveTo(1.0,0.2,0.9,0);
+  hullShape.lineTo(-0.9,0);
+  const hullGeo=new THREE.ExtrudeGeometry(hullShape,{depth:3.5,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.05,bevelSegments:2});
+  hullGeo.translate(-0.0,-0.15,-1.75);
+  const hull=new THREE.Mesh(hullGeo,new THREE.MeshLambertMaterial({color:0x6a4a2a}));
+  g.add(hull);
+  
+  // Bow (pointed front)
+  const bowGeo=new THREE.ConeGeometry(0.85,1.5,8);
+  bowGeo.rotateX(Math.PI/2);
+  const bow=new THREE.Mesh(bowGeo,new THREE.MeshLambertMaterial({color:0x5a3a1a}));
+  bow.position.set(0,0.1,-2.8);
+  g.add(bow);
+  
+  // Stern (flat back)
+  const stern=new THREE.Mesh(
+    new THREE.BoxGeometry(1.6,0.4,0.15),
+    new THREE.MeshLambertMaterial({color:0x5a3a1a})
+  );
+  stern.position.set(0,0.15,1.75);
+  g.add(stern);
+  
+  // Seats (two wooden planks across)
+  [-0.4,0.8].forEach(z=>{
+    const seat=new THREE.Mesh(
+      new THREE.BoxGeometry(1.3,0.06,0.4),
+      new THREE.MeshLambertMaterial({color:0x4a3018})
+    );
+    seat.position.set(0,0.3,z);
+    g.add(seat);
+  });
+  
+  // Oar holders (small cylinders on sides)
+  [-0.85,0.85].forEach(x=>{
+    const holder=new THREE.Mesh(
+      new THREE.CylinderGeometry(0.03,0.03,0.2,6),
+      new THREE.MeshLambertMaterial({color:0x888888})
+    );
+    holder.position.set(x,0.35,0);
+    g.add(holder);
+  });
+  
+  // Oars
+  [-0.85,0.85].forEach((x,i)=>{
+    const oarHandle=new THREE.Mesh(
+      new THREE.CylinderGeometry(0.02,0.02,2.2,6),
+      new THREE.MeshLambertMaterial({color:0x8B6914})
+    );
+    oarHandle.rotation.z=i===0?0.3:-0.3;
+    oarHandle.rotation.x=0.1;
+    oarHandle.position.set(x*(1.4),0.3,0);
+    g.add(oarHandle);
+    
+    const blade=new THREE.Mesh(
+      new THREE.BoxGeometry(0.2,0.02,0.5),
+      new THREE.MeshLambertMaterial({color:0x6a4a2a})
+    );
+    blade.position.set(x*(2.0),0.0,0);
+    g.add(blade);
+  });
+  
+  // Motor at back
+  const motor=new THREE.Mesh(
+    new THREE.BoxGeometry(0.3,0.25,0.3),
+    new THREE.MeshLambertMaterial({color:0x444444})
+  );
+  motor.position.set(0,0.15,1.9);
+  g.add(motor);
+  const motorShaft=new THREE.Mesh(
+    new THREE.CylinderGeometry(0.03,0.03,0.6,6),
+    new THREE.MeshLambertMaterial({color:0x666666})
+  );
+  motorShaft.position.set(0,-0.15,1.9);
+  g.add(motorShaft);
+  
+  // Rim/gunwale stripe
+  const rimGeo=new THREE.TorusGeometry(0.92,0.03,4,20,Math.PI);
+  const rim=new THREE.Mesh(rimGeo,new THREE.MeshLambertMaterial({color:0xCC9944}));
+  rim.rotation.x=Math.PI/2;
+  rim.position.set(0,0.35,0);
+  rim.scale.z=3.5;
+  g.add(rim);
+
+  g.position.set(camera.position.x,0.1,camera.position.z);
+  g.rotation.y=camera.rotation.y;
+  g.castShadow=true;
+  scene.add(g);
+  Game.boatMesh=g;
+  Game.inBoat=true;
+  Game.boatVelocity.set(0,0,0);
+  showNotif('Spawned boat! Press B again to exit','#88ddff');
+  sendAction('spawnBoat',{x:g.position.x,z:g.position.z,rotY:g.rotation.y});
+};
+
 </script>
 </body>
 </html>
