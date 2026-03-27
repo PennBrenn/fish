@@ -1410,6 +1410,7 @@ const Game = {
   castQuality:'weak',
   perfectCasts:0,
   trajectoryLine:null,
+  aimLine:null,
   combatPhase:'none',
   combatStamina:1.0,
   statusAilments:[],
@@ -6077,6 +6078,7 @@ function updateTrajectoryPreview(){
   const targetPos=new THREE.Vector3(camera.position.x+dir.x*dist,.06,camera.position.z+dir.z*dist);
   
   if(Game.trajectoryLine){scene.remove(Game.trajectoryLine);}
+  if(Game.aimLine){scene.remove(Game.aimLine);}
   const points=[];
   const steps=20;
   for(let i=0;i<=steps;i++){
@@ -6090,12 +6092,18 @@ function updateTrajectoryPreview(){
   const quality=Game.power<.3?0xff6060:Game.power>.7&&Game.power<.85?0xffd700:0xffa040;
   Game.trajectoryLine=new THREE.Line(geo,new THREE.LineBasicMaterial({color:quality,transparent:true,opacity:.4}));
   scene.add(Game.trajectoryLine);
+
+  const tip=getRodTip();
+  const aimGeo=new THREE.BufferGeometry().setFromPoints([tip,targetPos]);
+  Game.aimLine=new THREE.Line(aimGeo,new THREE.LineBasicMaterial({color:quality,transparent:true,opacity:.55}));
+  scene.add(Game.aimLine);
 }
 
 function releaseCast(){
   if(Game.state!=='casting') return;
   clearInterval(powerInterval);
   if(Game.trajectoryLine){scene.remove(Game.trajectoryLine);Game.trajectoryLine=null;}
+  if(Game.aimLine){scene.remove(Game.aimLine);Game.aimLine=null;}
   
   let quality='WEAK',color='#ff6060',distBonus=1,biteBonus=1;
   if(Game.power<.3){quality='WEAK 💩';color='#ff6060';distBonus=0.8;biteBonus=1.2;}
