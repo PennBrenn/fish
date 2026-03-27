@@ -2741,41 +2741,41 @@ function spawnBobber(pos){
 function createNewLine(){
   if(newLineMesh) return; // Already exists
   
-  const lineGeo = new THREE.BufferGeometry();
-  const lineMat = new THREE.LineBasicMaterial({
-    color: 0xd4c890,
-    linewidth: 3,
-    transparent: true,
-    opacity: 0.8
-  });
-  
-  newLineMesh = new THREE.Line(lineGeo, lineMat);
-  newLineMesh.frustumCulled = false; // Always render
+  // Create a visible cylinder-based line (more reliable than LineBasicMaterial)
+  const rodTip = getRodTip();
+  const initialPos = rodTip.clone();
+  const len = 0.1; // Initial tiny length
+  const geo = new THREE.CylinderGeometry(0.012, 0.012, len, 6, 1);
+  geo.rotateX(Math.PI/2);
+  geo.translate(0, 0, len/2);
+  const mat = new THREE.MeshBasicMaterial({color: 0xd4c890, transparent: true, opacity: 0.85});
+  newLineMesh = new THREE.Mesh(geo, mat);
+  newLineMesh.position.copy(rodTip);
+  newLineMesh.frustumCulled = false;
   scene.add(newLineMesh);
   newLineActive = true;
 }
 
 function updateNewLine(){
-  if(!newLineActive || !bobberGroup) return;
+  if(!newLineActive || !bobberGroup || !newLineMesh) return;
   
   const rodTip = getRodTip();
   const bobberPos = bobberGroup.position.clone();
   
-  // Create line points from rod tip to bobber
-  const points = [
-    rodTip,
-    bobberPos
-  ];
+  // Rebuild cylinder geometry to connect rod tip to bobber
+  const dir = new THREE.Vector3().subVectors(bobberPos, rodTip);
+  const len = dir.length();
   
-  const positions = new Float32Array(points.length * 3);
-  points.forEach((point, i) => {
-    positions[i * 3] = point.x;
-    positions[i * 3 + 1] = point.y;
-    positions[i * 3 + 2] = point.z;
-  });
+  if(len < 0.01) return; // Too short to render
   
-  newLineMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  newLineMesh.geometry.attributes.position.needsUpdate = true;
+  // Dispose old geometry and create new one
+  newLineMesh.geometry.dispose();
+  const geo = new THREE.CylinderGeometry(0.012, 0.012, len, 6, 1);
+  geo.rotateX(Math.PI/2);
+  geo.translate(0, 0, len/2);
+  newLineMesh.geometry = geo;
+  newLineMesh.position.copy(rodTip);
+  newLineMesh.lookAt(bobberPos);
 }
 
 function removeNewLine(){
@@ -7234,7 +7234,10 @@ function releaseCast(){
 
 // ─── BOBBER PHYSICS ────────────────────────────────────────────────────────────
 function updateBobberPhysics(dt){
-  if(!Game.bobberInFlight||!bobberGroup) return;
+  if(!Game.bobberInFlight||!bobberGroup){
+    if(Game.bobberInFlight) console.log('Bobber in flight but no bobberGroup!');
+    return;
+  }
   const GRAVITY=9.8;
   const AIR_RESISTANCE=0.32;
   // Apply gravity
@@ -7249,6 +7252,10 @@ function updateBobberPhysics(dt){
   // Update line each frame during flight
   updateLine(Game.bobberPos);
   updateNewLine();
+  
+  // Debug: log position every 30 frames
+  if(Math.random()<0.03) console.log('Bobber pos:', Game.bobberPos.y.toFixed(2), 'vel:', Game.bobberVelocity.y.toFixed(2));
+  
   // Landed?
   if(Game.bobberPos.y<=0.06){
     Game.bobberInFlight=false;
