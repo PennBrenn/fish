@@ -356,14 +356,14 @@
 </div>
 
 <div id="status-panel" class="panel" style="position:fixed;bottom:200px;left:16px;padding:8px 14px;display:none;max-width:180px;">
-  <div style="color:#ff6060;font-size:10px;letter-spacing:2px;">STATUS EFFECTS</div>
+  <div style="color:#ffaa00;font-size:10px;letter-spacing:2px;">STATUS EFFECTS</div>
   <div id="status-list" style="font-size:11px;margin-top:4px;line-height:1.6;"></div>
 </div>
 
 <div id="line-tension-panel" class="panel" style="position:fixed;bottom:70px;right:230px;padding:10px 16px;display:none;">
-  <div style="font-size:10px;letter-spacing:2px;color:#ff4040;margin-bottom:4px;">LINE TENSION</div>
+  <div style="font-size:10px;letter-spacing:2px;color:#ffaa00;margin-bottom:4px;">LINE TENSION</div>
   <div style="width:100px;height:10px;background:rgba(0,0,0,0.5);border:1px solid var(--border);">
-    <div id="tension-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4aff4a,#ffaa00,#ff4040);transition:width 0.1s;"></div>
+    <div id="tension-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4aff4a,#ffaa00,#ff8800);transition:width 0.1s;"></div>
   </div>
 </div>
 
@@ -5319,7 +5319,7 @@ function drawGauge(canvasId,value,label,warningZone=80,dangerZone=90){
     const warnEnd=startAngle+range*(dangerZone/100);
     ctx.beginPath();
     ctx.arc(cx,cy,radius-2,warnStart,warnEnd);
-    ctx.strokeStyle='#ff8800';
+    ctx.strokeStyle='#ffdd00';
     ctx.lineWidth=4;
     ctx.stroke();
   }
@@ -5328,7 +5328,7 @@ function drawGauge(canvasId,value,label,warningZone=80,dangerZone=90){
     const dangStart=startAngle+range*(dangerZone/100);
     ctx.beginPath();
     ctx.arc(cx,cy,radius-2,dangStart,endAngle);
-    ctx.strokeStyle='#ff4040';
+    ctx.strokeStyle='#ffaa00';
     ctx.lineWidth=4;
     ctx.stroke();
   }
@@ -5341,7 +5341,7 @@ function drawGauge(canvasId,value,label,warningZone=80,dangerZone=90){
     cx+Math.cos(needleAngle)*needleLen,
     cy+Math.sin(needleAngle)*needleLen
   );
-  ctx.strokeStyle=isCritical?'#ff4040':'#d4a574';
+  ctx.strokeStyle=isCritical?'#ffaa00':'#d4a574';
   ctx.lineWidth=3;
   ctx.stroke();
   
@@ -5351,7 +5351,7 @@ function drawGauge(canvasId,value,label,warningZone=80,dangerZone=90){
   ctx.fill();
   
   ctx.font='10px "Courier Prime"';
-  ctx.fillStyle=isCritical?'#ff4040':'#6a5a4a';
+  ctx.fillStyle=isCritical?'#ffaa00':'#6a5a4a';
   ctx.textAlign='center';
   ctx.fillText(Math.floor(value),cx,cy+radius+15);
   
