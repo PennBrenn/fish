@@ -4503,10 +4503,14 @@ function handleHostReceive(peerId,data){
     rp.targetRotY=data.rotY;
     rp.state=data.state||'idle';
     rp.action=data.action||null;
+    if(data.username){
+      rp.username=data.username;
+      if(rp.nameTag) rp.nameTag.textContent=data.username;
+    }
     
     Object.values(MP.connections).forEach(conn=>{
       if(conn.peer!==peerId){
-        conn.send({type:'remotePlayer',id:peerId,x:data.x,y:data.y,z:data.z,rotY:data.rotY,state:data.state,action:data.action});
+        conn.send({type:'remotePlayer',id:peerId,x:data.x,y:data.y,z:data.z,rotY:data.rotY,state:data.state,action:data.action,username:data.username});
       }
     });
   }
@@ -4551,6 +4555,10 @@ function handleGuestReceive(data){
     rp.targetRotY=data.rotY;
     rp.state=data.state||'idle';
     rp.action=data.action||null;
+    if(data.username){
+      rp.username=data.username;
+      if(rp.nameTag) rp.nameTag.textContent=data.username;
+    }
   }
   
   if(data.type==='hostPlayer'){
@@ -4561,6 +4569,10 @@ function handleGuestReceive(data){
     rp.targetPos.set(data.x,data.y,data.z);
     rp.targetRotY=data.rotY;
     rp.state=data.state||'idle';
+    if(data.username){
+      rp.username=data.username;
+      if(rp.nameTag) rp.nameTag.textContent=data.username;
+    }
   }
   
   if(data.type==='playerLeft'){
@@ -4609,8 +4621,14 @@ function updateRemotePlayers(dt){
       rp.rod.rotation.x+=(Math.PI/4-rp.rod.rotation.x)*0.1;
     }
     
-    const screenPos=rp.targetPos.clone();
-    screenPos.y+=2.3;
+    const screenPos=new THREE.Vector3();
+    if(rp.head&&rp.head.isObject3D){
+      rp.head.getWorldPosition(screenPos);
+      screenPos.y+=0.35;
+    } else{
+      screenPos.copy(rp.mesh.position);
+      screenPos.y+=2.1;
+    }
     screenPos.project(camera);
     
     if(screenPos.z<1){
@@ -4635,12 +4653,13 @@ function sendPlayerState(){
     z:camera.position.z,
     rotY:camera.rotation.y,
     state:Game.state,
-    action:null
+    action:null,
+    username:Game.playerUsername
   };
   
   if(MP.isHost){
     Object.values(MP.connections).forEach(conn=>{
-      conn.send({type:'hostPlayer',x:state.x,y:state.y,z:state.z,rotY:state.rotY,state:state.state});
+      conn.send({type:'hostPlayer',x:state.x,y:state.y,z:state.z,rotY:state.rotY,state:state.state,username:state.username});
     });
     
     Object.values(MP.connections).forEach(conn=>{
@@ -7145,14 +7164,15 @@ function spawnRemotePlayerV2(id){
   body.add(rod);
 
   const nameTag=document.createElement('div');
-  nameTag.style.cssText='position:fixed;font-size:10px;color:#88ddff;font-family:"Courier Prime",monospace;pointer-events:none;z-index:100;text-shadow:0 1px 3px rgba(0,0,0,0.8);';
-  nameTag.textContent=id==='host'?'Host':'Angler';
+  nameTag.style.cssText='position:fixed;font-size:10px;color:#88ddff;font-family:"Courier Prime",monospace;pointer-events:none;z-index:100;text-shadow:0 1px 3px rgba(0,0,0,0.8);transform:translate(-50%,-100%);white-space:nowrap;';
+  nameTag.textContent=id==='host'?'Host':(id||'Angler');
   document.body.appendChild(nameTag);
 
   scene.add(body);
 
   MP.remotePlayers[id]={
     mesh:body,
+    head:head,
     targetPos:new THREE.Vector3(0,0,0),
     targetRotY:0,
     state:'idle',
