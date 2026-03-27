@@ -1591,6 +1591,7 @@ const Game = {
   inBoat:false,
   boatMesh:null,
   boatVelocity:new THREE.Vector3(),
+  playerVelocityY:0,
   worldSeed:Math.floor(Math.random()*999999),
   graphicsState:{
     filmGrainIntensity:0.08,
@@ -1885,178 +1886,209 @@ function makeRock(x,y,z,s=1){
   m.position.set(x,y,z);m.rotation.set(Math.random(),Math.random(),Math.random());m.castShadow=true;scene.add(m);
 }
 
-// Shore
-const shoreGeo=new THREE.PlaneGeometry(300,120,60,25);
-const sp=shoreGeo.attributes.position;
-for(let i=0;i<sp.count;i++) sp.setZ(i,Math.sin(sp.getX(i)*.04)*2+Math.cos(sp.getY(i)*.07)*1.2+Math.random()*.4);
-shoreGeo.computeVertexNormals();
-const shore=new THREE.Mesh(shoreGeo,new THREE.MeshLambertMaterial({color:0x1a3518}));
-shore.rotation.x=-Math.PI/2; shore.position.set(0,-.05,60); shore.receiveShadow=true; scene.add(shore);
-
-// Shore trees & rocks
-[-18,-12,-6,0,6,12,18,-22,22,-26,26].forEach(x=>makeTree(x,0,20+Math.random()*10,.8+Math.random()*.5));
-for(let i=0;i<14;i++) makeRock(-24+i*4+Math.random()*2,.2,14+Math.random()*5,.3+Math.random()*.5);
-
-// ─── TERRAIN HEIGHT SYSTEM ─────────────────────────────────────────────────────
-function noise2d(x,z,seed=0){
-  const n=Math.sin(x*12.9898+z*78.233+seed+Game.worldSeed*0.001)*43758.5453;
-  return n-Math.floor(n);
+// ─── SEEDED NOISE SYSTEM ──────────────────────────────────────────────────────
+function hash2d(ix,iz,seed){
+  let n=(ix*374761393+iz*668265263+seed*1274126177)|0;
+  n=((n^(n>>13))*1274126177)|0;
+  n=n^(n>>16);
+  return(n&0x7fffffff)/2147483647;
 }
-function fbm(x,z,octaves=4){
-  let total=0,freq=1,amp=1,maxVal=0;
-  for(let i=0;i<octaves;i++){
-    total+=noise2d(x*freq,z*freq,i)*amp;
-    maxVal+=amp;
-    amp*=0.5;
-    freq*=2.1;
-  }
-  return total/maxVal;
-}
+function _sst(t){return t*t*(3-2*t);}
+function _ssClamp(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
 function smoothNoise(x,z,seed){
-  const corners=(noise2d(x-1,z-1,seed)+noise2d(x+1,z-1,seed)+noise2d(x-1,z+1,seed)+noise2d(x+1,z+1,seed))/16;
-  const sides=(noise2d(x-1,z,seed)+noise2d(x+1,z,seed)+noise2d(x,z-1,seed)+noise2d(x,z+1,seed))/8;
-  const center=noise2d(x,z,seed)/4;
-  return corners+sides+center;
+  const c=(hash2d(x-1,z-1,seed)+hash2d(x+1,z-1,seed)+hash2d(x-1,z+1,seed)+hash2d(x+1,z+1,seed))/16;
+  const s=(hash2d(x-1,z,seed)+hash2d(x+1,z,seed)+hash2d(x,z-1,seed)+hash2d(x,z+1,seed))/8;
+  return c+s+hash2d(x,z,seed)/4;
 }
 function interpolatedNoise(x,z,seed){
-  const ix=Math.floor(x),iz=Math.floor(z);
-  const fx=x-ix,fz=z-iz;
-  const sx=fx*fx*(3-2*fx),sz=fz*fz*(3-2*fz);
+  const ix=Math.floor(x),iz=Math.floor(z),fx=x-ix,fz=z-iz;
+  const sx=_sst(fx),sz=_sst(fz);
   const v1=smoothNoise(ix,iz,seed),v2=smoothNoise(ix+1,iz,seed);
   const v3=smoothNoise(ix,iz+1,seed),v4=smoothNoise(ix+1,iz+1,seed);
-  const i1=v1*(1-sx)+v2*sx,i2=v3*(1-sx)+v4*sx;
-  return i1*(1-sz)+i2*sz;
+  return(v1*(1-sx)+v2*sx)*(1-sz)+(v3*(1-sx)+v4*sx)*sz;
 }
-function smoothFbm(x,z,octaves=5){
-  let total=0,freq=1,amp=1,maxVal=0;
-  for(let i=0;i<octaves;i++){
-    total+=interpolatedNoise(x*freq,z*freq,i+Game.worldSeed)*amp;
-    maxVal+=amp;
-    amp*=0.5;
-    freq*=2.0;
-  }
-  return total/maxVal;
+function smoothFbm(x,z,oct){
+  oct=oct||5;let t=0,f=1,a=1,m=0;
+  for(let i=0;i<oct;i++){t+=interpolatedNoise(x*f,z*f,i+Game.worldSeed)*a;m+=a;a*=.5;f*=2;}
+  return t/m;
+}
+function noise2d(x,z,seed){return hash2d(Math.floor(x*97),Math.floor(z*97),(seed||0)+Game.worldSeed);}
+function seededRng(s){s=s|0;return function(){s=((s*1103515245+12345)&0x7fffffff);return s/0x7fffffff;};}
+
+// ─── TERRAIN DATA ─────────────────────────────────────────────────────────────
+Game.terrainData={size:300,segments:120,heights:[]};
+Game.lastWaterNotifTime=0;
+const td=Game.terrainData;
+
+// Pre-compute 2-4 inland lake basins (seeded)
+const _lrng=seededRng(Game.worldSeed*7+31);
+const _numLakes=2+Math.floor(_lrng()*3);
+const _lakes=[];
+for(let _li=0;_li<_numLakes;_li++){
+  _lakes.push({x:(_lrng()-.5)*100,z:35+_lrng()*55,rx:8+_lrng()*12,rz:6+_lrng()*10,d:.6+_lrng()*1.2,rot:_lrng()*Math.PI});
 }
 
-Game.terrainData={size:300,segments:80,heights:[]};
-const td=Game.terrainData;
-for(let z=0;z<=td.segments;z++){
-  for(let x=0;x<=td.segments;x++){
-    const wx=(x/td.segments-.5)*td.size,wz=(z/td.segments-.5)*td.size;
-    const distFromCenter=Math.sqrt(wx*wx+wz*wz);
+for(let gz=0;gz<=td.segments;gz++){
+  for(let gx=0;gx<=td.segments;gx++){
+    const wx=(gx/td.segments-.5)*td.size,wz=(gz/td.segments-.5)*td.size;
+    const dist0=Math.sqrt(wx*wx+wz*wz);
     let h=0;
-    
-    if(wz<-5){
-      // Smooth rolling hills with occasional mountains
-      const base=smoothFbm(wx*.012,wz*.012,5)*10;
-      const hills=smoothFbm(wx*.006,wz*.006,4)*16;
-      const mountains=Math.pow(Math.max(0,smoothFbm(wx*.004,wz*.004,3)-0.3)*3,1.8)*8;
-      const detail=smoothFbm(wx*.04,wz*.04,2)*1.5;
-      const ridges=Math.abs(smoothFbm(wx*.01,wz*.01,3)-0.5)*6;
-      h=base+hills+mountains+detail+ridges;
-      h=Math.max(h,0.3);
-      // Smooth transition near water edge
-      const edgeFade=Math.min(1,Math.max(0,(-wz-5)/15));
-      h*=edgeFade;
-      h=Math.max(h,edgeFade*0.3);
-    } else if(wz>=-5&&wz<=15){
-      const beachSlope=(wz+5)/20;
-      h=beachSlope*0.25-0.15+smoothFbm(wx*.08,wz*.08,2)*0.3;
-    } else{
-      // Open water area - slightly below sea level
-      h=-0.4+smoothFbm(wx*.015,wz*.015,2)*0.2;
+
+    if(wz>10){
+      // INLAND — gentle hills ramping up, mountains far away
+      const iD=wz-10;
+      const hillOn=_ssClamp(0,40,iD);
+      const base=smoothFbm(wx*.012,wz*.012,5)*8;
+      const hills=smoothFbm(wx*.006+1.3,wz*.006+.7,4)*12;
+      const det=smoothFbm(wx*.04,wz*.04,2)*1.2;
+      const mtnOn=_ssClamp(40,80,iD);
+      const mtn=Math.pow(Math.max(0,smoothFbm(wx*.004+2.1,wz*.004+1.5,3)-.25)*3,1.8)*10;
+      const ridge=Math.abs(smoothFbm(wx*.01+3,wz*.01+2,3)-.5)*5;
+      h=(base+hills+det)*hillOn+(mtn+ridge)*mtnOn;
+      h=Math.max(h,.2*hillOn);
+    }else if(wz>=-5){
+      // BEACH — very gentle slope, max ~5 degrees
+      const bT=(wz+5)/15;
+      h=bT*.35+smoothFbm(wx*.06,wz*.06,2)*.12;
+      h=Math.max(h,bT*.05);
+    }else{
+      // WATER FLOOR (z < -5): slopes down for ocean
+      const wd=Math.min(1,(-wz-5)/20);
+      h=-.2-wd*1.5+smoothFbm(wx*.015,wz*.015,2)*.3;
     }
-    
-    if(distFromCenter>130){
-      const fade=Math.max(0,1-(distFromCenter-130)/25);
-      h*=fade;
-      h=Math.min(h,-0.3);
+
+    // Spawn protection — within 25 units, flatten to gentle beach/grass
+    if(dist0<25){
+      const prot=_ssClamp(25,15,dist0);
+      const safeH=Math.max(.1,Math.min(.3,.15+smoothFbm(wx*.05,wz*.05,2)*.08));
+      h=h*(1-prot)+safeH*prot;
     }
-    
+
+    // Carve inland lakes into natural basins
+    for(const lk of _lakes){
+      const cr=Math.cos(lk.rot),sr=Math.sin(lk.rot);
+      const lx=(wx-lk.x)*cr+(wz-lk.z)*sr,lz=-(wx-lk.x)*sr+(wz-lk.z)*cr;
+      const ld=lx*lx/(lk.rx*lk.rx)+lz*lz/(lk.rz*lk.rz);
+      if(ld<1.6){
+        const lf=_ssClamp(1.6,.8,ld);
+        h=h*(1-lf)+(-lk.d*(1-ld*.3))*lf;
+      }
+    }
+
+    // Ocean edge falloff — terrain dips below 0 beyond radius ~120
+    if(dist0>110){
+      const ef=_ssClamp(110,140,dist0);
+      h=h*(1-ef)+(-1.5)*ef;
+    }
+
     td.heights.push(h);
   }
 }
+
 function getTerrainHeight(x,z){
-  const td=Game.terrainData;
-  const hsize=td.size*.5;
-  if(Math.abs(x)>hsize||Math.abs(z)>hsize)return 0;
+  const td=Game.terrainData,hs=td.size*.5;
+  if(Math.abs(x)>hs||Math.abs(z)>hs)return-1;
   const fx=(x/td.size+.5)*td.segments,fz=(z/td.size+.5)*td.segments;
   const x0=Math.floor(fx),z0=Math.floor(fz),x1=Math.min(x0+1,td.segments),z1=Math.min(z0+1,td.segments);
-  const dx=fx-x0,dz=fz-z0;
-  const h00=td.heights[z0*(td.segments+1)+x0]||0,h10=td.heights[z0*(td.segments+1)+x1]||0;
-  const h01=td.heights[z1*(td.segments+1)+x0]||0,h11=td.heights[z1*(td.segments+1)+x1]||0;
+  const dx=fx-x0,dz=fz-z0,st=td.segments+1;
+  const h00=td.heights[z0*st+x0]||0,h10=td.heights[z0*st+x1]||0;
+  const h01=td.heights[z1*st+x0]||0,h11=td.heights[z1*st+x1]||0;
   return(h00*(1-dx)+h10*dx)*(1-dz)+(h01*(1-dx)+h11*dx)*dz;
 }
 
+// ─── TERRAIN MESH ─────────────────────────────────────────────────────────────
 const terrainGeo=new THREE.PlaneGeometry(td.size,td.size,td.segments,td.segments);
 const terrainPos=terrainGeo.attributes.position;
 for(let i=0;i<terrainPos.count;i++){
-  const x=terrainPos.getX(i),z=terrainPos.getY(i);
-  const idx=Math.floor((z/td.size+.5)*td.segments)*(td.segments+1)+Math.floor((x/td.size+.5)*td.segments);
-  const h=td.heights[idx]||0;
-  terrainPos.setZ(i,h);
+  const lx=terrainPos.getX(i),ly=terrainPos.getY(i);
+  // After -PI/2 X rotation: worldX=lx, worldZ=-ly — use world coords for height lookup
+  const wx=lx,wz=-ly;
+  const gx=Math.max(0,Math.min(td.segments,Math.round((wx/td.size+.5)*td.segments)));
+  const gz=Math.max(0,Math.min(td.segments,Math.round((wz/td.size+.5)*td.segments)));
+  terrainPos.setZ(i,td.heights[gz*(td.segments+1)+gx]||0);
 }
 terrainGeo.computeVertexNormals();
 
-const terrainMat=new THREE.MeshLambertMaterial({
-  vertexColors:true,
-  side:THREE.DoubleSide
-});
+// ─── BIOME VERTEX COLORS (smoothstep blended) ────────────────────────────────
+const terrainMat=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
 const colors=new Float32Array(terrainPos.count*3);
 for(let i=0;i<terrainPos.count;i++){
   const h=terrainPos.getZ(i);
-  const wx=terrainPos.getX(i);
-  const wz=terrainPos.getY(i);
-  // Add micro-variation to colors
-  const variation=noise2d(wx*0.3,wz*0.3,42)*0.08-0.04;
+  const wx=terrainPos.getX(i),wz=-terrainPos.getY(i);
+  const v=noise2d(wx*.3,wz*.3,42)*.06-.03;
   let r,g,b;
-  if(h>14){
-    // Snow caps
-    r=.88+variation;g=.9+variation;b=.92+variation;
-  } else if(h>10){
-    // Rocky peaks
-    r=.55+variation;g=.52+variation;b=.48+variation;
-  } else if(h>6){
-    // High alpine
-    r=.3+variation;g=.42+variation;b=.22+variation;
-  } else if(h>3){
-    // Forest
-    r=.18+variation;g=.4+variation;b=.18+variation;
-  } else if(h>1){
-    // Grass
-    r=.22+variation;g=.5+variation;b=.25+variation;
-  } else if(h>-.15){
-    // Beach/sand
-    r=.72+variation;g=.66+variation;b=.42+variation;
-  } else{
-    // Underwater ground
-    r=.12+variation;g=.18+variation;b=.1+variation;
+  if(h<-.1){
+    r=.12;g=.18;b=.10;
+  }else if(h<.4){
+    // Beach → Grassland blend
+    const t=_ssClamp(0,.4,h);
+    r=.72*(1-t)+.22*t;g=.66*(1-t)+.50*t;b=.42*(1-t)+.25*t;
+  }else if(h<2.5){
+    // Grassland → Forest blend
+    const t=_ssClamp(1.8,2.5,h);
+    r=.22*(1-t)+.15*t;g=.50*(1-t)+.38*t;b=.25*(1-t)+.18*t;
+  }else if(h<6){
+    // Forest → Highland blend
+    const t=_ssClamp(4.5,6,h);
+    r=.15*(1-t)+.45*t;g=.38*(1-t)+.42*t;b=.18*(1-t)+.38*t;
+  }else if(h<14){
+    r=.45;g=.42;b=.38;
+  }else{
+    // Highland → Snow blend
+    const t=_ssClamp(14,16,h);
+    r=.45*(1-t)+.92*t;g=.42*(1-t)+.93*t;b=.38*(1-t)+.95*t;
   }
-  colors[i*3]=Math.max(0,Math.min(1,r));
-  colors[i*3+1]=Math.max(0,Math.min(1,g));
-  colors[i*3+2]=Math.max(0,Math.min(1,b));
+  // Sandy shoreline band around lakes and ocean (h 0 to 0.3)
+  if(h>-.1&&h<.3){const st=_ssClamp(.3,0,h);r=r*(1-st)+.72*st;g=g*(1-st)+.66*st;b=b*(1-st)+.42*st;}
+  r+=v;g+=v;b+=v;
+  colors[i*3]=Math.max(0,Math.min(1,r));colors[i*3+1]=Math.max(0,Math.min(1,g));colors[i*3+2]=Math.max(0,Math.min(1,b));
 }
 terrainGeo.setAttribute('color',new THREE.BufferAttribute(colors,3));
 
 const terrainMesh=new THREE.Mesh(terrainGeo,terrainMat);
 terrainMesh.rotation.x=-Math.PI/2;
-terrainMesh.receiveShadow=true;
-terrainMesh.castShadow=true;
-scene.add(terrainMesh);
+terrainMesh.receiveShadow=true;terrainMesh.castShadow=true;scene.add(terrainMesh);
 
-// Islands
+// Islands (preserved positions)
 makeIsland(-30,-20,8,2.5,0x204828,true);
 makeIsland(35,-18,5,2.0,0x1e3a1e,true);
 makeIsland(5,-55,12,3.0,0x25502a,true);
 makeIsland(-50,-45,7,2.8,0x3a4030,false);
-for(let i=0;i<5;i++) makeRock(-48+i*3+Math.random()*2,2.8,-46+Math.random()*4,.5+Math.random()*.8);
 makeIsland(55,-30,3.5,1.8,0x204828,false);
-makeRock(55,2.0,-30,.8); makeRock(57,1.8,-28,.5);
 makeIsland(60,-60,9,2.2,0x1d4022,true);
 makeIsland(68,-52,4,1.8,0x224426,false);
 makeIsland(-18,-70,4,2.0,0x1a3820,false);
-makeTree(-18,2.2,-70,1.2);
 makeIsland(25,-80,14,3.5,0x284e2a,true);
+
+// ─── PROCEDURAL VEGETATION (seeded) ──────────────────────────────────────────
+(function(){
+  const vr=seededRng(Game.worldSeed*13+53);
+  const tr=seededRng(Game.worldSeed*17+97);
+  const rr=seededRng(Game.worldSeed*23+41);
+  const cell=4;
+  for(let cwx=-td.size/2;cwx<td.size/2;cwx+=cell){
+    for(let cwz=-td.size/2;cwz<td.size/2;cwz+=cell){
+      const sx=cwx+vr()*cell,sz=cwz+vr()*cell;
+      if(Math.sqrt(sx*sx+sz*sz)<8)continue;
+      const h=getTerrainHeight(sx,sz);
+      if(h<.1||h>13)continue;
+      let tDen,rCh;
+      if(h<.4){tDen=.002;rCh=.01;}
+      else if(h<2.5){tDen=.008;rCh=.004;}
+      else if(h<6){tDen=.025;rCh=.008;}
+      else{tDen=.004;rCh=.015;}
+      const ca=cell*cell;
+      if(vr()<tDen*ca) makeTree(sx,h,sz,h>6?.4+tr()*.4:.6+tr()*.8);
+      if(vr()<rCh*ca){
+        const cn=3+Math.floor(rr()*5);
+        for(let ri=0;ri<cn;ri++){
+          const rx2=sx+(rr()-.5)*4,rz2=sz+(rr()-.5)*4,rh=getTerrainHeight(rx2,rz2);
+          if(rh>.05)makeRock(rx2,rh,rz2,h>6?.5+rr():.3+rr()*.7);
+        }
+      }
+    }
+  }
+})();
 
 // ─── DOCKS SYSTEM ──────────────────────────────────────────────────────────────
 function makeDock(px,pz,width=2.4,depth=3,hasExtras=true){
@@ -2467,10 +2499,9 @@ function updateSentientBuoy(e,dt){
     e.mesh.position.x+=dx/d*e.speed*dt;
     e.mesh.position.z+=dz/d*e.speed*dt;
     if(dist<2){
-      camera.position.y+=30;
+      Game.playerVelocityY=18;
       showNotif('🚨 BUOY YEETED YOU INTO THE STRATOSPHERE!','#ff4040');
       triggerScreenShake(.2,1);
-      setTimeout(()=>{camera.position.y=1.7;},2000);
       return true;
     }
   }
@@ -2575,7 +2606,7 @@ function startTornado(){
     
     const playerDist=Math.sqrt((camera.position.x-tornadoX)**2+(camera.position.z-tornadoZ)**2);
     if(playerDist<15){
-      camera.position.y+=0.3;
+      if(Game.playerVelocityY<2) Game.playerVelocityY+=0.8;
       camera.rotation.z+=(Math.random()-.5)*0.1;
       triggerScreenShake(.08,.1);
     }
@@ -3511,17 +3542,17 @@ function scatterTackleBox(){
   
   const items=['🪱','🐟','🧀','🌽','✨','🎣','🪝','🎯'];
   for(let i=0;i<8;i++){
+    const sx=camera.position.x+(Math.random()-.5)*3;
+    const sz=camera.position.z+(Math.random()-.5)*3;
+    const sy=1+Math.random();
+    const dx=sx-camera.position.x,dy=sy-camera.position.y,dz=sz-camera.position.z;
+    if(Math.sqrt(dx*dx+dy*dy+dz*dz)<1.5) continue;
     const mesh=new THREE.Mesh(
       new THREE.BoxGeometry(.08,.08,.08),
       new THREE.MeshBasicMaterial({color:Math.random()*0xffffff})
     );
-    mesh.position.set(
-      camera.position.x+(Math.random()-.5)*3,
-      1+Math.random(),
-      camera.position.z+(Math.random()-.5)*3
-    );
+    mesh.position.set(sx,sy,sz);
     scene.add(mesh);
-    
     Game.scatteredTackle.push({
       mesh,
       vel:new THREE.Vector3((Math.random()-.5)*4,2+Math.random()*3,(Math.random()-.5)*4),
@@ -4002,11 +4033,11 @@ function spawnMysteryBuoy(){
 function sitOnDock(){
   if(Game.sitting){
     Game.sitting=false;
-    camera.position.y=1.7;
+    Game.playerVelocityY=0;
     showNotif('Stood up','#888888');
   } else{
     Game.sitting=true;
-    camera.position.y=0.8;
+    camera.position.y=Math.max(0.2,camera.position.y-0.9);
     camera.rotation.x=0.3;
     showNotif('Sitting on the dock, dangling your feet over the water','#88aacc');
     showNotif('...peaceful','#6688aa');
@@ -4277,11 +4308,10 @@ function tripOnDock(){
     triggerScreenShake(.15,.8);
     
     camera.rotation.x=Math.PI/3;
-    camera.position.y=0.5;
-    
+    camera.position.y=Math.max(0.2,camera.position.y-1.2);
+    Game.playerVelocityY=0;
     setTimeout(()=>{
       camera.rotation.x=0;
-      camera.position.y=1.7;
       showNotif('...dropped everything','#888888');
     },1500);
     
@@ -5613,11 +5643,8 @@ function useJumperCables(){
       showNotif('⚡⚡⚡ EVERYONE IS ELECTROCUTED! SERVER RAGDOLL!','#ff4040');
       triggerScreenShake(.25,2);
       camera.rotation.z=(Math.random()-.5)*Math.PI;
-      camera.position.y+=5;
-      setTimeout(()=>{
-        camera.rotation.z=0;
-        camera.position.y=1.7;
-      },3000);
+      Game.playerVelocityY=6;
+      setTimeout(()=>{camera.rotation.z=0;},3000);
     }
   },1500);
 }
@@ -5705,19 +5732,12 @@ function throwAntiGravityAnchor(){
   showNotif('⚓ Throwing anti-gravity anchor...','#88aaff');
   setTimeout(()=>{
     showNotif('☁️ BOAT IS FLOATING INTO THE SKY!','#ff8040');
-    const floatInterval=setInterval(()=>{
-      camera.position.y+=0.5;
-      if(camera.position.y>40){
-        clearInterval(floatInterval);
-        showNotif('☁️ You\'re stuck in the clouds...','#aaddff');
-        setTimeout(()=>{
-          camera.position.y=1.7;
-          Game.antiGravityActive=false;
-          showNotif('💥 Crashed back down!','#ff5050');
-          triggerScreenShake(.2,1);
-        },5000);
-      }
-    },100);
+    Game.playerVelocityY=12;
+    setTimeout(()=>{
+      Game.antiGravityActive=false;
+      showNotif('💥 Crashed back down!','#ff5050');
+      triggerScreenShake(.2,1);
+    },5000);
   },1000);
 }
 
@@ -6060,37 +6080,69 @@ function movePlayer(dt){
     return;
   }
   
-  const spd=5*dt;
+  let spd=5*dt;
   const dir=new THREE.Vector3();
   const kb=Game.scrambledKeys;
   if(keys[kb.w]) dir.z-=1; if(keys[kb.s]) dir.z+=1;
   if(keys[kb.a]) dir.x-=1; if(keys[kb.d]) dir.x+=1;
   if(dir.length()){
     dir.normalize().applyEuler(new THREE.Euler(0,camera.rotation.y,0,'YXZ'));
+
+    // Steep slope slowdown: check height gradient over 1 unit in move direction
+    const curH=getTerrainHeight(camera.position.x,camera.position.z);
+    const probeX=camera.position.x+dir.x,probeZ=camera.position.z+dir.z;
+    const probeH=getTerrainHeight(probeX,probeZ);
+    if(Math.abs(probeH-curH)>.8) spd*=.6;
+
     const newX=camera.position.x+dir.x*spd;
     const newZ=camera.position.z+dir.z*spd;
-    
-    // Prevent walking on water without boat
-    if(!isOnWater(newX,newZ)){
-      camera.position.x=newX;
-      camera.position.z=newZ;
-    } else {
-      // Allow slight push back toward land
-      if(Math.random()<0.02) showNotif('🌊 Can\'t walk on water! Press B for boat','#88aaff');
+
+    // Per-axis water blocking
+    const hX=getTerrainHeight(newX,camera.position.z);
+    const hZ=getTerrainHeight(camera.position.x,newZ);
+    let blocked=false;
+    if(hX>-.05) camera.position.x=newX; else blocked=true;
+    if(hZ>-.05) camera.position.z=newZ; else blocked=true;
+    if(blocked){
+      const now=performance.now();
+      if(now-Game.lastWaterNotifTime>5000){
+        Game.lastWaterNotifTime=now;
+        showNotif('🌊 Too deep — press B for a boat','#88aaff');
+      }
     }
-    
+
     Game.pissLevel=Math.min(1,Game.pissLevel+dt*.006);
     Game.shitLevel=Math.min(1,Game.shitLevel+dt*.004);
     updateBodyMeters();
   }
-  
+
   const dockH=getDockHeight(camera.position.x,camera.position.z);
   const terrainH=getTerrainHeight(camera.position.x,camera.position.z);
   const targetY=(dockH!==null?dockH:terrainH)+1.7;
-  camera.position.y+=(targetY-camera.position.y)*Math.min(1,dt*8);
-  
-  // FIX: Clamp camera Y to prevent random sky flinging
-  camera.position.y=Math.min(camera.position.y,25);
+
+  if(camera.position.y>targetY+0.1){
+    // Airborne — apply gravity
+    Game.playerVelocityY=Math.max(-20,Game.playerVelocityY-9.8*dt);
+    camera.position.y+=Game.playerVelocityY*dt;
+    // Land check
+    if(camera.position.y<=targetY){
+      camera.position.y=targetY;
+      Game.playerVelocityY=0;
+    }
+  }else{
+    // Grounded — consume any upward launch velocity, then lerp to terrain
+    if(Game.playerVelocityY>0){
+      camera.position.y+=Game.playerVelocityY*dt;
+      Game.playerVelocityY=Math.max(0,Game.playerVelocityY-9.8*dt);
+    }else{
+      Game.playerVelocityY=0;
+      const yDelta=(targetY-camera.position.y)*Math.min(1,dt*8);
+      camera.position.y+=Math.max(-0.4,Math.min(0.4,yDelta));
+    }
+  }
+
+  // Hard safety clamp — never more than 8 units above terrain
+  camera.position.y=Math.min(camera.position.y,terrainH+8);
 }
 
 function updateBodyMeters(){
@@ -6234,6 +6286,16 @@ function releaseCast(){
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
   dir.y=0; dir.normalize();
   const land=new THREE.Vector3(camera.position.x+dir.x*dist,.06,camera.position.z+dir.z*dist);
+
+  // Cancel cast if lure hits land
+  if(getTerrainHeight(land.x,land.z)>.05){
+    Game.state='idle';Game.power=0;
+    document.getElementById('cast-power-bar').style.display='none';
+    document.getElementById('power-fill').style.width='0%';
+    showNotif('🎣 Lure hit land — cast into water!','#ff8844');
+    return;
+  }
+
   Game.bobberPos.copy(land); Game.lineOut=true; Game.state='waiting'; Game.bobberAnimT=0;
   Game.nibbleCount=0;
   spawnBobber(land); spawnLine(land); spawnSplash(land); spawnRipple(land,true);
@@ -6852,7 +6914,7 @@ function drawMinimap(){
   [[-30,-20,8],[35,-18,5],[5,-55,12],[-50,-45,7],[55,-30,3.5],[60,-60,9],[-18,-70,4],[25,-80,14]].forEach(([cx,cz,r])=>{
     mmx.fillStyle='#2a5030';mmx.beginPath();mmx.arc(ox+cx*sc,oz+cz*sc,Math.max(2,r*sc),0,Math.PI*2);mmx.fill();
   });
-  mmx.fillStyle='#1a4020';mmx.fillRect(0,oz+15*sc,90,12);
+  mmx.fillStyle='#1a4020';mmx.fillRect(0,oz+10*sc,90,oz-10*sc);
   Game.rodObjects.forEach(r=>{
     if(r.collected) return;
     mmx.fillStyle='#40d4ff';mmx.beginPath();mmx.arc(ox+r.pos.x*sc,oz+r.pos.z*sc,3,0,Math.PI*2);mmx.fill();
@@ -7015,15 +7077,17 @@ function animate(){
   updateUIDisplays();
   updateAtmosphereUI();
 
-  // Screen Shake
+  // Screen Shake — rotation only, never touches camera.position
   if(screenShake.active){
     screenShake.timer-=dt;
     screenShake.intensity=Math.max(0,screenShake.intensity-screenShake.decay*dt);
     const si=screenShake.intensity;
-    screenShake.offset.set((Math.random()-.5)*si*2,(Math.random()-.5)*si*2,0);
-    camera.position.x+=screenShake.offset.x;
-    camera.position.y+=screenShake.offset.y;
-    if(screenShake.timer<=0){screenShake.active=false;screenShake.offset.set(0,0,0);}
+    camera.rotation.z=(Math.random()-.5)*si*1.8;
+    camera.rotation.x+=((Math.random()-.5)*si*.8-camera.rotation.x)*Math.min(1,dt*20);
+    if(screenShake.timer<=0){
+      screenShake.active=false;
+      camera.rotation.z=0;
+    }
   }
 
   // Dust Motes
@@ -7347,7 +7411,7 @@ function isOnWater(x,z){
   const dockH=getDockHeight(x,z);
   if(dockH!==null) return false;
   const terrainH=getTerrainHeight(x,z);
-  return terrainH<-0.1;
+  return terrainH<-0.05;
 }
 
 // ─── GOD RAYS ─────────────────────────────────────────────────────────────────
