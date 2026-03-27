@@ -7613,15 +7613,21 @@ function updateTrajectoryPreview(){
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
   dir.y=0; dir.normalize();
   const targetPos=new THREE.Vector3(camera.position.x+dir.x*dist,0.12,camera.position.z+dir.z*dist);
+  // Keep target in Game for exact matching with bobber flight/landing
+  Game.castTargetX=targetPos.x;
+  Game.castTargetZ=targetPos.z;
   if(Game.trajectoryLine){scene.remove(Game.trajectoryLine);}
   if(Game.aimLine){scene.remove(Game.aimLine);}
   const points=[];
+  const tip=getRodTip();
+  const dx=targetPos.x-tip.x;
+  const dz=targetPos.z-tip.z;
   for(let i=0;i<=20;i++){
     const t=i/20;
     points.push(new THREE.Vector3(
-      camera.position.x+dir.x*dist*t,
-      camera.position.y+Math.sin(t*Math.PI)*2.5-t*2,
-      camera.position.z+dir.z*dist*t
+      tip.x+dx*t,
+      tip.y+Math.sin(t*Math.PI)*2.5-t*2,
+      tip.z+dz*t
     ));
   }
   const quality=Game.power<.3?0xff6060:Game.power>.7&&Game.power<.85?0xffd700:0xffa040;
@@ -7630,9 +7636,9 @@ function updateTrajectoryPreview(){
     new THREE.LineBasicMaterial({color:quality,transparent:true,opacity:.4})
   );
   scene.add(Game.trajectoryLine);
-  const tip=getRodTip();
+  const tip2=getRodTip();
   Game.aimLine=new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([tip,targetPos]),
+    new THREE.BufferGeometry().setFromPoints([tip2,targetPos]),
     new THREE.LineBasicMaterial({color:quality,transparent:true,opacity:0})
   );
   scene.add(Game.aimLine);
@@ -7661,13 +7667,16 @@ function releaseCast(){
   Game.castTargetX=targetX;
   Game.castTargetZ=targetZ;
 
-  // Physics launch (visual arc only)
+  // Physics launch: drive towards indicator from rod tip to prevent sideways offset
+  const rodTip=getRodTip();
   const launchSpeed=(8+Game.power*26)*castMul;
   const minYVel=0.8+Game.power*2.5;
-  Game.bobberVelocity.copy(lookDir).multiplyScalar(launchSpeed);
+  const target3=new THREE.Vector3(targetX,0.12,targetZ);
+  const toTarget=target3.clone().sub(rodTip);
+  const horiz=new THREE.Vector3(toTarget.x,0,toTarget.z).normalize();
+  Game.bobberVelocity.copy(horiz).multiplyScalar(launchSpeed);
   if(Game.bobberVelocity.y<minYVel) Game.bobberVelocity.y=minYVel;
 
-  const rodTip=getRodTip();
   Game.bobberPos.copy(rodTip);
   Game.bobberInFlight=true;
   Game.lineOut=true;
