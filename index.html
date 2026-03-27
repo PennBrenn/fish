@@ -7,23 +7,25 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root { --gold:#c9a84c; --cream:#f0e8d0; --ui-bg:rgba(8,16,28,0.88); --border:rgba(201,168,76,0.35); --piss:#e8d020; --shit:#7a4010; }
+  :root { --gold:#c9a84c; --cream:#f0e8d0; --ui-bg:rgba(8,16,28,0.92); --border:rgba(201,168,76,0.35); --piss:#e8d020; --shit:#7a4010; --accent:var(--gold); --ui-scale:0.85; }
   body { background:#000; overflow:hidden; font-family:'Courier Prime',monospace; color:var(--cream); user-select:none; cursor:crosshair; }
   #canvas { display:block; width:100vw; height:100vh; }
   .panel { background:var(--ui-bg); border:1px solid var(--border); backdrop-filter:blur(8px); }
 
+  .panel { transform:scale(var(--ui-scale)); transform-origin:top left; }
+
   /* SCORE */
-  #score-panel { position:fixed; top:16px; left:16px; padding:14px 20px; min-width:200px; }
-  #score-panel h2 { font-family:'Playfair Display',serif; font-size:15px; color:var(--gold); margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:6px; line-height:1.3; }
+  #score-panel { position:fixed; top:12px; left:12px; padding:10px 14px; min-width:160px; }
+  #score-panel h2 { font-family:'Playfair Display',serif; font-size:13px; color:var(--accent); margin-bottom:6px; border-bottom:1px solid var(--border); padding-bottom:4px; line-height:1.3; }
   #score-panel h2 .strikeout { text-decoration:line-through; color:#888; font-style:italic; }
   #score-panel h2 .piss-word { color:var(--piss); font-style:italic; }
-  .stat { display:flex; justify-content:space-between; gap:16px; font-size:12px; margin:3px 0; color:#99aabb; }
+  .stat { display:flex; justify-content:space-between; gap:12px; font-size:10px; margin:2px 0; color:#99aabb; }
   .stat span:last-child { color:var(--cream); font-weight:700; }
 
   /* CONTROLS */
-  #controls-panel { position:fixed; top:16px; right:16px; padding:12px 16px; font-size:11px; color:rgba(180,200,220,0.7); line-height:2.0; }
-  #controls-panel .key { color:var(--gold); font-weight:700; }
-  #controls-panel h3 { color:var(--gold); font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+  #controls-panel { position:fixed; top:12px; right:12px; padding:8px 12px; font-size:9px; color:rgba(180,200,220,0.7); line-height:1.8; transform-origin:top right; }
+  #controls-panel .key { color:var(--accent); font-weight:700; }
+  #controls-panel h3 { color:var(--accent); font-size:9px; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
 
   /* POWER BAR */
   #cast-power-bar { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); width:280px; display:none; flex-direction:column; align-items:center; gap:6px; padding:12px 18px; }
@@ -74,27 +76,27 @@
   @keyframes notifPop { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
   /* PISS/SHIT METER */
-  #bodily-meters { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:16px; }
-  .bm-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .bm-label { font-size:9px; letter-spacing:2px; color:rgba(200,200,220,0.5); text-transform:uppercase; }
-  .bm-bar-bg { width:100px; height:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); }
+  #bodily-meters { position:fixed; bottom:12px; left:50%; transform:translateX(-50%) scale(var(--ui-scale)); display:flex; gap:12px; transform-origin:bottom center; }
+  .bm-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .bm-label { font-size:8px; letter-spacing:2px; color:rgba(200,200,220,0.5); text-transform:uppercase; }
+  .bm-bar-bg { width:80px; height:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); }
   #piss-fill { height:100%; background:var(--piss); transition:width .3s; }
   #shit-fill { height:100%; background:var(--shit); transition:width .3s; }
 
   /* RODS DISPLAY */
-  #rods-panel { position:fixed; bottom:16px; right:16px; padding:12px 14px; text-align:right; }
-  #rods-panel h3 { font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:6px; }
-  #rod-icons { font-size:22px; }
-  #rod-multiplier { font-size:11px; color:#40ffaa; margin-top:4px; }
+  #rods-panel { position:fixed; bottom:12px; right:12px; padding:8px 10px; text-align:right; transform-origin:bottom right; }
+  #rods-panel h3 { font-size:9px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; margin-bottom:4px; }
+  #rod-icons { font-size:18px; }
+  #rod-multiplier { font-size:9px; color:#40ffaa; margin-top:3px; }
 
   /* CATCH LOG */
-  #catch-log { position:fixed; bottom:70px; right:16px; padding:12px 14px; max-width:220px; max-height:180px; overflow:hidden; }
-  #catch-log h3 { font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:8px; }
-  .log-entry { font-size:11px; color:rgba(200,215,235,0.7); margin:3px 0; border-left:2px solid var(--gold); padding-left:7px; line-height:1.4; }
+  #catch-log { position:fixed; bottom:60px; right:12px; padding:8px 10px; max-width:180px; max-height:150px; overflow:hidden; transform-origin:bottom right; }
+  #catch-log h3 { font-size:9px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; margin-bottom:6px; }
+  .log-entry { font-size:9px; color:rgba(200,215,235,0.7); margin:2px 0; border-left:2px solid var(--accent); padding-left:6px; line-height:1.3; }
 
   /* MINIMAP */
-  #minimap-canvas { position:fixed; top:16px; left:50%; transform:translateX(-50%); border:1px solid var(--border); background:rgba(6,14,24,0.8); image-rendering:pixelated; }
-  #time-display { position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(76px); font-size:11px; letter-spacing:2px; color:rgba(200,210,230,0.5); pointer-events:none; }
+  #minimap-canvas { position:fixed; top:12px; left:50%; transform:translateX(-50%) scale(var(--ui-scale)); border:1px solid var(--border); background:rgba(6,14,24,0.8); image-rendering:pixelated; }
+  #time-display { position:fixed; top:12px; left:50%; transform:translateX(-50%) translateY(72px) scale(var(--ui-scale)); font-size:10px; letter-spacing:2px; color:rgba(200,210,230,0.5); pointer-events:none; }
 
   /* CROSSHAIR */
   #crosshair { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:16px; height:16px; pointer-events:none; }
@@ -103,8 +105,15 @@
   #crosshair::after  { width:1px; height:16px; left:50%; top:0; transform:translateX(-50%); }
 
   /* INSTRUCTIONS */
-  #instructions { position:fixed; bottom:16px; left:16px; padding:10px 16px; font-size:11px; line-height:2; color:rgba(200,210,230,0.6); }
-  #instructions span { color:var(--gold); }
+  #instructions { position:fixed; bottom:12px; left:12px; padding:6px 10px; font-size:9px; line-height:1.8; color:rgba(200,210,230,0.6); transform-origin:bottom left; }
+  #instructions span { color:var(--accent); }
+
+  /* VHS OVERLAY */
+  #vhs-overlay { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:993; }
+  #vhs-scanlines { position:absolute; inset:0; background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events:none; }
+  #vhs-flicker { position:absolute; inset:0; background:transparent; opacity:0; pointer-events:none; animation:vhsFlicker 0.15s infinite; }
+  @keyframes vhsFlicker { 0%,100%{opacity:0;} 50%{opacity:0.02;background:rgba(255,255,255,0.02);} }
+  #vhs-chroma { position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen; opacity:0; }
 
   /* PILE */
   #pile-panel { position:fixed; bottom:16px; left:220px; padding:12px 14px; max-width:240px; display:none; }
@@ -203,6 +212,13 @@
 <body>
 
 <canvas id="canvas"></canvas>
+
+<!-- VHS OVERLAY -->
+<div id="vhs-overlay">
+  <div id="vhs-scanlines"></div>
+  <div id="vhs-flicker"></div>
+  <div id="vhs-chroma"></div>
+</div>
 
 <div id="main-menu" style="position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#0a0806 0%,#1a1410 50%,#0a0806 100%);z-index:10000;opacity:1;transition:opacity 0.5s;">
   <div style="text-align:center;">
@@ -452,6 +468,21 @@
     </select>
   </div>
   
+  <div style="margin-top:15px;">
+    <div style="font-size:11px;color:var(--cream);margin-bottom:6px;">God Ray Intensity: <span id="godray-value">0.5</span></div>
+    <input type="range" min="0" max="1" step="0.05" value="0.5" id="godray-slider" style="width:100%;" onchange="Game.settings.godrayIntensity=parseFloat(this.value);document.getElementById('godray-value').textContent=this.value;"/>
+  </div>
+
+  <div style="margin-top:15px;">
+    <div style="font-size:11px;color:var(--cream);margin-bottom:6px;">UI Scale: <span id="ui-scale-value">0.85</span></div>
+    <input type="range" min="0.5" max="1.2" step="0.05" value="0.85" id="ui-scale-slider" style="width:100%;" onchange="setUIScale(parseFloat(this.value))"/>
+  </div>
+
+  <div style="margin-top:15px;">
+    <div style="font-size:11px;color:var(--cream);margin-bottom:6px;">Username:</div>
+    <input type="text" id="username-input" placeholder="Angler" value="Angler" maxlength="20" spellcheck="false" autocomplete="off" style="width:100%;padding:8px 12px;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--cream);font-family:'Courier Prime',monospace;font-size:12px;" onchange="setUsername(this.value)"/>
+  </div>
+
   <button onclick="closeGraphicsSettings()" style="margin-top:20px;padding:10px 30px;width:100%;background:var(--ui-bg);color:var(--gold);border:1px solid var(--border);cursor:pointer;font-family:'Courier Prime',monospace;">BACK</button>
 </div>
 
@@ -1463,8 +1494,15 @@ const Game = {
     particles:true,
     reflections:true,
     godrays:true,
-    lensEffects:true
+    godrayIntensity:0.5,
+    lensEffects:true,
+    uiScale:0.85
   },
+  playerUsername:'Angler',
+  inBoat:false,
+  boatMesh:null,
+  boatVelocity:new THREE.Vector3(),
+  worldSeed:Math.floor(Math.random()*999999),
   graphicsState:{
     filmGrainIntensity:0.08,
     vignetteIntensity:0,
@@ -1730,11 +1768,21 @@ function makeIsland(cx,cz,radius,height,col,trees=true){
 
 function makeTree(x,by,z,s=1){
   const g=new THREE.Group();
-  const tk=new THREE.Mesh(new THREE.CylinderGeometry(.12*s,.18*s,(1.5+Math.random()*1.2)*s,6),new THREE.MeshLambertMaterial({color:0x4a2e10}));
-  tk.position.y=(1.5+Math.random()*1.2)*s*.5; tk.castShadow=true; g.add(tk);
-  for(let l=0;l<3;l++){
-    const fl=new THREE.Mesh(new THREE.ConeGeometry((1.8-l*.4)*s,(2.5-l*.3)*s,7),new THREE.MeshLambertMaterial({color:l===0?0x0e3015:0x153820}));
-    fl.position.y=(1.5+Math.random()*1.2)*s+l*(2.5-l*.3)*s*.55; fl.castShadow=true; g.add(fl);
+  const trunkColors=[0x4a2e10,0x3a2008,0x5a3a18,0x604020,0x352010];
+  const leafColors=[[0x0e3015,0x153820,0x1a4425],[0x1a4020,0x204a28,0x285530],[0x0a2810,0x123218,0x183a20],[0x204828,0x2a5530,0x305a35]];
+  const trunkCol=trunkColors[Math.floor(Math.random()*trunkColors.length)];
+  const leafSet=leafColors[Math.floor(Math.random()*leafColors.length)];
+  const trunkH=(1.3+Math.random()*1.5)*s;
+  const lean=(Math.random()-0.5)*0.15;
+  const tk=new THREE.Mesh(new THREE.CylinderGeometry(.10*s,.16*s,trunkH,5+Math.floor(Math.random()*3)),new THREE.MeshLambertMaterial({color:trunkCol}));
+  tk.position.y=trunkH*.5; tk.rotation.z=lean; tk.castShadow=true; g.add(tk);
+  const layers=2+Math.floor(Math.random()*2);
+  for(let l=0;l<layers;l++){
+    const leafSize=(1.6-l*.35+Math.random()*0.3)*s;
+    const leafH=(2.2-l*.25+Math.random()*0.4)*s;
+    const sides=5+Math.floor(Math.random()*4);
+    const fl=new THREE.Mesh(new THREE.ConeGeometry(leafSize,leafH,sides),new THREE.MeshLambertMaterial({color:leafSet[l%leafSet.length]}));
+    fl.position.y=trunkH+l*leafH*.5; fl.castShadow=true; g.add(fl);
   }
   g.position.set(x,by,z); scene.add(g);
 }
@@ -1762,7 +1810,7 @@ for(let i=0;i<14;i++) makeRock(-24+i*4+Math.random()*2,.2,14+Math.random()*5,.3+
 
 // ─── TERRAIN HEIGHT SYSTEM ─────────────────────────────────────────────────────
 function noise2d(x,z,seed=0){
-  const n=Math.sin(x*12.9898+z*78.233+seed)*43758.5453;
+  const n=Math.sin(x*12.9898+z*78.233+seed+Game.worldSeed*0.001)*43758.5453;
   return n-Math.floor(n);
 }
 function fbm(x,z,octaves=4){
@@ -1775,8 +1823,33 @@ function fbm(x,z,octaves=4){
   }
   return total/maxVal;
 }
+function smoothNoise(x,z,seed){
+  const corners=(noise2d(x-1,z-1,seed)+noise2d(x+1,z-1,seed)+noise2d(x-1,z+1,seed)+noise2d(x+1,z+1,seed))/16;
+  const sides=(noise2d(x-1,z,seed)+noise2d(x+1,z,seed)+noise2d(x,z-1,seed)+noise2d(x,z+1,seed))/8;
+  const center=noise2d(x,z,seed)/4;
+  return corners+sides+center;
+}
+function interpolatedNoise(x,z,seed){
+  const ix=Math.floor(x),iz=Math.floor(z);
+  const fx=x-ix,fz=z-iz;
+  const sx=fx*fx*(3-2*fx),sz=fz*fz*(3-2*fz);
+  const v1=smoothNoise(ix,iz,seed),v2=smoothNoise(ix+1,iz,seed);
+  const v3=smoothNoise(ix,iz+1,seed),v4=smoothNoise(ix+1,iz+1,seed);
+  const i1=v1*(1-sx)+v2*sx,i2=v3*(1-sx)+v4*sx;
+  return i1*(1-sz)+i2*sz;
+}
+function smoothFbm(x,z,octaves=5){
+  let total=0,freq=1,amp=1,maxVal=0;
+  for(let i=0;i<octaves;i++){
+    total+=interpolatedNoise(x*freq,z*freq,i+Game.worldSeed)*amp;
+    maxVal+=amp;
+    amp*=0.5;
+    freq*=2.0;
+  }
+  return total/maxVal;
+}
 
-Game.terrainData={size:300,segments:60,heights:[]};
+Game.terrainData={size:300,segments:80,heights:[]};
 const td=Game.terrainData;
 for(let z=0;z<=td.segments;z++){
   for(let x=0;x<=td.segments;x++){
@@ -1785,20 +1858,28 @@ for(let z=0;z<=td.segments;z++){
     let h=0;
     
     if(wz<-5){
-      const base=fbm(wx*.015,wz*.015,4)*8;
-      const hills=fbm(wx*.008,wz*.008,3)*12;
-      const detail=fbm(wx*.05,wz*.05,2)*2;
-      h=base+hills+detail;
-      h=Math.max(h,0.5);
+      // Smooth rolling hills with occasional mountains
+      const base=smoothFbm(wx*.012,wz*.012,5)*10;
+      const hills=smoothFbm(wx*.006,wz*.006,4)*16;
+      const mountains=Math.pow(Math.max(0,smoothFbm(wx*.004,wz*.004,3)-0.3)*3,1.8)*8;
+      const detail=smoothFbm(wx*.04,wz*.04,2)*1.5;
+      const ridges=Math.abs(smoothFbm(wx*.01,wz*.01,3)-0.5)*6;
+      h=base+hills+mountains+detail+ridges;
+      h=Math.max(h,0.3);
+      // Smooth transition near water edge
+      const edgeFade=Math.min(1,Math.max(0,(-wz-5)/15));
+      h*=edgeFade;
+      h=Math.max(h,edgeFade*0.3);
     } else if(wz>=-5&&wz<=15){
       const beachSlope=(wz+5)/20;
-      h=beachSlope*0.3-0.2+fbm(wx*.1,wz*.1,2)*0.4;
+      h=beachSlope*0.25-0.15+smoothFbm(wx*.08,wz*.08,2)*0.3;
     } else{
-      h=-0.5+fbm(wx*.02,wz*.02,2)*0.3;
+      // Open water area - slightly below sea level
+      h=-0.4+smoothFbm(wx*.015,wz*.015,2)*0.2;
     }
     
-    if(distFromCenter>140){
-      const fade=Math.max(0,1-(distFromCenter-140)/20);
+    if(distFromCenter>130){
+      const fade=Math.max(0,1-(distFromCenter-130)/25);
       h*=fade;
       h=Math.min(h,-0.3);
     }
@@ -1835,29 +1916,43 @@ const terrainMat=new THREE.MeshLambertMaterial({
 const colors=new Float32Array(terrainPos.count*3);
 for(let i=0;i<terrainPos.count;i++){
   const h=terrainPos.getZ(i);
-  const z=terrainPos.getY(i);
+  const wx=terrainPos.getX(i);
+  const wz=terrainPos.getY(i);
+  // Add micro-variation to colors
+  const variation=noise2d(wx*0.3,wz*0.3,42)*0.08-0.04;
   let r,g,b;
-  if(h>8){
-    r=.6;g=.6;b=.55;
-  } else if(h>4){
-    r=.25;g=.45;b=.2;
+  if(h>14){
+    // Snow caps
+    r=.88+variation;g=.9+variation;b=.92+variation;
+  } else if(h>10){
+    // Rocky peaks
+    r=.55+variation;g=.52+variation;b=.48+variation;
+  } else if(h>6){
+    // High alpine
+    r=.3+variation;g=.42+variation;b=.22+variation;
+  } else if(h>3){
+    // Forest
+    r=.18+variation;g=.4+variation;b=.18+variation;
   } else if(h>1){
-    r=.2;g=.5;b=.25;
-  } else if(h>-.2){
-    r=.7;g=.65;b=.45;
+    // Grass
+    r=.22+variation;g=.5+variation;b=.25+variation;
+  } else if(h>-.15){
+    // Beach/sand
+    r=.72+variation;g=.66+variation;b=.42+variation;
   } else{
-    r=.15;g=.2;b=.12;
+    // Underwater ground
+    r=.12+variation;g=.18+variation;b=.1+variation;
   }
-  colors[i*3]=r;
-  colors[i*3+1]=g;
-  colors[i*3+2]=b;
+  colors[i*3]=Math.max(0,Math.min(1,r));
+  colors[i*3+1]=Math.max(0,Math.min(1,g));
+  colors[i*3+2]=Math.max(0,Math.min(1,b));
 }
 terrainGeo.setAttribute('color',new THREE.BufferAttribute(colors,3));
 
 const terrainMesh=new THREE.Mesh(terrainGeo,terrainMat);
 terrainMesh.rotation.x=-Math.PI/2;
 terrainMesh.receiveShadow=true;
-terrainMesh.castShadow=false;
+terrainMesh.castShadow=true;
 scene.add(terrainMesh);
 
 // Islands
@@ -1917,6 +2012,17 @@ makeDock(35,-18,2.8,3.5,false);
 makeDock(5,-55,4.2,5,false);
 makeDock(-50,-45,3.2,3.8,false);
 makeDock(60,-60,3.8,4.5,false);
+// Additional scattered docks
+makeDock(25,-80,3.0,3.5,false);
+makeDock(-18,-70,2.6,3.0,false);
+makeDock(68,-52,2.2,2.8,false);
+makeDock(55,-30,2.0,2.5,false);
+makeDock(-40,-10,2.8,3.2,true);
+makeDock(20,-35,2.4,3.0,false);
+makeDock(-60,-65,3.0,3.8,false);
+makeDock(45,-45,2.6,3.2,false);
+makeDock(-10,-40,2.2,2.8,false);
+makeDock(70,-75,3.2,4.0,false);
 function getDockHeight(x,z){
   for(const d of Game.docks){
     const dx=Math.abs(x-d.pos.x),dz=Math.abs(z-d.pos.z);
@@ -1965,15 +2071,28 @@ const rodBodyMat=new THREE.MeshLambertMaterial({color:0x7a4a1a});
 function rebuildHeldRods(){
   while(heldRodGroup.children.length>0) heldRodGroup.remove(heldRodGroup.children[0]);
   const n=Game.rods;
+  const rodColors=[0x7a4a1a,0x5a3010,0x8a5a2a,0x4a2808,0x6a3a18,0x9a6a3a,0x3a2010];
+  const reelColors=[0x505560,0x606878,0x404850,0x707888,0x585a68,0x383840,0x4a4c58];
   for(let i=0;i<n;i++){
     const offset=(i-(n-1)/2)*0.18;
-    const rodBody=new THREE.Mesh(new THREE.CylinderGeometry(.012,.022,1.8,8),rodBodyMat.clone());
+    const rodCol=rodColors[i%rodColors.length];
+    const lenVar=1.6+Math.sin(i*2.7)*0.3;
+    const thickVar=0.010+Math.sin(i*1.3)*0.004;
+    const rodBody=new THREE.Mesh(
+      new THREE.CylinderGeometry(thickVar,thickVar+0.012,lenVar,8),
+      new THREE.MeshLambertMaterial({color:rodCol})
+    );
     rodBody.rotation.z=Math.PI/2.4;
     rodBody.position.set(.28+offset,-.2+Math.abs(offset)*.3,-.2);
     heldRodGroup.add(rodBody);
-    const reel=new THREE.Mesh(new THREE.TorusGeometry(.05,.02,6,12),new THREE.MeshLambertMaterial({color:0x505560}));
+    const reelCol=reelColors[i%reelColors.length];
+    const reel=new THREE.Mesh(new THREE.TorusGeometry(.04+Math.sin(i)*0.015,.018,6,12),new THREE.MeshLambertMaterial({color:reelCol}));
     reel.position.set(.18+offset,-.22,-.25); reel.rotation.y=Math.PI/2;
     heldRodGroup.add(reel);
+    // Rod tip
+    const tip=new THREE.Mesh(new THREE.SphereGeometry(0.008,4,4),new THREE.MeshBasicMaterial({color:0xff4444}));
+    tip.position.set(.28+offset+Math.cos(Math.PI/2.4)*lenVar*0.5,-.2+Math.abs(offset)*.3+Math.sin(Math.PI/2.4)*lenVar*0.5,-.2);
+    heldRodGroup.add(tip);
   }
 }
 rebuildHeldRods();
@@ -4462,53 +4581,7 @@ function handleGuestReceive(data){
 }
 
 function spawnRemotePlayer(id){
-  const body=new THREE.Group();
-  
-  const torso=new THREE.Mesh(
-    new THREE.BoxGeometry(0.5,0.8,0.3),
-    new THREE.MeshLambertMaterial({color:0x556677})
-  );
-  torso.position.y=1.2;
-  body.add(torso);
-  
-  const head=new THREE.Mesh(
-    new THREE.SphereGeometry(0.2,8,8),
-    new THREE.MeshLambertMaterial({color:0xddbb88})
-  );
-  head.position.y=1.8;
-  body.add(head);
-  
-  const hat=new THREE.Mesh(
-    new THREE.CylinderGeometry(0.25,0.3,0.15,8),
-    new THREE.MeshLambertMaterial({color:0x8a6a4a})
-  );
-  hat.position.y=2.0;
-  body.add(hat);
-  
-  const rod=new THREE.Mesh(
-    new THREE.CylinderGeometry(0.02,0.01,2.5,4),
-    new THREE.MeshLambertMaterial({color:0x4a3020})
-  );
-  rod.position.set(0.4,1.5,0);
-  rod.rotation.x=Math.PI/4;
-  body.add(rod);
-  
-  const nameTag=document.createElement('div');
-  nameTag.style.cssText='position:fixed;font-size:10px;color:#88ddff;font-family:"Courier Prime",monospace;pointer-events:none;z-index:100;text-shadow:0 1px 3px rgba(0,0,0,0.8);';
-  nameTag.textContent=id==='host'?'Host':'Angler';
-  document.body.appendChild(nameTag);
-  
-  scene.add(body);
-  
-  MP.remotePlayers[id]={
-    mesh:body,
-    targetPos:new THREE.Vector3(0,0,0),
-    targetRotY:0,
-    state:'idle',
-    action:null,
-    nameTag:nameTag,
-    rod:rod
-  };
+  spawnRemotePlayerV2(id);
 }
 
 function removeRemotePlayer(id){
@@ -4608,6 +4681,21 @@ function handleRemoteAction(id,data){
     showNotif('💩 '+id+' is shitting!','#7a4010');
   } else if(data.actionType==='punch'){
     showNotif('👊 '+id+' punched a fish!','#ff8844');
+  } else if(data.actionType==='spawnBoat'){
+    // Spawn a visible boat for the remote player
+    const boatG=new THREE.Group();
+    const boatHull=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.4,3.5),new THREE.MeshLambertMaterial({color:0x6a4a2a}));
+    boatHull.position.y=-0.1;boatG.add(boatHull);
+    [-0.85,0.85].forEach(x=>{
+      const side=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.35,3.3),new THREE.MeshLambertMaterial({color:0x5a3a1a}));
+      side.position.set(x,0.15,0);boatG.add(side);
+    });
+    boatG.position.set(data.x,0.1,data.z);
+    boatG.rotation.y=data.rotY||0;
+    boatG.castShadow=true;
+    scene.add(boatG);
+    if(MP.remotePlayers[id]) MP.remotePlayers[id].boat=boatG;
+    showNotif('🚣 '+id+' spawned a boat!','#88ddff');
   }
 }
 
@@ -4862,8 +4950,8 @@ function setShadowQuality(quality){
   Game.settings.shadowQuality=quality;
   const shadowSizes={low:512,medium:1024,high:2048,ultra:4096};
   renderer.shadowMap.enabled=quality!=='low';
-  if(directionalLight.shadow){
-    directionalLight.shadow.mapSize.set(shadowSizes[quality],shadowSizes[quality]);
+  if(sunLight.shadow){
+    sunLight.shadow.mapSize.set(shadowSizes[quality],shadowSizes[quality]);
   }
 }
 
@@ -5723,7 +5811,7 @@ document.addEventListener('keydown',e=>{
     throwAntiGravityAnchor();
   }
   if(e.code==='KeyB'){
-    drinkWarmBeverage();
+    spawnPlayerBoat();
   }
   if(e.code==='KeyI'){
     Game.engineRunning=!Game.engineRunning;
@@ -5853,6 +5941,13 @@ document.addEventListener('mousemove',e=>{
 // ─── PLAYER MOVEMENT ──────────────────────────────────────────────────────────
 function movePlayer(dt){
   if(!Game.locked||Game.state==='display'||Game.state==='rodshop') return;
+  
+  // If in boat, delegate to boat movement
+  if(Game.inBoat){
+    updateBoat(dt);
+    return;
+  }
+  
   const spd=5*dt;
   const dir=new THREE.Vector3();
   const kb=Game.scrambledKeys;
@@ -5860,7 +5955,18 @@ function movePlayer(dt){
   if(keys[kb.a]) dir.x-=1; if(keys[kb.d]) dir.x+=1;
   if(dir.length()){
     dir.normalize().applyEuler(new THREE.Euler(0,camera.rotation.y,0,'YXZ'));
-    camera.position.x+=dir.x*spd; camera.position.z+=dir.z*spd;
+    const newX=camera.position.x+dir.x*spd;
+    const newZ=camera.position.z+dir.z*spd;
+    
+    // Prevent walking on water without boat
+    if(!isOnWater(newX,newZ)){
+      camera.position.x=newX;
+      camera.position.z=newZ;
+    } else {
+      // Allow slight push back toward land
+      if(Math.random()<0.02) showNotif('🌊 Can\'t walk on water! Press B for boat','#88aaff');
+    }
+    
     Game.pissLevel=Math.min(1,Game.pissLevel+dt*.006);
     Game.shitLevel=Math.min(1,Game.shitLevel+dt*.004);
     updateBodyMeters();
@@ -5870,6 +5976,9 @@ function movePlayer(dt){
   const terrainH=getTerrainHeight(camera.position.x,camera.position.z);
   const targetY=(dockH!==null?dockH:terrainH)+1.7;
   camera.position.y+=(targetY-camera.position.y)*Math.min(1,dt*8);
+  
+  // FIX: Clamp camera Y to prevent random sky flinging
+  camera.position.y=Math.min(camera.position.y,25);
 }
 
 function updateBodyMeters(){
@@ -6805,10 +6914,261 @@ function animate(){
   });
 
   gradeOverlay.material.uniforms.uDay.value=Game.dayTime;
+  
+  // God rays update
+  if(Game.settings.godrays){
+    godRayMat.uniforms.uDay.value=Game.dayTime;
+    godRayMat.uniforms.uTime.value=elapsed;
+    godRayMat.uniforms.uIntensity.value=Game.settings.godrayIntensity;
+  }
+  
   renderer.render(scene,camera);
   renderer.autoClear=false;
   renderer.render(gradeScene,gradeCamera);
+  if(Game.settings.godrays) renderer.render(godRayScene,godRayCamera);
   renderer.autoClear=true;
+}
+
+// ─── RANDOM UI COLOR ON RELOAD ────────────────────────────────────────────────
+(function initRandomAccentColor(){
+  const hues=[0,30,45,60,120,180,200,220,260,280,320];
+  const h=hues[Math.floor(Math.random()*hues.length)];
+  const s=50+Math.floor(Math.random()*30);
+  const l=55+Math.floor(Math.random()*15);
+  const accent=`hsl(${h},${s}%,${l}%)`;
+  document.documentElement.style.setProperty('--accent',accent);
+  document.documentElement.style.setProperty('--gold',accent);
+  document.documentElement.style.setProperty('--border',`hsla(${h},${s}%,${l}%,0.35)`);
+})();
+
+// ─── UI SCALE ─────────────────────────────────────────────────────────────────
+function setUIScale(val){
+  Game.settings.uiScale=val;
+  document.documentElement.style.setProperty('--ui-scale',val);
+  document.getElementById('ui-scale-value').textContent=val.toFixed(2);
+}
+
+// ─── USERNAME ─────────────────────────────────────────────────────────────────
+function setUsername(name){
+  Game.playerUsername=name.trim()||'Angler';
+  showNotif('Username set to: '+Game.playerUsername,'#88dd88');
+}
+
+// ─── BOAT SYSTEM ──────────────────────────────────────────────────────────────
+function spawnPlayerBoat(){
+  if(Game.inBoat){
+    exitBoat();
+    return;
+  }
+  if(Game.boatMesh){
+    scene.remove(Game.boatMesh);
+    Game.boatMesh=null;
+  }
+  const g=new THREE.Group();
+  // Hull
+  const hull=new THREE.Mesh(
+    new THREE.BoxGeometry(1.8,0.4,3.5),
+    new THREE.MeshLambertMaterial({color:0x6a4a2a})
+  );
+  hull.position.y=-0.1;
+  g.add(hull);
+  // Sides
+  [-0.85,0.85].forEach(x=>{
+    const side=new THREE.Mesh(
+      new THREE.BoxGeometry(0.1,0.35,3.3),
+      new THREE.MeshLambertMaterial({color:0x5a3a1a})
+    );
+    side.position.set(x,0.15,0);
+    g.add(side);
+  });
+  // Seat
+  const seat=new THREE.Mesh(
+    new THREE.BoxGeometry(1.4,0.1,0.6),
+    new THREE.MeshLambertMaterial({color:0x4a3018})
+  );
+  seat.position.set(0,0.2,-0.3);
+  g.add(seat);
+  // Bow
+  const bow=new THREE.Mesh(
+    new THREE.ConeGeometry(0.9,1.2,4),
+    new THREE.MeshLambertMaterial({color:0x5a3a1a})
+  );
+  bow.rotation.x=Math.PI/2;
+  bow.position.set(0,0,-2.0);
+  g.add(bow);
+
+  g.position.set(camera.position.x,0.1,camera.position.z);
+  g.rotation.y=camera.rotation.y;
+  g.castShadow=true;
+  scene.add(g);
+  Game.boatMesh=g;
+  Game.inBoat=true;
+  Game.boatVelocity.set(0,0,0);
+  showNotif('🚣 Spawned boat! Press B again to exit','#88ddff');
+  sendAction('spawnBoat',{x:g.position.x,z:g.position.z,rotY:g.rotation.y});
+}
+
+function exitBoat(){
+  Game.inBoat=false;
+  showNotif('🚶 Exited boat','#88ddff');
+  // Keep boat mesh in world
+}
+
+function updateBoat(dt){
+  if(!Game.inBoat||!Game.boatMesh) return;
+  const spd=4*dt;
+  const dir=new THREE.Vector3();
+  const kb=Game.scrambledKeys;
+  if(keys[kb.w]) dir.z-=1; if(keys[kb.s]) dir.z+=1;
+  if(keys[kb.a]) dir.x-=1; if(keys[kb.d]) dir.x+=1;
+  if(dir.length()){
+    dir.normalize().applyEuler(new THREE.Euler(0,camera.rotation.y,0,'YXZ'));
+    Game.boatMesh.position.x+=dir.x*spd;
+    Game.boatMesh.position.z+=dir.z*spd;
+    Game.boatMesh.rotation.y=camera.rotation.y;
+  }
+  Game.boatMesh.position.y=0.1+Math.sin(elapsed*1.5)*0.08;
+  camera.position.x=Game.boatMesh.position.x;
+  camera.position.z=Game.boatMesh.position.z;
+  camera.position.y=Game.boatMesh.position.y+1.5;
+}
+
+// ─── WATER WALKING PREVENTION ─────────────────────────────────────────────────
+function isOnWater(x,z){
+  const dockH=getDockHeight(x,z);
+  if(dockH!==null) return false;
+  const terrainH=getTerrainHeight(x,z);
+  return terrainH<-0.1;
+}
+
+// ─── GOD RAYS ─────────────────────────────────────────────────────────────────
+const godRayMat=new THREE.ShaderMaterial({
+  uniforms:{uDay:{value:0.25},uTime:{value:0},uIntensity:{value:0.5}},
+  vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`uniform float uDay;uniform float uTime;uniform float uIntensity;varying vec2 vUv;
+    void main(){
+      float sunVis=max(0.,sin(uDay*6.28318-1.5708));
+      vec2 center=vec2(0.5,0.3);
+      float dist=length(vUv-center);
+      float rays=0.;
+      for(int i=0;i<6;i++){
+        float angle=float(i)*1.0472+uTime*0.1;
+        vec2 dir=vec2(cos(angle),sin(angle));
+        float d=abs(dot(normalize(vUv-center),dir));
+        rays+=pow(d,8.0)*0.15;
+      }
+      float falloff=exp(-dist*2.5);
+      float alpha=rays*falloff*sunVis*uIntensity;
+      vec3 col=mix(vec3(1.0,0.95,0.8),vec3(1.0,0.7,0.3),dist);
+      gl_FragColor=vec4(col,alpha*0.4);}`,
+  transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide
+});
+const godRayPlane=new THREE.Mesh(new THREE.PlaneGeometry(2,2),godRayMat);
+godRayPlane.renderOrder=998;
+godRayPlane.frustumCulled=false;
+const godRayScene=new THREE.Scene();
+const godRayCamera=new THREE.Camera();
+godRayScene.add(godRayPlane);
+
+// ─── IMPROVED REMOTE PLAYER MODEL (arms + legs) ──────────────────────────────
+function spawnRemotePlayerV2(id){
+  const body=new THREE.Group();
+  const skinColor=0xddbb88;
+  const shirtColor=0x336699+Math.floor(Math.random()*0x444444);
+  const pantsColor=0x334455;
+
+  // Torso
+  const torso=new THREE.Mesh(
+    new THREE.BoxGeometry(0.45,0.65,0.25),
+    new THREE.MeshLambertMaterial({color:shirtColor})
+  );
+  torso.position.y=1.15;torso.castShadow=true;
+  body.add(torso);
+
+  // Head
+  const head=new THREE.Mesh(
+    new THREE.SphereGeometry(0.18,8,8),
+    new THREE.MeshLambertMaterial({color:skinColor})
+  );
+  head.position.y=1.7;head.castShadow=true;
+  body.add(head);
+
+  // Hat
+  const hat=new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22,0.26,0.12,8),
+    new THREE.MeshLambertMaterial({color:0x8a6a4a})
+  );
+  hat.position.y=1.88;
+  body.add(hat);
+
+  // Arms
+  [-0.32,0.32].forEach(x=>{
+    const arm=new THREE.Mesh(
+      new THREE.BoxGeometry(0.12,0.55,0.12),
+      new THREE.MeshLambertMaterial({color:shirtColor})
+    );
+    arm.position.set(x,1.05,0);arm.castShadow=true;
+    body.add(arm);
+    // Hands
+    const hand=new THREE.Mesh(
+      new THREE.SphereGeometry(0.06,6,6),
+      new THREE.MeshLambertMaterial({color:skinColor})
+    );
+    hand.position.set(x,0.75,0);
+    body.add(hand);
+  });
+
+  // Legs
+  [-0.12,0.12].forEach(x=>{
+    const leg=new THREE.Mesh(
+      new THREE.BoxGeometry(0.14,0.6,0.14),
+      new THREE.MeshLambertMaterial({color:pantsColor})
+    );
+    leg.position.set(x,0.5,0);leg.castShadow=true;
+    body.add(leg);
+    // Shoes
+    const shoe=new THREE.Mesh(
+      new THREE.BoxGeometry(0.15,0.08,0.2),
+      new THREE.MeshLambertMaterial({color:0x333333})
+    );
+    shoe.position.set(x,0.2,0.03);
+    body.add(shoe);
+  });
+
+  // Rod
+  const rod=new THREE.Mesh(
+    new THREE.CylinderGeometry(0.02,0.01,2.5,4),
+    new THREE.MeshLambertMaterial({color:0x4a3020})
+  );
+  rod.position.set(0.4,1.5,0);
+  rod.rotation.x=Math.PI/4;
+  body.add(rod);
+
+  const nameTag=document.createElement('div');
+  nameTag.style.cssText='position:fixed;font-size:10px;color:#88ddff;font-family:"Courier Prime",monospace;pointer-events:none;z-index:100;text-shadow:0 1px 3px rgba(0,0,0,0.8);';
+  nameTag.textContent=id==='host'?'Host':'Angler';
+  document.body.appendChild(nameTag);
+
+  scene.add(body);
+
+  MP.remotePlayers[id]={
+    mesh:body,
+    targetPos:new THREE.Vector3(0,0,0),
+    targetRotY:0,
+    state:'idle',
+    action:null,
+    nameTag:nameTag,
+    rod:rod
+  };
+}
+
+// ─── SEEDED RANDOM ────────────────────────────────────────────────────────────
+function seededRandom(seed){
+  let s=seed;
+  return function(){
+    s=(s*16807+0)%2147483647;
+    return(s-1)/2147483646;
+  };
 }
 
 // ─── START ─────────────────────────────────────────────────────────────────────
