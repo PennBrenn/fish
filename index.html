@@ -7658,18 +7658,8 @@ function spawnPlayerBoat(){
 
 function exitBoat(){
   Game.inBoat=false;
-  // Nudge player forward in look direction to step off the boat
-  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-  fwd.y=0;fwd.normalize();
-  camera.position.x+=fwd.x*2;
-  camera.position.z+=fwd.z*2;
-  // Set proper height for dock/terrain
-  const dockH=getDockHeight(camera.position.x,camera.position.z);
-  const terrainH=getTerrainHeight(camera.position.x,camera.position.z);
-  const groundH=(dockH!==null?dockH:Math.max(0,terrainH))+1.7;
-  camera.position.y=groundH;
-  Game.playerVelocityY=0;
-  showNotif('Exited boat','#88ddff');
+  showNotif('🚶 Exited boat','#88ddff');
+  // Keep boat mesh in world
 }
 
 function updateBoat(dt){
