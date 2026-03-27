@@ -8,6 +8,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
   :root { --gold:#c9a84c; --cream:#f0e8d0; --ui-bg:rgba(8,16,28,0.92); --border:rgba(201,168,76,0.35); --piss:#e8d020; --shit:#7a4010; --accent:var(--gold); --ui-scale:0.85; }
+  /* Random accent colors will override --gold, --accent, and --border on load */
   body { background:#000; overflow:hidden; font-family:'Courier Prime',monospace; color:var(--cream); user-select:none; cursor:crosshair; }
   #canvas { display:block; width:100vw; height:100vh; }
   .panel { background:var(--ui-bg); border:1px solid var(--border); backdrop-filter:blur(8px); }
@@ -608,6 +609,16 @@
     <input type="text" id="username-input" placeholder="Angler" value="Angler" maxlength="20" spellcheck="false" autocomplete="off" style="width:100%;padding:8px 12px;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--cream);font-family:'Courier Prime',monospace;font-size:12px;" onchange="setUsername(this.value)"/>
   </div>
 
+  <div style="margin-top:15px;">
+    <div style="font-size:11px;color:var(--cream);margin-bottom:6px;">Skin Tone: <span id="melanin-value">50</span>%</div>
+    <input type="range" min="0" max="100" step="1" value="50" id="melanin-slider" style="width:100%;" onchange="setMelaninLevel(parseInt(this.value))"/>
+    <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:rgba(200,210,230,0.5);">
+      <span>Light</span>
+      <span>Medium</span>
+      <span>Dark</span>
+    </div>
+  </div>
+
   <button onclick="closeGraphicsSettings()" style="margin-top:20px;padding:10px 30px;width:100%;background:var(--ui-bg);color:var(--gold);border:1px solid var(--border);cursor:pointer;font-family:'Courier Prime',monospace;">BACK</button>
 </div>
 
@@ -1172,12 +1183,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/BokehShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSRPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSRShader.js"></script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 'use strict';
@@ -1690,6 +1701,7 @@ function rW(f){ return (f.minW+Math.random()*(f.maxW-f.minW)).toFixed(1); }
 // ─── GAME STATE ────────────────────────────────────────────────────────────────
 const Game = {
   state:'idle',
+  gameStarted:false,
   power:0, powerDir:1,
   bobberPos: new THREE.Vector3(),
   caughtCount:0, bestWeight:0, totalWeight:0, castCount:0,
@@ -1818,10 +1830,11 @@ const Game = {
     volumetricFog:true,
     particles:true,
     reflections:true,
-    godrays:true,
+    godrays:false,
     godrayIntensity:0.5,
     lensEffects:true,
-    uiScale:0.85
+    uiScale:0.85,
+    melaninLevel:50
   },
   playerUsername:'Angler',
   inBoat:false,
@@ -1943,6 +1956,13 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=0.85;
 
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x1a3a5a,0.013);
+
+const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.01,800);
+camera.position.set(0,1.7,0);
+camera.rotation.order='YXZ';
+
 // ─── POST-PROCESSING COMPOSER ─────────────────────────────────────────────────────
 const composer = new THREE.EffectComposer(renderer);
 const renderPass = new THREE.RenderPass(scene, camera);
@@ -2020,75 +2040,10 @@ const colorGradeShader = {
 const colorGradePass = new THREE.ShaderPass(colorGradeShader);
 composer.addPass(colorGradePass);
 
-// Screen Space Reflections will be added after water is created
-
-// Depth of Field (Bokeh) for cinematic focus on bobber
-const bokehPass = new THREE.BokehPass(scene, camera, {
-  focus: 10.0,
-  aperture: 0.025,
-  maxblur: 0.01,
-  width: window.innerWidth,
-  height: window.innerHeight
-});
-composer.addPass(bokehPass);
-
 // Final output pass
 const copyPass = new THREE.ShaderPass(THREE.CopyShader);
 copyPass.renderToScreen = true;
 composer.addPass(copyPass);
-
-const scene=new THREE.Scene();
-scene.fog=new THREE.FogExp2(0x1a3a5a,0.013);
-
-// Dynamic fog system
-let dynamicFog = {
-  baseColor: new THREE.Color(0x1a3a5a),
-  baseDensity: 0.013,
-  dayColor: new THREE.Color(0x2a4a6a),
-  nightColor: new THREE.Color(0x0a1a3a),
-  sunsetColor: new THREE.Color(0x3a2a5a)
-};
-
-function updateDynamicFog(dayTime) {
-  // Calculate fog color based on time of day
-  let fogColor;
-  
-  if (dayTime < 0.25) {
-    // Night to dawn
-    fogColor = dynamicFog.nightColor.clone().lerp(dynamicFog.dayColor, dayTime * 4);
-  } else if (dayTime < 0.4) {
-    // Day
-    fogColor = dynamicFog.dayColor;
-  } else if (dayTime < 0.6) {
-    // Day to sunset
-    fogColor = dynamicFog.dayColor.clone().lerp(dynamicFog.sunsetColor, (dayTime - 0.4) * 5);
-  } else if (dayTime < 0.75) {
-    // Sunset
-    fogColor = dynamicFog.sunsetColor;
-  } else {
-    // Sunset to night
-    fogColor = dynamicFog.sunsetColor.clone().lerp(dynamicFog.nightColor, (dayTime - 0.75) * 4);
-  }
-  
-  // Update fog color and density
-  scene.fog.color.copy(fogColor);
-  
-  // Fog density varies with time - thicker at night and dawn
-  let densityMultiplier = 1.0;
-  if (dayTime < 0.25 || dayTime > 0.75) {
-    densityMultiplier = 1.5; // Night - thicker fog
-  } else if (dayTime > 0.4 && dayTime < 0.6) {
-    densityMultiplier = 0.7; // Day - thinner fog
-  } else {
-    densityMultiplier = 1.2; // Dawn/dusk - moderate fog
-  }
-  
-  scene.fog.density = dynamicFog.baseDensity * densityMultiplier;
-}
-
-const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.01,800);
-camera.position.set(0,1.7,0);
-camera.rotation.order='YXZ';
 
 // ─── LIGHTING ──────────────────────────────────────────────────────────────────
 const ambLight=new THREE.AmbientLight(0x304060,1.4); scene.add(ambLight);
@@ -2280,35 +2235,12 @@ const waterMat=new THREE.ShaderMaterial({
       float foamLine=foam(vWorldPos.xz,uTime)*smoothstep(60.,15.,dist)*.3*(1.+sunVis*.5);
       col+=vec3(.7,.8,.9)*foamLine;
       col=mix(col,col*vec3(.85,.92,1.05),night*.3);
-      
-      // Enhanced reflection for SSR - increase fresnel effect
-      float reflectionStrength = fr * 0.9;
-      vec3 skyReflection = mix(deep, vec3(.4,.6,.8), (1.-night)*0.7);
-      col = mix(col, skyReflection, reflectionStrength);
-      
       gl_FragColor=vec4(col,.88);}`,
   transparent:true,side:THREE.DoubleSide
 });
 const water = new THREE.Mesh(new THREE.PlaneGeometry(600, 600, 150, 150), waterMat);
 water.rotation.x = -Math.PI / 2;
 scene.add(water);
-
-// Add Screen Space Reflections for water
-const ssrPass = new THREE.SSRPass({
-  renderer,
-  scene,
-  camera,
-  width: window.innerWidth,
-  height: window.innerHeight,
-  opacity: 0.8,
-  maxDistance: 100,
-  thickness: 0.1
-});
-composer.insertPass(ssrPass, 2); // Insert after color grading, before DoF
-
-// Make water reflective for SSR
-water.material.defines = { USE_SSR: true };
-water.material.needsUpdate = true;
 
 // ─── WORLD BUILDERS ────────────────────────────────────────────────────────────
 function makeIsland(cx,cz,radius,height,col,trees=true){
@@ -5853,7 +5785,7 @@ function setGraphicsPreset(preset){
       volumetricFog:true,
       particles:true,
       reflections:true,
-      godrays:true,
+      godrays:false,
       lensEffects:true,
       waterQuality:'high',
       shadowQuality:'high'
@@ -5868,7 +5800,7 @@ function setGraphicsPreset(preset){
       volumetricFog:true,
       particles:true,
       reflections:true,
-      godrays:true,
+      godrays:false,
       lensEffects:true,
       waterQuality:'ultra',
       shadowQuality:'ultra'
@@ -5915,6 +5847,12 @@ function syncGraphicsUI(){
   document.getElementById('gfx-lens').checked=Game.settings.lensEffects;
   document.getElementById('water-quality').value=Game.settings.waterQuality;
   document.getElementById('shadow-quality').value=Game.settings.shadowQuality;
+  
+  // Sync melanin slider
+  if(document.getElementById('melanin-slider')) {
+    document.getElementById('melanin-slider').value = Game.settings.melaninLevel;
+    document.getElementById('melanin-value').textContent = Game.settings.melaninLevel;
+  }
 }
 
 function applyGraphicsSettings(){
@@ -6903,14 +6841,18 @@ document.addEventListener('pointerlockchange',()=>{
   const ov=document.getElementById('lock-overlay');
   const mainMenu=document.getElementById('main-menu');
   const menuVisible=mainMenu&&mainMenu.style.display!=='none';
-  // Only show lock overlay if we're not in a menu and game hasn't started yet
+  // Hide overlay when pointer lock is gained (if not already hidden)
   if(Game.locked){
     ov.style.opacity='0';
     ov.style.pointerEvents='none';
+    ov.style.display='none';
   } else if(!menuVisible&&!Game.paused){
-    // Don't show fullscreen overlay when exiting pause or during gameplay
-    ov.style.opacity='0';
-    ov.style.pointerEvents='none';
+    // Only show overlay when losing pointer lock if game hasn't properly started
+    if(!Game.gameStarted){
+      ov.style.display='flex';
+      ov.style.opacity='1';
+      ov.style.pointerEvents='auto';
+    }
   }
 });
 document.addEventListener('mousemove',e=>{
@@ -7168,14 +7110,17 @@ function releaseCast(){
   document.getElementById('line-indicator').style.display='block';
   document.getElementById('line-dist').textContent=Math.round(dist)+' ft';
   document.getElementById('depth-fill').style.width='15%';
-  // Schedule first nibble then real bite — modified by heatmap, premiumBait, syncPiss
+  
+  // Simplified: Random time until bite (2-8 seconds)
   const hotspot=sampleHeatmap(land.x,land.z);
   let biteSpeedMul=0.5+hotspot*1.5;
   if(Game.premiumBaitTimer>0) biteSpeedMul*=1.5;
   if(Game.syncPissActive) biteSpeedMul*=2;
-  const nibbleDelay=(1500+Math.random()*3000)/biteSpeedMul;
+  
+  const biteDelay=(2000+Math.random()*6000)/biteSpeedMul; // 2-8 seconds random
+  
   if(Game.luckyLureCasts>0) Game.luckyLureCasts--;
-  Game.nibbleTimer=setTimeout(()=>startNibbleSequence(biteBonus),nibbleDelay);
+  Game.biteTimer=setTimeout(triggerBite,biteDelay);
 }
 
 // ─── NIBBLE → BITE SYSTEM ─────────────────────────────────────────────────────
@@ -7220,17 +7165,15 @@ function triggerBite(){
   // Bigger visual: flash the border of the screen
   document.body.style.boxShadow='inset 0 0 60px rgba(255,215,0,0.4)';
   setTimeout(()=>{document.body.style.boxShadow='none';},300);
-  // Auto-miss if too slow (2.5 second window — generous)
-  Game._biteTimeout=setTimeout(()=>{
+  
+  // Auto-reel after 1 second and start minigame
+  setTimeout(()=>{
     if(Game.state==='bite'){
       document.getElementById('bite-indicator').style.display='none';
-      showNotif('⏰ Too slow! The fish got away...','#ff8844');
-      Game.state='waiting';
-      Game.catchStreak=0;
-      updateStreakUI();
-      Game.biteTimer=setTimeout(triggerBite,4000+Math.random()*6000);
+      showNotif('🎣 Fish on the line! Starting minigame...','#44dd88');
+      startHookSet(); // Automatically start the minigame
     }
-  },2500);
+  }, 1000);
 }
 
 // ─── HOOK-SET MINIGAME ────────────────────────────────────────────────────────
@@ -7881,9 +7824,6 @@ function updateDay(dt){
   const d=Game.dayTime;
   skyMat.uniforms.uDay.value=d;
   skyMat.uniforms.uTime.value=elapsed;
-  
-  // Update dynamic fog based on time of day
-  updateDynamicFog(d);
   waterMat.uniforms.uDay.value=d;
   causticsMat.uniforms.uDay.value=d;
   const sa=d*Math.PI*2-Math.PI/2;
@@ -8295,16 +8235,8 @@ function animate(){
   // Update post-processing uniforms
   colorGradePass.uniforms.uTime.value = elapsed;
   
-  // Update depth of field focus to track bobber when fishing
-  if (Game.lineOut && bobberGroup) {
-    const distance = camera.position.distanceTo(bobberGroup.position);
-    bokehPass.focus = distance;
-  } else {
-    bokehPass.focus = 10.0; // Default focus distance
-  }
-  
-  // Render scene through post-processing pipeline
-  composer.render();
+  // Render scene directly (debugging composer chain)
+  renderer.render(scene, camera);
   
   // Apply VHS effects on top if enabled
   if (Game.settings.vhs) {
@@ -8331,14 +8263,22 @@ function animate(){
 
 // ─── RANDOM UI COLOR ON RELOAD ────────────────────────────────────────────────
 (function initRandomAccentColor(){
-  const hues=[0,30,45,60,120,180,200,220,260,280,320];
+  const hues=[0,15,30,45,60,75,90,120,135,150,180,195,210,225,240,255,270,285,300,315,330,345];
   const h=hues[Math.floor(Math.random()*hues.length)];
-  const s=50+Math.floor(Math.random()*30);
-  const l=55+Math.floor(Math.random()*15);
+  const s=60+Math.floor(Math.random()*25);
+  const l=50+Math.floor(Math.random()*20);
   const accent=`hsl(${h},${s}%,${l}%)`;
   document.documentElement.style.setProperty('--accent',accent);
   document.documentElement.style.setProperty('--gold',accent);
   document.documentElement.style.setProperty('--border',`hsla(${h},${s}%,${l}%,0.35)`);
+  
+  // Also randomize some other UI elements for more variety
+  const creamHues=[30,40,50,60];
+  const creamH=creamHues[Math.floor(Math.random()*creamHues.length)];
+  const creamS=15+Math.floor(Math.random()*10);
+  const creamL=85+Math.floor(Math.random()*10);
+  const cream=`hsl(${creamH},${creamS}%,${creamL}%)`;
+  document.documentElement.style.setProperty('--cream',cream);
 })();
 
 // ─── UI SCALE ─────────────────────────────────────────────────────────────────
@@ -8352,6 +8292,44 @@ function setUIScale(val){
 function setUsername(name){
   Game.playerUsername=name.trim()||'Angler';
   showNotif('Username set to: '+Game.playerUsername,'#88dd88');
+}
+
+// ─── MELANIN/SKIN TONE ─────────────────────────────────────────────────────────
+function setMelaninLevel(level){
+  Game.settings.melaninLevel = Math.max(0, Math.min(100, level));
+  document.getElementById('melanin-value').textContent = Game.settings.melaninLevel;
+  
+  // Update multiplayer player skin color if in multiplayer
+  if(MP.isHost && MP.playerMesh){
+    updatePlayerSkinColor(MP.playerMesh, Game.settings.melaninLevel);
+  }
+  
+  // Save to localStorage for persistence
+  localStorage.setItem('fishingGameMelanin', Game.settings.melaninLevel);
+  showNotif('Skin tone updated','#88dd88');
+}
+
+function updatePlayerSkinColor(playerMesh, melaninLevel){
+  if(!playerMesh) return;
+  
+  // Convert melanin level (0-100) to skin color
+  const hue = 25 + (melaninLevel * 0.15); // Warm orange to deeper brown
+  const saturation = 40 - (melaninLevel * 0.2); // Less saturated for darker tones
+  const lightness = 70 - (melaninLevel * 0.4); // Darker for higher melanin
+  
+  const skinColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  
+  // Update player mesh material color
+  if(playerMesh.material && playerMesh.material.color){
+    playerMesh.material.color.setStyle(skinColor);
+  }
+  
+  // Update any child meshes that might represent skin
+  playerMesh.traverse((child) => {
+    if(child.isMesh && child.material && child.material.color){
+      child.material.color.setStyle(skinColor);
+    }
+  });
 }
 
 // ─── BOAT SYSTEM ──────────────────────────────────────────────────────────────
@@ -9103,13 +9081,73 @@ function seededRandom(seed){
 // FIX: request pointer lock on `canvas` (not `document.body`) so that the
 // pointerlockchange handler sees pointerLockElement === canvas → Game.locked = true.
 const lockOverlay=document.getElementById('lock-overlay');
-lockOverlay.addEventListener('click',()=>{
-  canvas.requestPointerLock();  // was document.body.requestPointerLock() — FIXED
+console.log('Lock overlay found:', !!lockOverlay);
+
+if(lockOverlay) {
+  lockOverlay.addEventListener('click',()=>{
+    console.log('Overlay clicked - starting game');
+    
+    // Start game immediately on click
+    if(!Game.gameStarted){
+      Game.gameStarted=true;
+      Game.state='idle';
+      showNotif('Click to cast your line!','#c9a84c');
+      console.log('Game started:', Game.gameStarted);
+    }
+    
+    // Hide overlay immediately
+    lockOverlay.style.display='none';
+    lockOverlay.style.opacity='0';
+    lockOverlay.style.pointerEvents='none';
+    console.log('Overlay hidden');
+    
+    // Try to get pointer lock
+    canvas.requestPointerLock();
+  });
+} else {
+  console.error('Lock overlay element not found!');
+}
+
+// Backup: Also handle clicks on canvas directly
+canvas.addEventListener('click',()=>{
+  const overlay = document.getElementById('lock-overlay');
+  if(overlay && overlay.style.display !== 'none' && !Game.gameStarted) {
+    console.log('Canvas backup click - starting game');
+    Game.gameStarted=true;
+    Game.state='idle';
+    showNotif('Click to cast your line!','#c9a84c');
+    overlay.style.display='none';
+    overlay.style.opacity='0';
+    overlay.style.pointerEvents='none';
+    canvas.requestPointerLock();
+  }
+});
+
+// Backup: Keyboard shortcut to start game
+document.addEventListener('keydown', (e) => {
+  const overlay = document.getElementById('lock-overlay');
+  if(overlay && overlay.style.display !== 'none' && !Game.gameStarted && (e.code === 'Space' || e.code === 'Enter')) {
+    console.log('Keyboard backup - starting game');
+    e.preventDefault();
+    Game.gameStarted=true;
+    Game.state='idle';
+    showNotif('Click to cast your line!','#c9a84c');
+    overlay.style.display='none';
+    overlay.style.opacity='0';
+    overlay.style.pointerEvents='none';
+    canvas.requestPointerLock();
+  }
 });
 
 initializeStarterInventory();
 initializeBeerSpawns();
 initHeatmap();
+
+// Load saved melanin setting
+const savedMelanin = localStorage.getItem('fishingGameMelanin');
+if(savedMelanin !== null){
+  Game.settings.melaninLevel = parseInt(savedMelanin);
+}
 
 const sensSlider=document.getElementById('sens-slider');
 sensSlider.addEventListener('input',()=>{
@@ -9127,15 +9165,6 @@ window.addEventListener('resize',()=>{
   
   // Update post-processing passes that need size
   bloomPass.setSize(innerWidth, innerHeight);
-  bokehPass.width = innerWidth;
-  bokehPass.height = innerHeight;
-  
-  // Update SSR pass if it exists
-  if (ssrPass) {
-    ssrPass.width = innerWidth;
-    ssrPass.height = innerHeight;
-  }
-  
   vhsRT.setSize(innerWidth,innerHeight);
   vhsMat.uniforms.uResolution.value.set(innerWidth,innerHeight);
 });
@@ -9274,9 +9303,9 @@ function updateFishingHint(){
   } else if(Game.state==='casting'){
     hint='Release LEFT CLICK to cast — aim with mouse';
   } else if(Game.state==='waiting'){
-    hint='Waiting for a bite... watch for nibbles';
+    hint='Waiting for a bite... automatic reel when fish bites!';
   } else if(Game.state==='bite'){
-    hint='FISH ON! Press SPACE to set the hook!';
+    hint='FISH ON! Auto-reeling in... get ready for minigame!';
   } else if(Game.state==='hookset'){
     hint='Press SPACE when needle is in the GREEN zone!';
   } else if(Game.state==='reeling'){
@@ -9447,6 +9476,17 @@ spawnPlayerBoat=function(){
   showNotif('Spawned boat! Press B again to exit','#88ddff');
   sendAction('spawnBoat',{x:g.position.x,z:g.position.z,rotY:g.rotation.y});
 };
+
+// Dismiss the lock overlay on click
+document.getElementById('lock-overlay').addEventListener('click', () => {
+    document.getElementById('lock-overlay').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('lock-overlay').style.display = 'none';
+    }, 400);
+    
+    // Request pointer lock for the game
+    canvas.requestPointerLock();
+});
 
 </script>
 </body>
