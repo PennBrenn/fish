@@ -350,22 +350,6 @@
   <div class="sub">CLICK TO BEGIN · WASD MOVE · P PISS · O SHIT · COLLECT RODS FOR EXPONENTIAL FISH</div>
 </div>
 
-<!-- HUD -->
-<div id="score-panel" class="panel">
-  <h2>Stillwater —<br><span class="strikeout">Fishing</span> <span class="piss-word">Pissing</span> Sim</h2>
-  <div class="stat"><span>Caught</span><span id="caught-count">0</span></div>
-  <div class="stat"><span>Best</span><span id="best-weight">—</span></div>
-  <div class="stat"><span>Total lbs</span><span id="total-weight">0.0</span></div>
-  <div class="stat"><span>Casts</span><span id="cast-count">0</span></div>
-  <div class="stat"><span>Perfect Casts</span><span id="perfect-count">0</span></div>
-  <div class="stat"><span>Species</span><span id="species-count">0</span></div>
-  <div class="stat"><span>Times Pissed</span><span id="piss-count">0</span></div>
-  <div class="stat"><span>Times Shat</span><span id="shit-count">0</span></div>
-  <div class="stat"><span>Fish Punched</span><span id="punch-count">0</span></div>
-  <div class="stat"><span>Rods</span><span id="rod-count">1</span></div>
-</div>
-
-
 <div id="xp-panel" class="panel" style="position:fixed;top:16px;right:230px;padding:10px 16px;display:flex;flex-direction:column;gap:4px;">
   <div style="font-size:10px;letter-spacing:2px;color:var(--gold);">LEVEL <span id="player-level">1</span></div>
   <div style="width:120px;height:8px;background:rgba(0,0,0,0.5);border:1px solid var(--border);">
@@ -7111,15 +7095,25 @@ function releaseCast(){
   document.getElementById('line-dist').textContent=Math.round(dist)+' ft';
   document.getElementById('depth-fill').style.width='15%';
   
-  // Simplified: Random time until bite (2-8 seconds)
+  // Bite timing: 3-12 seconds base, capped at 20s, with nibbles for feedback
   const hotspot=sampleHeatmap(land.x,land.z);
   let biteSpeedMul=0.5+hotspot*1.5;
   if(Game.premiumBaitTimer>0) biteSpeedMul*=1.5;
   if(Game.syncPissActive) biteSpeedMul*=2;
+  if(Game.luckyLureCasts>0){ biteSpeedMul*=1.5; Game.luckyLureCasts--; }
   
-  const biteDelay=(2000+Math.random()*6000)/biteSpeedMul; // 2-8 seconds random
+  const rawDelay=(3000+Math.random()*9000)/biteSpeedMul;
+  const biteDelay=Math.min(rawDelay, 20000); // Hard cap at 20 seconds
   
-  if(Game.luckyLureCasts>0) Game.luckyLureCasts--;
+  // Schedule 1-3 nibbles before the bite for feedback
+  const numNibbles=1+Math.floor(Math.random()*3);
+  for(let i=0;i<numNibbles;i++){
+    const nibbleTime=biteDelay*(0.3+i*0.2)+Math.random()*500;
+    if(nibbleTime<biteDelay-500){
+      setTimeout(()=>{ if(Game.state==='waiting') showNibble(); }, nibbleTime);
+    }
+  }
+  
   Game.biteTimer=setTimeout(triggerBite,biteDelay);
 }
 
@@ -7164,16 +7158,23 @@ function triggerBite(){
   triggerScreenShake(.05,.35);
   // Bigger visual: flash the border of the screen
   document.body.style.boxShadow='inset 0 0 60px rgba(255,215,0,0.4)';
-  setTimeout(()=>{document.body.style.boxShadow='none';},300);
+  setTimeout(()=>{document.body.style.boxShadow='none';},400);
   
-  // Auto-reel after 1 second and start minigame
-  setTimeout(()=>{
+  // Dramatic bobber dunk animation
+  if(bobberGroup){
+    const origY=bobberGroup.position.y;
+    bobberGroup.position.y=origY-0.15;
+    setTimeout(()=>{ if(bobberGroup) bobberGroup.position.y=origY-0.08; },150);
+    setTimeout(()=>{ if(bobberGroup) bobberGroup.position.y=origY-0.12; },300);
+  }
+  
+  // Auto-reel after brief pause and start hook-set minigame
+  Game._biteTimeout=setTimeout(()=>{
     if(Game.state==='bite'){
       document.getElementById('bite-indicator').style.display='none';
-      showNotif('🎣 Fish on the line! Starting minigame...','#44dd88');
-      startHookSet(); // Automatically start the minigame
+      startHookSet();
     }
-  }, 1000);
+  }, 800);
 }
 
 // ─── HOOK-SET MINIGAME ────────────────────────────────────────────────────────
@@ -7971,7 +7972,14 @@ function animate(){
   drawMinimap();
   updateLureIndicator();
   updateFishingHint();
-  if(lineMesh&&Game.lineOut&&bobberGroup) updateLine(Game.bobberPos);
+  // Keep line visible during ALL fishing states (waiting, bite, hookset, reeling, fighting, brawling)
+  if(lineMesh&&bobberGroup){
+    const fishingStates=['waiting','bite','hookset','reeling','fighting','brawling'];
+    if(Game.lineOut||fishingStates.includes(Game.state)){
+      const target=Game.fishMesh?Game.fishMesh.position:Game.bobberPos;
+      updateLine(target);
+    }
+  }
   
   if(Game.isPissing&&Game.weather==='rain') checkAchievement('pissRain');
   checkAchievement('punch100');
