@@ -661,7 +661,9 @@
     <span style="color:var(--gold);">1-3</span><span>Tools</span>
     <span style="color:var(--gold);">4</span><span>Shop</span>
     <span style="color:var(--gold);">5</span><span>Cook Fish</span>
+    <span style="color:var(--gold);">6</span><span>Eat Fish</span>
     <span style="color:var(--gold);">H</span><span>Forage</span>
+    <span style="color:var(--gold);">Shift+7-0</span><span>Fill Vitals</span>
     <span style="color:var(--gold);">Shift+Z</span><span>Scatter</span>
     <span style="color:var(--gold);">W</span><span>Worm</span>
     <span style="color:var(--gold);">Click</span><span>Retract/Reel</span>
@@ -4280,6 +4282,9 @@ function spawnDroppedFish(item){
 }
 
 // ─── BODILY METERS ─────────────────────────────────────────────────────────────
+// Notification cooldown tracker for vital signs
+if(!Game.vitalNotifCooldowns) Game.vitalNotifCooldowns={};
+
 function updateBodilyMeters(dt){
   Game.hunger=Math.min(100,Game.hunger+dt*0.5);
   Game.thirst=Math.min(100,Game.thirst+dt*0.8);
@@ -4305,12 +4310,34 @@ function updateBodilyMeters(dt){
     Game.sobriety=Math.min(100,Game.sobriety+dt*2);
   }
   
-  if(Game.hunger>=90) showNotif('🍽️ Starving...stomach growling','#ff8040');
-  if(Game.thirst>=90) showNotif('💧 Parched...need water','#88ccff');
-  if(Game.fatigue>=90) showNotif('😴 Exhausted...eyes closing','#888888');
-  if(Game.stress>=90) showNotif('😰 Stressed out!','#ff4040');
-  if(Game.warmth<=20) showNotif('🥶 Freezing cold!','#aaddff');
-  if(Game.bloodSugar<=20) showNotif('🍬 Blood sugar crashed!','#ffaa88');
+  // Notification cooldown system - only notify once per 5 seconds per vital
+  const now=Date.now();
+  const canNotify=(type)=>!Game.vitalNotifCooldowns[type]||now-Game.vitalNotifCooldowns[type]>5000;
+  
+  if(Game.hunger>=90&&canNotify('hunger')){
+    showNotif('🍽️ Starving...stomach growling','#ff8040');
+    Game.vitalNotifCooldowns.hunger=now;
+  }
+  if(Game.thirst>=90&&canNotify('thirst')){
+    showNotif('💧 Parched...need water','#88ccff');
+    Game.vitalNotifCooldowns.thirst=now;
+  }
+  if(Game.fatigue>=90&&canNotify('fatigue')){
+    showNotif('😴 Exhausted...eyes closing','#888888');
+    Game.vitalNotifCooldowns.fatigue=now;
+  }
+  if(Game.stress>=90&&canNotify('stress')){
+    showNotif('😰 Stressed out!','#ff4040');
+    Game.vitalNotifCooldowns.stress=now;
+  }
+  if(Game.warmth<=20&&canNotify('warmth')){
+    showNotif('🥶 Freezing cold!','#aaddff');
+    Game.vitalNotifCooldowns.warmth=now;
+  }
+  if(Game.bloodSugar<=20&&canNotify('bloodSugar')){
+    showNotif('🍬 Blood sugar crashed!','#ffaa88');
+    Game.vitalNotifCooldowns.bloodSugar=now;
+  }
   
   if(Game.fatigue>=100){
     showNotif('💤 FELL ASLEEP STANDING UP!','#ff4040');
@@ -4330,6 +4357,30 @@ function updateBodilyMeters(dt){
     showNotif('🤢 Too hungry...vision blurring','#ff5050');
     camera.rotation.z=(Math.random()-.5)*0.1;
     setTimeout(()=>camera.rotation.z=0,1000);
+  }
+}
+
+function eatCaughtFish(){
+  const fishInInventory=Game.inventory.fish||[];
+  if(fishInInventory.length===0){
+    showNotif('🐟 No fish in inventory to eat','#ff8040');
+    return;
+  }
+  
+  const fishToEat=fishInInventory[fishInInventory.length-1];
+  removeFromInventory('fish',fishInInventory.length-1);
+  
+  // Raw fish reduces hunger but increases stress/risk
+  Game.hunger=Math.max(0,Game.hunger-40);
+  Game.thirst=Math.max(0,Game.thirst-10);
+  Game.stress=Math.min(100,Game.stress+10);
+  
+  // Small chance of food poisoning from raw fish
+  if(Math.random()<0.15){
+    showNotif('🤢 Ate raw '+fishToEat.emoji+' '+fishToEat.name+'...feeling queasy','#ff8844');
+    applyStatusEffect('poison',8);
+  } else{
+    showNotif('🍣 Ate raw '+fishToEat.emoji+' '+fishToEat.name+' (sashimi style)','#88dd88');
   }
 }
 
@@ -7193,6 +7244,26 @@ document.addEventListener('keydown',e=>{
   }
   if(e.code==='Digit5'){
     cookFish();
+  }
+  if(e.code==='Digit6'){
+    eatCaughtFish();
+  }
+  // Debug: Fill vital signs with Shift+number
+  if(e.code==='Digit7'&&e.shiftKey){
+    Game.hunger=0;
+    showNotif('🍔 Hunger filled','#88dd88');
+  }
+  if(e.code==='Digit8'&&e.shiftKey){
+    Game.thirst=0;
+    showNotif('💧 Thirst filled','#88dd88');
+  }
+  if(e.code==='Digit9'&&e.shiftKey){
+    Game.fatigue=0;
+    showNotif('😴 Fatigue removed','#88dd88');
+  }
+  if(e.code==='Digit0'&&e.shiftKey){
+    Game.stress=0;
+    showNotif('😌 Stress relieved','#88dd88');
   }
   if(e.code==='KeyC'){
     toggleEncyclopedia();
