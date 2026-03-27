@@ -2492,6 +2492,72 @@ const gradeScene=new THREE.Scene();
 const gradeCamera=new THREE.Camera();
 gradeScene.add(gradeOverlay);
 
+// ─── VHS POST-PROCESSING ──────────────────────────────────────────────────────
+const vhsRT=new THREE.WebGLRenderTarget(innerWidth,innerHeight);
+const vhsMat=new THREE.ShaderMaterial({
+  uniforms:{
+    tDiffuse:{value:null},
+    uTime:{value:0},
+    uResolution:{value:new THREE.Vector2(innerWidth,innerHeight)}
+  },
+  vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`,
+  fragmentShader:`
+    uniform sampler2D tDiffuse;
+    uniform float uTime;
+    uniform vec2 uResolution;
+    varying vec2 vUv;
+
+    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+
+    void main(){
+      vec2 uv=vUv;
+      // --- Fisheye lens distortion ---
+      vec2 center=uv-0.5;
+      float dist=length(center);
+      float barrel=1.0+dist*dist*0.25;
+      vec2 fishUv=center*barrel+0.5;
+
+      // --- Tape warp & jitter ---
+      float w=sin(fishUv.y*12.0+uTime*1.5)*sin(fishUv.y*3.0+uTime*0.7)*0.0004;
+      fishUv.x+=w;
+      // Rare horizontal tracking glitch
+      float glitchLine=step(0.998,hash(vec2(floor(fishUv.y*120.0),floor(uTime*4.0))));
+      fishUv.x+=glitchLine*(hash(vec2(uTime,fishUv.y))-0.5)*0.02;
+
+      // --- Chromatic aberration ---
+      float aberration=0.002+sin(uTime*2.0)*0.001;
+      vec2 dir=normalize(center)*aberration;
+      float r=texture2D(tDiffuse,fishUv+dir).r;
+      float g=texture2D(tDiffuse,fishUv).g;
+      float b=texture2D(tDiffuse,fishUv-dir).b;
+      vec3 col=vec3(r,g,b);
+
+      // --- Posterization with dithering ---
+      float posterLevels=16.0;
+      float ditherAmount=hash(vUv*uResolution+fract(uTime))*0.1;
+      col=floor((col+ditherAmount)*posterLevels)/posterLevels;
+
+      // --- Color desaturation & warm tint ---
+      float lum=dot(col,vec3(0.299,0.587,0.114));
+      col=mix(vec3(lum),col,0.86);
+      col.r*=1.05;
+      col.b*=0.92;
+
+      // Clamp for edge of fisheye
+      float mask=step(0.0,fishUv.x)*step(fishUv.x,1.0)*step(0.0,fishUv.y)*step(fishUv.y,1.0);
+      col*=mask;
+
+      gl_FragColor=vec4(col,1.0);
+    }
+  `,
+  depthTest:false,depthWrite:false
+});
+const vhsQuad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),vhsMat);
+vhsQuad.frustumCulled=false;
+const vhsScene=new THREE.Scene();
+const vhsCamera=new THREE.Camera();
+vhsScene.add(vhsQuad);
+
 // ─── SCREEN SHAKE ──────────────────────────────────────────────────────────────
 const screenShake={active:false,intensity:0,decay:0,timer:0,offset:new THREE.Vector3()};
 function triggerScreenShake(intensity=.04,duration=.3){
@@ -4724,6 +4790,11 @@ function handleHostReceive(peerId,data){
       rp.username=data.username;
       if(rp.nameTag) rp.nameTag.textContent=data.username;
     }
+    // Update leaderboard with guest stats
+    if(data.lbs!==undefined){
+      Game.leaderboard=Game.leaderboard.filter(e=>e.id!==peerId);
+      Game.leaderboard.push({id:peerId,username:data.username||peerId,lbs:data.lbs||0,catches:data.catches||0,species:data.species||0,pissCount:data.pissCount||0});
+    }
     
     Object.values(MP.connections).forEach(conn=>{
       if(conn.peer!==peerId){
@@ -4746,6 +4817,10 @@ function handleHostReceive(peerId,data){
   
   if(data.type==='action'){
     handleRemoteAction(peerId,data);
+    // Relay action to all other guests
+    Object.entries(MP.connections).forEach(([id,conn])=>{
+      if(id!==peerId) conn.send({type:'remoteAction',id:peerId,actionType:data.actionType,...data});
+    });
   }
 }
 
@@ -6027,6 +6102,27 @@ function randomJankEvent(t){
 // ─── INPUT ─────────────────────────────────────────────────────────────────────
 const keys=Game.moveKeys;
 document.addEventListener('keydown',e=>{
+  // Chat input intercepts all keys when open
+  if(Game.chatOpen){
+    if(e.code==='Enter'){e.preventDefault();sendChatMessage(document.getElementById('chat-input').value);return;}
+    if(e.code==='Escape'){e.preventDefault();closeChatInput();return;}
+    return;
+  }
+  // Freeze blocks movement keys
+  if(Game.frozenTimer>0&&['KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code)){e.preventDefault();return;}
+  if(e.code==='Enter'){e.preventDefault();openChatInput();return;}
+  if(e.code==='Tab'){
+    e.preventDefault();
+    if(Game.rodOffer){acceptRodOffer();return;}
+    if(Game.state==='reeling'){offerRod();return;}
+    toggleLeaderboard();return;
+  }
+  if(e.code==='Digit4'&&e.shiftKey){e.preventDefault();toggleBaitShop();return;}
+  // Quick emotes (only when chat closed)
+  if(QUICK_EMOTES[e.code]&&!e.shiftKey){
+    showChatBubble('local',QUICK_EMOTES[e.code]);
+    sendAction('chatBubble',{msg:QUICK_EMOTES[e.code]});
+  }
   if(e.code==='KeyW'){
     keys.w=true;
     if(Game.state==='brawling') brawlDodge('UP');
@@ -6042,27 +6138,6 @@ document.addEventListener('keydown',e=>{
   if(e.code==='KeyD'){
     keys.d=true;
     if(Game.state==='brawling') brawlDodge('RIGHT');
-  }
-  // Chat input intercepts all keys when open
-  if(Game.chatOpen){
-    if(e.code==='Enter'){e.preventDefault();sendChatMessage(document.getElementById('chat-input').value);return;}
-    if(e.code==='Escape'){e.preventDefault();closeChatInput();return;}
-    return;
-  }
-  // Freeze blocks movement keys
-  if(Game.frozenTimer>0&&['KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code)){e.preventDefault();return;}
-  if(e.code==='Enter'&&!Game.chatOpen){e.preventDefault();openChatInput();return;}
-  if(e.code==='Tab'){
-    e.preventDefault();
-    if(Game.rodOffer){acceptRodOffer();return;}
-    if(Game.state==='reeling'){offerRod();return;}
-    toggleLeaderboard();return;
-  }
-  if(e.code==='Digit4'&&e.shiftKey){e.preventDefault();toggleBaitShop();return;}
-  // Quick emotes (only when chat closed)
-  if(!Game.chatOpen&&QUICK_EMOTES[e.code]&&!e.shiftKey){
-    showChatBubble('local',QUICK_EMOTES[e.code]);
-    sendAction('chatBubble',{msg:QUICK_EMOTES[e.code]});
   }
   if(e.code==='KeyP') startPissing();
   if(e.code==='KeyO'&&!Game.isShitting) Game.isShitting=true;
@@ -6556,9 +6631,11 @@ function startHookSet(){
   Game.hookset.needle=0;
   Game.hookset.needleDir=1;
   Game.hookset.speed=cfg.hookSpeed;
-  // Sweet spot: random position, width based on difficulty
-  Game.hookset.sweetWidth=cfg.sweetW;
-  Game.hookset.sweetLeft=15+Math.random()*(85-cfg.sweetW-15);
+  // Sweet spot: random position, width based on difficulty (Rod Magnet shrinks 30%)
+  let sw=cfg.sweetW;
+  if(Game.shopItems.rodMagnet>0) sw=Math.max(5,sw*0.7);
+  Game.hookset.sweetWidth=sw;
+  Game.hookset.sweetLeft=15+Math.random()*(85-sw-15);
   Game.state='hookset';
   const hs=document.getElementById('hookset-ui');
   hs.style.display='flex';
@@ -7479,11 +7556,25 @@ function animate(){
     godRayMat.uniforms.uIntensity.value=Game.settings.godrayIntensity;
   }
   
+  // Render scene + grade into VHS render target
+  renderer.setRenderTarget(vhsRT);
   renderer.render(scene,camera);
   renderer.autoClear=false;
   renderer.render(gradeScene,gradeCamera);
-  if(Game.settings.godrays) renderer.render(godRayScene,godRayCamera);
   renderer.autoClear=true;
+  renderer.setRenderTarget(null);
+
+  // Apply VHS shader to screen
+  vhsMat.uniforms.tDiffuse.value=vhsRT.texture;
+  vhsMat.uniforms.uTime.value=elapsed;
+  renderer.render(vhsScene,vhsCamera);
+
+  // Godrays on top
+  if(Game.settings.godrays){
+    renderer.autoClear=false;
+    renderer.render(godRayScene,godRayCamera);
+    renderer.autoClear=true;
+  }
 }
 
 // ─── RANDOM UI COLOR ON RELOAD ────────────────────────────────────────────────
@@ -7567,8 +7658,18 @@ function spawnPlayerBoat(){
 
 function exitBoat(){
   Game.inBoat=false;
-  showNotif('🚶 Exited boat','#88ddff');
-  // Keep boat mesh in world
+  // Nudge player forward in look direction to step off the boat
+  const fwd=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  fwd.y=0;fwd.normalize();
+  camera.position.x+=fwd.x*2;
+  camera.position.z+=fwd.z*2;
+  // Set proper height for dock/terrain
+  const dockH=getDockHeight(camera.position.x,camera.position.z);
+  const terrainH=getTerrainHeight(camera.position.x,camera.position.z);
+  const groundH=(dockH!==null?dockH:Math.max(0,terrainH))+1.7;
+  camera.position.y=groundH;
+  Game.playerVelocityY=0;
+  showNotif('Exited boat','#88ddff');
 }
 
 function updateBoat(dt){
@@ -7925,7 +8026,7 @@ function updateChatBubblePositions(){
     Game.chatBubbles[id].el.style.top=Math.max(10,y)+'px';
   });
 }
-const QUICK_EMOTES={Digit1:'🐟 Nice catch!',Digit2:'💛 Pissing...',Digit3:'😤 Come on fish!',Digit4:'🤙 Let\'s go!',Digit5:'💀 I\'m dying'};
+const QUICK_EMOTES={Numpad1:'🐟 Nice catch!',Numpad2:'💛 Pissing...',Numpad3:'😤 Come on fish!',Numpad4:'🤙 Let\'s go!',Numpad5:'💀 I\'m dying'};
 
 // ─── FEATURE 5: SYNCHRONIZED PISS BONUS ──────────────────────────────────────
 function checkSyncPiss(){
@@ -8224,6 +8325,8 @@ window.addEventListener('resize',()=>{
   camera.aspect=innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
+  vhsRT.setSize(innerWidth,innerHeight);
+  vhsMat.uniforms.uResolution.value.set(innerWidth,innerHeight);
 });
 </script>
 </body>
