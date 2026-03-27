@@ -7872,8 +7872,8 @@ function updateFishingMinigame(dt){
     fg.inZoneTime+=dt;
     fg.outZoneTime=Math.max(0,fg.outZoneTime-dt);
   } else {
-    fg.outZoneTime+=dt;
     // Hold progress: do not decrease inZoneTime when outside the zone
+    fg.outZoneTime+=dt;
   }
   
   const progress=Math.min(100,(fg.inZoneTime/fg.requiredTime)*100);
