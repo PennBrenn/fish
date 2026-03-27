@@ -11,17 +11,64 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root { --gold:#c9a84c; --cream:#f0e8d0; --ui-bg:rgba(8,16,28,0.92); --border:rgba(201,168,76,0.35); --piss:#e8d020; --shit:#7a4010; --accent:var(--gold); --ui-scale:0.85; }
+  :root { 
+    --gold:#c9a84c; --cream:#f0e8d0; 
+    --ui-bg:rgba(8,16,28,0.92); 
+    --border:rgba(201,168,76,0.35); 
+    --border-inner:rgba(201,168,76,0.15);
+    --border-outer:rgba(201,168,76,0.5);
+    --piss:#e8d020; --shit:#7a4010; 
+    --accent:var(--gold); 
+    --ui-scale:0.85;
+    --wood:#4a3420;
+    --rust:#8a5a3a;
+    --tackle-green:#2a4a3a;
+  }
   /* Random accent colors will override --gold, --accent, and --border on load */
   body { background:#000; overflow:hidden; font-family:'Courier Prime',monospace; color:var(--cream); user-select:none; cursor:crosshair; }
   #canvas { display:block; width:100vw; height:100vh; }
-  .panel { background:var(--ui-bg); border:1px solid var(--border); backdrop-filter:blur(8px); }
+  .panel { 
+    background:var(--ui-bg); 
+    border:3px double var(--border-outer); 
+    box-shadow:inset 0 0 0 1px var(--border-inner), 0 4px 12px rgba(0,0,0,0.5);
+    backdrop-filter:blur(8px); 
+    position:relative;
+  }
+  .panel::before {
+    content:'';
+    position:absolute;
+    inset:-3px;
+    border:1px solid rgba(0,0,0,0.4);
+    pointer-events:none;
+  }
 
   .panel { transform:scale(var(--ui-scale)); transform-origin:top left; }
 
   /* SCORE */
-  #score-panel { position:fixed; top:12px; left:12px; padding:10px 14px; min-width:160px; }
-  #score-panel h2 { font-family:'Playfair Display',serif; font-size:13px; color:var(--accent); margin-bottom:6px; border-bottom:1px solid var(--border); padding-bottom:4px; line-height:1.3; }
+  #score-panel { 
+    position:fixed; top:12px; left:12px; 
+    padding:12px 16px; min-width:160px;
+    background:linear-gradient(135deg, rgba(8,16,28,0.95), rgba(12,20,32,0.92));
+  }
+  #score-panel::after {
+    content:'⚓';
+    position:absolute;
+    top:-8px; right:8px;
+    font-size:14px;
+    opacity:0.3;
+    color:var(--accent);
+  }
+  #score-panel h2 { 
+    font-family:'Playfair Display',serif; 
+    font-size:13px; 
+    color:var(--accent); 
+    margin-bottom:6px; 
+    border-bottom:2px solid var(--border); 
+    border-image:repeating-linear-gradient(90deg, var(--border) 0, var(--border) 4px, transparent 4px, transparent 8px) 1;
+    padding-bottom:5px; 
+    line-height:1.3;
+    text-shadow:0 1px 3px rgba(0,0,0,0.6);
+  }
   #score-panel h2 .strikeout { text-decoration:line-through; color:#888; font-style:italic; }
   #score-panel h2 .piss-word { color:var(--piss); font-style:italic; }
   .stat { display:flex; justify-content:space-between; gap:12px; font-size:10px; margin:2px 0; color:#99aabb; }
@@ -29,9 +76,23 @@
 
   
   /* POWER BAR */
-  #cast-power-bar { position:fixed; bottom:70px; left:50%; transform:translateX(-50%); width:280px; display:none; flex-direction:column; align-items:center; gap:6px; padding:12px 18px; }
+  #cast-power-bar { 
+    position:fixed; bottom:70px; left:50%; 
+    transform:translateX(-50%); width:280px; 
+    display:none; flex-direction:column; align-items:center; 
+    gap:6px; padding:14px 20px;
+    background:linear-gradient(180deg, rgba(10,18,30,0.94), rgba(8,16,28,0.92));
+    border:3px double var(--border-outer);
+    box-shadow:inset 0 0 0 1px var(--border-inner), 0 6px 16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
   #cast-power-bar label { font-size:10px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; }
-  #power-track { width:100%; height:12px; background:rgba(255,255,255,0.08); border:1px solid var(--border); position:relative; }
+  #power-track { 
+    width:100%; height:14px; 
+    background:linear-gradient(180deg, rgba(0,0,0,0.5), rgba(20,20,20,0.3)); 
+    border:2px solid var(--border);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), inset 0 -1px 2px rgba(255,255,255,0.05);
+    position:relative;
+  }
   #power-zones { position:absolute; inset:0; display:flex; }
   .zone-weak { flex:0.3; background:linear-gradient(90deg,rgba(200,80,80,0.15),rgba(200,120,60,0.2)); }
   .zone-good { flex:0.4; background:linear-gradient(90deg,rgba(100,180,100,0.2),rgba(201,168,76,0.25)); }
@@ -57,7 +118,22 @@
   #hookset-hint { font-size:10px; color:rgba(200,220,240,0.5); }
 
   /* REEL MINIGAME */
-  #reel-ui { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); display:none; flex-direction:column; align-items:center; gap:8px; padding:16px 28px; min-width:360px; z-index:501; }
+  #reel-ui { 
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%); 
+    display:none; flex-direction:column; align-items:center; 
+    gap:8px; padding:18px 32px; min-width:380px; z-index:501;
+    background:linear-gradient(135deg, rgba(10,18,30,0.96), rgba(8,16,28,0.94));
+    border:4px double var(--border-outer);
+    box-shadow:inset 0 0 0 2px var(--border-inner), 0 8px 24px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,255,255,0.06);
+  }
+  #reel-ui::before {
+    content:'🎣';
+    position:absolute;
+    top:-12px; left:50%;
+    transform:translateX(-50%);
+    font-size:20px;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  }
   #reel-fish-info { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
   #reel-fish-emoji { font-size:28px; }
   #reel-fish-name { font-family:'Playfair Display',serif; font-size:16px; color:var(--gold); font-style:italic; }
@@ -74,7 +150,14 @@
   #reel-tension-label { font-size:9px; letter-spacing:2px; color:rgba(200,210,230,0.5); white-space:nowrap; }
   #reel-tension-bar { flex:1; height:12px; background:rgba(0,0,0,0.5); border:1px solid var(--border); position:relative; }
   #reel-tension-fill { height:100%; width:0%; background:linear-gradient(90deg,#4aff4a,#ffaa00,#ff8800); transition:width 0.1s; }
-  #reel-zone-track { width:100%; height:40px; background:rgba(0,0,0,0.5); border:2px solid var(--border); position:relative; overflow:hidden; border-radius:2px; margin-top:4px; }
+  #reel-zone-track { 
+    width:100%; height:44px; 
+    background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(10,10,10,0.4)); 
+    border:3px solid var(--border);
+    box-shadow:inset 0 3px 6px rgba(0,0,0,0.7), inset 0 -1px 2px rgba(255,255,255,0.04);
+    position:relative; overflow:hidden; 
+    border-radius:2px; margin-top:4px;
+  }
   #reel-zone-sweet { position:absolute; height:100%; background:rgba(80,200,120,0.2); border:2px solid rgba(80,200,120,0.5); border-radius:2px; transition:left 0.3s ease, width 0.3s ease; }
   #reel-zone-cursor { position:absolute; width:6px; height:100%; background:#ffd700; top:0; box-shadow:0 0 10px rgba(255,215,0,0.5); border-radius:1px; }
   #reel-zone-fish { position:absolute; font-size:20px; top:50%; transform:translateY(-50%); transition:left 0.2s ease; pointer-events:none; }
@@ -95,7 +178,25 @@
   #fight-fish-name { font-size:15px; color:#ff9090; }
 
   /* CATCH DISPLAY */
-  #catch-display { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); display:none; flex-direction:column; align-items:center; gap:8px; padding:28px 50px; text-align:center; border:2px solid var(--gold); animation:cfade .4s ease; backdrop-filter:blur(14px); background:rgba(6,14,24,0.92); }
+  #catch-display { 
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
+    display:none; flex-direction:column; align-items:center; 
+    gap:8px; padding:32px 56px; text-align:center; 
+    border:4px double var(--gold);
+    box-shadow:inset 0 0 0 2px rgba(201,168,76,0.2), 0 10px 40px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.06);
+    animation:cfade .4s ease; 
+    backdrop-filter:blur(16px); 
+    background:linear-gradient(135deg, rgba(6,14,24,0.96), rgba(8,16,28,0.94));
+  }
+  #catch-display::before {
+    content:'═══════════════════';
+    position:absolute;
+    top:10px; left:50%;
+    transform:translateX(-50%);
+    color:var(--border);
+    font-size:8px;
+    letter-spacing:2px;
+  }
   @keyframes cfade { from{opacity:0;transform:translate(-50%,-53%) scale(0.92)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
   #catch-display .fish-name { font-family:'Playfair Display',serif; font-size:26px; font-style:italic; color:var(--gold); }
   #catch-display .fish-weight { font-size:13px; letter-spacing:2px; }
@@ -113,7 +214,17 @@
 
   /* NOTIFICATIONS */
   #notif-area { position:fixed; top:20px; right:20px; display:flex; flex-direction:column; align-items:flex-end; gap:8px; pointer-events:none; }
-  .notif { background:rgba(10,20,35,0.9); border:1px solid var(--border); padding:8px 18px; font-size:13px; color:var(--cream); animation:notifPop .25s ease; white-space:nowrap; }
+  .notif { 
+    background:linear-gradient(135deg, rgba(10,20,35,0.94), rgba(12,22,38,0.92)); 
+    border:2px solid var(--border);
+    box-shadow:inset 0 0 0 1px var(--border-inner), 0 4px 10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+    padding:9px 20px; 
+    font-size:13px; 
+    color:var(--cream); 
+    animation:notifPop .25s ease; 
+    white-space:nowrap;
+    border-left:4px solid var(--accent);
+  }
   @keyframes notifPop { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
   /* PISS/SHIT METER */
@@ -131,12 +242,43 @@
   #rod-multiplier { font-size:9px; color:#40ffaa; margin-top:3px; }
 
   /* CATCH LOG */
-  #catch-log { position:fixed; bottom:60px; right:12px; padding:8px 10px; max-width:180px; max-height:150px; overflow:hidden; transform-origin:bottom right; }
-  #catch-log h3 { font-size:9px; letter-spacing:2px; color:var(--accent); text-transform:uppercase; margin-bottom:6px; }
-  .log-entry { font-size:9px; color:rgba(200,215,235,0.7); margin:2px 0; border-left:2px solid var(--accent); padding-left:6px; line-height:1.3; }
+  #catch-log { 
+    position:fixed; bottom:60px; right:12px; 
+    padding:10px 12px; max-width:180px; max-height:150px; 
+    overflow:hidden; transform-origin:bottom right;
+    background:linear-gradient(135deg, rgba(8,16,28,0.95), rgba(10,18,30,0.92));
+  }
+  #catch-log h3 { 
+    font-size:9px; letter-spacing:2px; 
+    color:var(--accent); text-transform:uppercase; 
+    margin-bottom:6px;
+    text-shadow:0 1px 2px rgba(0,0,0,0.5);
+  }
+  .log-entry { 
+    font-size:9px; color:rgba(200,215,235,0.7); 
+    margin:2px 0; 
+    border-left:3px solid var(--accent); 
+    padding-left:7px; 
+    line-height:1.3;
+    position:relative;
+  }
+  .log-entry::before {
+    content:'▪';
+    position:absolute;
+    left:-8px;
+    color:var(--accent);
+    font-size:6px;
+  }
 
   /* MINIMAP */
-  #minimap-canvas { position:fixed; top:12px; left:50%; transform:translateX(-50%) scale(var(--ui-scale)); border:1px solid var(--border); background:rgba(6,14,24,0.8); image-rendering:pixelated; }
+  #minimap-canvas { 
+    position:fixed; top:12px; left:50%; 
+    transform:translateX(-50%) scale(var(--ui-scale)); 
+    border:3px double var(--border-outer);
+    box-shadow:inset 0 0 0 1px var(--border-inner), 0 4px 12px rgba(0,0,0,0.6);
+    background:linear-gradient(135deg, rgba(6,14,24,0.9), rgba(8,16,26,0.85)); 
+    image-rendering:pixelated;
+  }
   #time-display { position:fixed; top:12px; left:50%; transform:translateX(-50%) translateY(72px) scale(var(--ui-scale)); font-size:10px; letter-spacing:2px; color:rgba(200,210,230,0.5); pointer-events:none; }
 
   /* CROSSHAIR */
@@ -8522,24 +8664,54 @@ function animate(){
   }
 }
 
-// ─── RANDOM UI COLOR ON RELOAD ────────────────────────────────────────────────
+// ─── RANDOM UI COLOR ON RELOAD — FISHING PALETTES ─────────────────────────────
 (function initRandomAccentColor(){
-  const hues=[0,15,30,45,60,75,90,120,135,150,180,195,210,225,240,255,270,285,300,315,330,345];
-  const h=hues[Math.floor(Math.random()*hues.length)];
-  const s=60+Math.floor(Math.random()*25);
-  const l=50+Math.floor(Math.random()*20);
+  // Expanded fishing-themed color palettes
+  const palettes=[
+    {name:'Classic Gold',hue:45,sat:65,light:55},
+    {name:'Ocean Blue',hue:200,sat:70,light:50},
+    {name:'Deep Sea',hue:210,sat:75,light:45},
+    {name:'Sunset Orange',hue:25,sat:80,light:58},
+    {name:'Forest Green',hue:140,sat:55,light:48},
+    {name:'Tackle Box Green',hue:165,sat:50,light:52},
+    {name:'Rust Brown',hue:20,sat:60,light:45},
+    {name:'Copper',hue:30,sat:70,light:50},
+    {name:'Weathered Teal',hue:180,sat:45,light:50},
+    {name:'Dawn Pink',hue:340,sat:55,light:60},
+    {name:'Dusk Purple',hue:270,sat:50,light:55},
+    {name:'Moss Green',hue:90,sat:45,light:45},
+    {name:'Lake Blue',hue:195,sat:65,light:52},
+    {name:'Rod Red',hue:0,sat:70,light:50},
+    {name:'Lure Silver',hue:220,sat:15,light:65},
+    {name:'Tackle Orange',hue:35,sat:85,light:55},
+    {name:'Boat Blue',hue:215,sat:60,light:48},
+    {name:'Vintage Brass',hue:42,sat:55,light:50},
+  ];
+  
+  const palette=palettes[Math.floor(Math.random()*palettes.length)];
+  const h=palette.hue+(Math.random()*20-10); // ±10 variation
+  const s=palette.sat+(Math.random()*15-7); // ±7 variation
+  const l=palette.light+(Math.random()*10-5); // ±5 variation
+  
   const accent=`hsl(${h},${s}%,${l}%)`;
+  const accentDark=`hsl(${h},${s}%,${l-10}%)`;
+  const accentLight=`hsl(${h},${s-20}%,${l+15}%)`;
+  
   document.documentElement.style.setProperty('--accent',accent);
   document.documentElement.style.setProperty('--gold',accent);
   document.documentElement.style.setProperty('--border',`hsla(${h},${s}%,${l}%,0.35)`);
+  document.documentElement.style.setProperty('--border-inner',`hsla(${h},${s}%,${l}%,0.15)`);
+  document.documentElement.style.setProperty('--border-outer',`hsla(${h},${s}%,${l}%,0.5)`);
   
-  // Also randomize some other UI elements for more variety
+  // Complementary cream/text color based on accent hue
   const creamHues=[30,40,50,60];
   const creamH=creamHues[Math.floor(Math.random()*creamHues.length)];
   const creamS=15+Math.floor(Math.random()*10);
   const creamL=85+Math.floor(Math.random()*10);
   const cream=`hsl(${creamH},${creamS}%,${creamL}%)`;
   document.documentElement.style.setProperty('--cream',cream);
+  
+  console.log(`🎣 UI Palette: ${palette.name} (${Math.round(h)}°, ${Math.round(s)}%, ${Math.round(l)}%)`);
 })();
 
 // ─── UI SCALE ─────────────────────────────────────────────────────────────────
