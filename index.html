@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>fishing simulator but you have to piss and are gay</title>
+<meta name="theme-color" content="#c9a84c">
+<meta name="description" content="A fishing simulator game">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>fih</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -7234,7 +7240,7 @@ function updateTrajectoryPreview(){
   const dist=6+Game.power*28;
   const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
   dir.y=0; dir.normalize();
-  const targetPos=new THREE.Vector3(camera.position.x+dir.x*dist,.06,camera.position.z+dir.z*dist);
+  const targetPos=new THREE.Vector3(camera.position.x+dir.x*dist,0.12,camera.position.z+dir.z*dist);
   if(Game.trajectoryLine){scene.remove(Game.trajectoryLine);}
   if(Game.aimLine){scene.remove(Game.aimLine);}
   const points=[];
@@ -7390,7 +7396,7 @@ function startFishingMinigame(){
   fg.cursor=50;
   fg.zone={left:50-zoneW/2,width:zoneW};
   fg.zoneDir=Math.random()>0.5?1:-1;
-  fg.zoneSpeed=12+Math.random()*12;
+  fg.zoneSpeed=15+Math.random()*20;
   fg.inZoneTime=0;
   fg.outZoneTime=0;
   fg.requiredTime=reqTime;
@@ -7424,10 +7430,10 @@ function updateFishingMinigame(dt){
 
   // Move capture zone randomly and smoothly
   fg.zone.left+=fg.zoneDir*fg.zoneSpeed*dt;
-  if(fg.zone.left<5){fg.zone.left=5;fg.zoneDir=1;fg.zoneSpeed=10+Math.random()*18;}
-  if(fg.zone.left+fg.zone.width>95){fg.zone.left=95-fg.zone.width;fg.zoneDir=-1;fg.zoneSpeed=10+Math.random()*18;}
+  if(fg.zone.left<=5){fg.zone.left=5;fg.zoneDir=1;fg.zoneSpeed=15+Math.random()*20;}
+  if(fg.zone.left+fg.zone.width>=95){fg.zone.left=95-fg.zone.width;fg.zoneDir=-1;fg.zoneSpeed=15+Math.random()*20;}
   // Occasionally change direction for unpredictability
-  if(Math.random()<dt*0.5){fg.zoneDir*=-1;fg.zoneSpeed=10+Math.random()*18;}
+  if(Math.random()<dt*0.8){fg.zoneDir*=-1;fg.zoneSpeed=15+Math.random()*20;}
 
   // Bar physics: pulled LEFT, click pushes RIGHT
   if(fg.lmbHeld){
