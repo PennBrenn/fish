@@ -1,7 +1,7 @@
 {
-  "name": "fih",
-  "short_name": "fih",
-  "description": "Fishing simulator",
+  "name": "Gay Fishing Simulator",
+  "short_name": "Gay Fishing",
+  "description": "Gay Fishing Simulator",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
