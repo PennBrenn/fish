@@ -7594,12 +7594,26 @@ const DIFF_CONFIG={
 function startCharging(){
   if(Game.state!=='idle') return;
   Game.state='casting'; Game.power=0; Game.powerDir=1;
+  Game.maxChargeStart=null; Game.deepSeaTriggered=false;
   document.getElementById('cast-power-bar').style.display='flex';
   document.getElementById('cast-quality').style.opacity='0';
   powerInterval=setInterval(()=>{
-    Game.power+=.012*Game.powerDir;
-    if(Game.power>=1){Game.power=1;Game.powerDir=-1;}
-    if(Game.power<=0){Game.power=0;Game.powerDir=1;}
+    // Charge up to max, then hold at max (no bounce)
+    if(Game.power<1){
+      Game.power+=.012*Game.powerDir;
+      if(Game.power>=1){ Game.power=1; Game.maxChargeStart=Date.now(); }
+    } else {
+      // Track time held at max for deep sea cast trigger
+      if(!Game.maxChargeStart) Game.maxChargeStart=Date.now();
+      const held=Date.now()-Game.maxChargeStart;
+      if(held>=5000 && !Game.deepSeaTriggered){
+        Game.deepSeaTriggered=true;
+        triggerScreenShake(0.15,0.9);
+        showNotif('🌊 DEEP SEA CAST!','#ffd700');
+        // Auto-release for deep sea fishing
+        if(Game.state==='casting'){ releaseCast(); return; }
+      }
+    }
     document.getElementById('power-fill').style.width=(Game.power*100)+'%';
     updateTrajectoryPreview();
   },20);
@@ -7657,7 +7671,10 @@ function releaseCast(){
   // Calculate exact target position (same as marker)
   const eqRod=getEquippedRod();
   const castMul=eqRod?eqRod.castDist:1.0;
-  const dist=(6+Game.power*28)*castMul;
+  let dist=(6+Game.power*28)*castMul;
+  if(Game.deepSeaTriggered){
+    dist*=5; // 5x distance for deep sea fishing cast
+  }
   const lookDir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
   lookDir.y=0; lookDir.normalize();
   const targetX=camera.position.x+lookDir.x*dist;
@@ -7684,6 +7701,10 @@ function releaseCast(){
   Game.bobberAnimT=0;
   spawnBobber(rodTip);
   spawnLine(rodTip);
+
+  // Reset deep sea trigger state after casting
+  Game.deepSeaTriggered=false;
+  Game.maxChargeStart=null;
 
   if(Game.power>=0.7&&Game.power<0.85){
     Game.perfectCasts++;
