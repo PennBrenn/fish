@@ -7396,7 +7396,7 @@ document.addEventListener('mousemove',e=>{
   if(!Game.locked) return;
   yaw-=e.movementX*.0018;
   pitch-=e.movementY*.0018;
-  pitch=Math.max(-.45,Math.min(.55,pitch));
+  pitch=Math.max(-.8,Math.min(.8,pitch));
   camera.rotation.y=yaw; camera.rotation.x=pitch;
 });
 
