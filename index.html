@@ -125,6 +125,7 @@
     background:linear-gradient(135deg, rgba(10,18,30,0.96), rgba(8,16,28,0.94));
     border:4px double var(--border-outer);
     box-shadow:inset 0 0 0 2px var(--border-inner), 0 8px 24px rgba(0,0,0,0.7), inset 0 2px 0 rgba(255,255,255,0.06);
+    pointer-events:none;
   }
   #reel-ui::before {
     content:'🎣';
@@ -7214,6 +7215,7 @@ document.addEventListener('keydown',e=>{
   if(e.code==='KeyR'){
     if(Game.state==='brawling') brawlPin();
     else if(Game.lineOut&&(Game.state==='waiting'||Game.state==='hooked')) reelIn();
+    else if(Game.state==='minigame'&&Game.fightGame.active) Game.fightGame.lmbHeld=true;
   }
   if(e.code==='KeyF'){
     if(Game.state==='brawling') brawlPunch();
@@ -7359,7 +7361,7 @@ document.addEventListener('keyup',e=>{
   if(e.code==='KeyD') keys.d=false;
   if(e.code==='KeyP') stopPissing();
   if(e.code==='KeyR'){
-    // R key released — no action needed for new system
+    if(Game.state==='minigame'&&Game.fightGame.active) Game.fightGame.lmbHeld=false;
   }
   if(e.code==='ShiftLeft'||e.code==='ShiftRight'){
     keys.Shift=false;
@@ -7374,7 +7376,7 @@ canvas.addEventListener('mousedown',e=>{
   if(!document.pointerLockElement){canvas.requestPointerLock();}
   if(Game.state==='idle') startCharging();
   else if(Game.state==='waiting'&&!Game.bobberInFlight) retractBobber();
-  else if(Game.state==='hooked') startFishingMinigame();
+  else if(Game.state==='hooked') { startFishingMinigame(); if(Game.fightGame.active) Game.fightGame.lmbHeld=true; }
   else if(Game.state==='minigame'&&Game.fightGame.active) Game.fightGame.lmbHeld=true;
 });
 canvas.addEventListener('mouseup',e=>{
@@ -7903,6 +7905,7 @@ function updateFishingMinigame(dt){
 function endMinigame(victory){
   const fg=Game.fightGame;
   fg.active=false;
+  fg.lmbHeld=false;
   const _h=id=>{const e=document.getElementById(id);if(e)e.style.display='none';};
   _h('reel-ui'); _h('fishing-vignette');
   const rzf=document.getElementById('reel-zone-fish');if(rzf)rzf.style.display='';
