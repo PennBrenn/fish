@@ -1148,9 +1148,22 @@
   </div>
 </div>
 
+<div id="score-panel" class="panel">
+  <h2><span class="strikeout">Fishing</span> <span class="piss-word">Piss</span> Simulator</h2>
+  <div class="stat"><span>Caught</span><span id="caught-count">0</span></div>
+  <div class="stat"><span>Best</span><span id="best-weight">0.0 lb</span></div>
+  <div class="stat"><span>Total lbs</span><span id="total-weight">0.0</span></div>
+  <div class="stat"><span>Casts</span><span id="cast-count">0</span></div>
+  <div class="stat"><span>Perfect</span><span id="perfect-count">0</span></div>
+  <div class="stat"><span>Species</span><span id="species-count">0</span></div>
+  <div class="stat"><span>Pisses</span><span id="piss-count">0</span></div>
+  <div class="stat"><span>Shits</span><span id="shit-count">0</span></div>
+  <div class="stat"><span>Punches</span><span id="punch-count">0</span></div>
+</div>
+
 <div id="rods-panel" style="display:none;"><div id="rod-icons"></div><div id="rod-multiplier"></div></div>
 
-<div id="catch-log" style="display:none;"><div id="log-entries"></div></div>
+<div id="catch-log" class="panel" style="display:none;"><h3>Catch Log</h3><div id="log-entries"></div></div>
 
 <div id="pile-panel" class="panel">
   <h3>On the Dock 🐟</h3>
@@ -6131,20 +6144,21 @@ function toggleEncyclopedia(){
 }
 
 function updateAllUI(){
-  document.getElementById('caught-count').textContent=Game.caughtCount;
-  document.getElementById('best-weight').textContent=Game.bestWeight.toFixed(1)+' lb';
-  document.getElementById('total-weight').textContent=Game.totalWeight.toFixed(1);
-  document.getElementById('cast-count').textContent=Game.castCount;
-  document.getElementById('perfect-count').textContent=Game.perfectCasts;
-  document.getElementById('species-count').textContent=Game.seenSpecies.size;
-  document.getElementById('piss-count').textContent=Game.pissCount;
-  document.getElementById('shit-count').textContent=Game.shitCount;
-  document.getElementById('punch-count').textContent=Game.punchCount;
-  const _rc=document.getElementById('rod-count');if(_rc)_rc.textContent=Game.rods;
-  document.getElementById('player-level').textContent=Game.playerLevel;
-  document.getElementById('player-xp').textContent=Game.playerXP;
-  document.getElementById('xp-next').textContent=Game.xpToNextLevel;
-  document.getElementById('xp-bar').style.width=(Game.playerXP/Game.xpToNextLevel*100)+'%';
+  const _s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  _s('caught-count',Game.caughtCount);
+  _s('best-weight',Game.bestWeight.toFixed(1)+' lb');
+  _s('total-weight',Game.totalWeight.toFixed(1));
+  _s('cast-count',Game.castCount);
+  _s('perfect-count',Game.perfectCasts);
+  _s('species-count',Game.seenSpecies.size);
+  _s('piss-count',Game.pissCount);
+  _s('shit-count',Game.shitCount);
+  _s('punch-count',Game.punchCount);
+  _s('rod-count',Game.rods);
+  _s('player-level',Game.playerLevel);
+  _s('player-xp',Game.playerXP);
+  _s('xp-next',Game.xpToNextLevel);
+  const _xb=document.getElementById('xp-bar');if(_xb)_xb.style.width=(Game.playerXP/Game.xpToNextLevel*100)+'%';
 }
 
 function updateUIDisplays(){
@@ -7183,7 +7197,7 @@ function releaseCast(){
   const qualityEl=document.getElementById('cast-quality');
   setTimeout(()=>{document.getElementById('cast-power-bar').style.display='none';},600);
 
-  Game.castCount++; document.getElementById('cast-count').textContent=Game.castCount;
+  Game.castCount++; const _cc=document.getElementById('cast-count');if(_cc)_cc.textContent=Game.castCount;
 
   // ── Physics launch ──────────────────────────────────────────────────────────
   const eqRod=getEquippedRod();
@@ -7727,16 +7741,17 @@ function landFish(){
     if(c.fish.name==='Leviathan') checkAchievement('leviathan');
   });
 
-  document.getElementById('caught-count').textContent=Game.caughtCount;
-  document.getElementById('best-weight').textContent=Game.bestWeight.toFixed(1)+' lb';
-  document.getElementById('total-weight').textContent=Game.totalWeight.toFixed(1);
-  document.getElementById('species-count').textContent=Game.seenSpecies.size;
-  document.getElementById('perfect-count').textContent=Game.perfectCasts;
+  const _el=id=>document.getElementById(id);
+  if(_el('caught-count'))_el('caught-count').textContent=Game.caughtCount;
+  if(_el('best-weight'))_el('best-weight').textContent=Game.bestWeight.toFixed(1)+' lb';
+  if(_el('total-weight'))_el('total-weight').textContent=Game.totalWeight.toFixed(1);
+  if(_el('species-count'))_el('species-count').textContent=Game.seenSpecies.size;
+  if(_el('perfect-count'))_el('perfect-count').textContent=Game.perfectCasts;
 
   const entry=`${bestCatch.fish.emoji} ${bestCatch.fish.name} ${bestCatch.weight}lb`+(fishCount>1?` (+${fishCount-1} more)`:'');
   Game.catchLog.unshift(entry);
   if(Game.catchLog.length>6) Game.catchLog.pop();
-  document.getElementById('log-entries').innerHTML=Game.catchLog.map(e=>`<div class="log-entry">${e}</div>`).join('');
+  if(_el('log-entries'))_el('log-entries').innerHTML=Game.catchLog.map(e=>`<div class="log-entry">${e}</div>`).join('');
 
   catches.forEach(c=>{Game.catchPile.push(c.fish.emoji); addFishToPile(c.fish);});
   document.getElementById('pile-emojis').textContent=Game.catchPile.join('');
