@@ -7560,10 +7560,20 @@ function releaseCast(){
   Game.castCount++;
   const _cc=document.getElementById('cast-count');if(_cc)_cc.textContent=Game.castCount;
 
-  // Physics launch from camera direction
+  // Calculate exact target position (same as marker)
   const eqRod=getEquippedRod();
   const castMul=eqRod?eqRod.castDist:1.0;
+  const dist=(6+Game.power*28)*castMul;
   const lookDir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  lookDir.y=0; lookDir.normalize();
+  const targetX=camera.position.x+lookDir.x*dist;
+  const targetZ=camera.position.z+lookDir.z*dist;
+  
+  // Store target for bobber physics
+  Game.castTargetX=targetX;
+  Game.castTargetZ=targetZ;
+
+  // Physics launch (visual arc only)
   const launchSpeed=(8+Game.power*26)*castMul;
   const minYVel=0.8+Game.power*2.5;
   Game.bobberVelocity.copy(lookDir).multiplyScalar(launchSpeed);
@@ -7608,8 +7618,15 @@ function updateBobberPhysics(dt){
   // Water collision (sea level y≈0, keep bobber visible above waves)
   if(Game.bobberPos.y<=0.12){
     Game.bobberInFlight=false;
+    
+    // Snap bobber to exact target marker position at sea level
+    if(Game.castTargetX!==undefined&&Game.castTargetZ!==undefined){
+      Game.bobberPos.x=Game.castTargetX;
+      Game.bobberPos.z=Game.castTargetZ;
+    }
     Game.bobberPos.y=0.12;
-    bobberGroup.position.y=0.12;
+    bobberGroup.position.copy(Game.bobberPos);
+    
     Game.bobberVelocity.set(0,0,0);
     bobberGroup.rotation.x=0;
     spawnSplash(Game.bobberPos); spawnRipple(Game.bobberPos,true);
