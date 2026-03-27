@@ -994,7 +994,7 @@
 
 <div id="bite-indicator">
   <div class="bite-text">STRIKE!</div>
-  <div class="bite-sub">PRESS <span style="color:var(--gold)">SPACE</span> NOW!</div>
+  <div class="bite-sub">CLICK <span style="color:var(--gold)">LMB</span> TO FIGHT!</div>
 </div>
 
 <div id="hookset-ui" class="panel">
@@ -1747,6 +1747,9 @@ const Game = {
   nibbleTimer:null,
   hookset:{active:false,needle:0,needleDir:1,speed:2,sweetLeft:35,sweetWidth:25},
   reelGame:{active:false,cursor:50,fishPos:50,sweetLeft:30,sweetWidth:30,fishStamina:100,tension:0,progress:0,fishDir:1,fishSpeed:1,reeling:false,difficulty:'easy'},
+  bobberVelocity:new THREE.Vector3(),
+  bobberInFlight:false,
+  fightGame:{active:false,cursor:80,zone:{left:35,width:30},zoneMoving:false,zoneDir:1,zoneSpeed:0,inZoneTime:0,requiredTime:3,driftSpeed:20,lmbHeld:false,fish:null},
   catchStreak:0,
   streakTimer:null,
   lastCatchTime:0,
@@ -6721,9 +6724,7 @@ document.addEventListener('keydown',e=>{
   if(e.code==='KeyG'){spawnFartCloud();Game.fartSync.myFartTime=Date.now();sendAction('fartSync',{timestamp:Date.now()});checkFartSync();}
   if(e.code==='Space'){
     e.preventDefault();
-    if(Game.state==='bite') startHookSet();
-    else if(Game.state==='hookset') attemptHookSet();
-    else if(Game.state==='brawling') brawlParry();
+    if(Game.state==='brawling') brawlParry();
   }
   if(e.code==='KeyR'){
     if(Game.state==='reeling'&&Game.reelGame.active) Game.reelGame.reeling=true;
@@ -6858,17 +6859,17 @@ document.addEventListener('keyup',e=>{
 let powerInterval=null;
 canvas.addEventListener('mousedown',e=>{
   if(e.button!==0) return;
-  // Force the overlay to hide even if pointer lock fails
-  document.getElementById('lock-overlay').style.display = 'none';
-  Game.locked = true; 
-  
+  document.getElementById('lock-overlay').style.display='none';
+  Game.locked=true;
   if(!document.pointerLockElement){canvas.requestPointerLock();}
   if(Game.state==='idle') startCharging();
+  else if(Game.state==='bite') startFightMinigame();
+  else if(Game.state==='fighting'&&Game.fightGame.active) Game.fightGame.lmbHeld=true;
 });
 canvas.addEventListener('mouseup',e=>{
   if(e.button!==0) return;
   if(Game.state==='casting') releaseCast();
-  // Don't clear line on mouseup - line should stay until reeled in with 'R' key
+  if(Game.state==='fighting'&&Game.fightGame.active) Game.fightGame.lmbHeld=false;
 });
 canvas.addEventListener('click',()=>{
   if(Game.state==='display') dismissCatch();
@@ -7106,71 +7107,95 @@ function releaseCast(){
   clearInterval(powerInterval);
   if(Game.trajectoryLine){scene.remove(Game.trajectoryLine);Game.trajectoryLine=null;}
   if(Game.aimLine){scene.remove(Game.aimLine);Game.aimLine=null;}
-  
-  let quality='WEAK',color='#ff6060',distBonus=1,biteBonus=1;
-  if(Game.power<.3){quality='WEAK 💩';color='#ff6060';distBonus=0.8;biteBonus=1.2;}
-  else if(Game.power>=.3&&Game.power<.7){quality='GOOD 👍';color='#88dd88';distBonus=1;biteBonus=1;}
-  else if(Game.power>=.7&&Game.power<.85){quality='PERFECT! ⭐';color='#ffd700';distBonus=1.3;biteBonus=0.6;Game.perfectCasts++;spawnCastParticles(camera.position);}
-  else{quality='OVERSHOOT 😬';color='#ffaa44';distBonus=0.9;biteBonus=1.1;}
-  
-  Game.castQuality=quality;
+
   const qualityEl=document.getElementById('cast-quality');
-  qualityEl.textContent=quality;
-  qualityEl.style.color=color;
-  qualityEl.style.opacity='1';
-  setTimeout(()=>{qualityEl.style.opacity='0';},1200);
-  setTimeout(()=>{document.getElementById('cast-power-bar').style.display='none';},1400);
-  
+  setTimeout(()=>{document.getElementById('cast-power-bar').style.display='none';},600);
+
   Game.castCount++; document.getElementById('cast-count').textContent=Game.castCount;
-  const baseDist=6+Game.power*28;
-  const dist=baseDist*distBonus;
-  const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-  dir.y=0; dir.normalize();
-  const land=new THREE.Vector3(camera.position.x+dir.x*dist,.06,camera.position.z+dir.z*dist);
 
-  // Cancel cast if lure hits land
-  if(getTerrainHeight(land.x,land.z)>.05){
-    Game.state='idle';Game.power=0;
-    document.getElementById('cast-power-bar').style.display='none';
-    document.getElementById('power-fill').style.width='0%';
-    showNotif('Can\'t fish there — that\'s land! Aim at the water.','#ff8844');
-    return;
-  }
+  // ── Physics launch ──────────────────────────────────────────────────────────
+  // Look direction fully 3D — pitch affects arc height
+  const lookDir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  const launchSpeed=8+Game.power*26; // 8–34 u/s
 
-  Game.bobberPos.copy(land); Game.lineOut=true; Game.state='waiting'; Game.bobberAnimT=0;
+  // If player is looking mostly downward give a gentle upward kick
+  const minYVel=0.8+Game.power*2.5;
+  Game.bobberVelocity.copy(lookDir).multiplyScalar(launchSpeed);
+  if(Game.bobberVelocity.y<minYVel) Game.bobberVelocity.y=minYVel;
+
+  // Start at rod tip
+  const rodTip=getRodTip();
+  Game.bobberPos.copy(rodTip);
+  Game.bobberInFlight=true;
+  Game.lineOut=true;
+  Game.state='waiting'; // will switch to 'fishing' once bobber lands
+  Game.bobberAnimT=0;
   Game.nibbleCount=0;
-  spawnBobber(land); spawnLine(land); spawnSplash(land); spawnRipple(land,true);
-  sendAction('cast',{x:land.x,z:land.z});
-  
-  if(quality.includes('PERFECT')){
-    for(let i=0;i<3;i++)setTimeout(()=>spawnRipple(land,false),i*200);
-    showNotif('✨ PERFECT CAST! Faster bite time!','#ffd700');
+  spawnBobber(rodTip);
+  spawnLine(rodTip);
+
+  if(Game.power>=0.7&&Game.power<0.85){
+    Game.perfectCasts++;
+    spawnCastParticles(camera.position);
+    qualityEl.textContent='PERFECT! ⭐'; qualityEl.style.color='#ffd700';
+  } else {
+    qualityEl.textContent=''; 
   }
-  
-  document.getElementById('line-indicator').style.display='block';
-  document.getElementById('line-dist').textContent=Math.round(dist)+' ft';
-  document.getElementById('depth-fill').style.width='15%';
-  
-  // Bite timing: 3-12 seconds base, capped at 20s, with nibbles for feedback
-  const hotspot=sampleHeatmap(land.x,land.z);
-  let biteSpeedMul=0.5+hotspot*1.5;
-  if(Game.premiumBaitTimer>0) biteSpeedMul*=1.5;
-  if(Game.syncPissActive) biteSpeedMul*=2;
-  if(Game.luckyLureCasts>0){ biteSpeedMul*=1.5; Game.luckyLureCasts--; }
-  
-  const rawDelay=(3000+Math.random()*9000)/biteSpeedMul;
-  const biteDelay=Math.min(rawDelay, 20000); // Hard cap at 20 seconds
-  
-  // Schedule 1-3 nibbles before the bite for feedback
-  const numNibbles=1+Math.floor(Math.random()*3);
-  for(let i=0;i<numNibbles;i++){
-    const nibbleTime=biteDelay*(0.3+i*0.2)+Math.random()*500;
-    if(nibbleTime<biteDelay-500){
-      setTimeout(()=>{ if(Game.state==='waiting') showNibble(); }, nibbleTime);
+  qualityEl.style.opacity='1';
+  setTimeout(()=>{qualityEl.style.opacity='0';},1000);
+}
+
+// ─── BOBBER PHYSICS ────────────────────────────────────────────────────────────
+function updateBobberPhysics(dt){
+  if(!Game.bobberInFlight||!bobberGroup) return;
+  const GRAVITY=9.8;
+  const AIR_RESISTANCE=0.32;
+  // Apply gravity
+  Game.bobberVelocity.y-=GRAVITY*dt;
+  // Air resistance (scalar drag)
+  Game.bobberVelocity.multiplyScalar(1-AIR_RESISTANCE*dt);
+  // Integrate position
+  Game.bobberPos.addScaledVector(Game.bobberVelocity,dt);
+  bobberGroup.position.copy(Game.bobberPos);
+  // Rotate bobber in flight for visual feel
+  bobberGroup.rotation.x+=dt*4;
+  // Update line each frame during flight
+  updateLine(Game.bobberPos);
+  updateNewLine();
+  // Landed?
+  if(Game.bobberPos.y<=0.06){
+    Game.bobberInFlight=false;
+    Game.bobberPos.y=0.06;
+    bobberGroup.position.y=0.06;
+    Game.bobberVelocity.set(0,0,0);
+    bobberGroup.rotation.x=0;
+    // On land — reel in
+    if(getTerrainHeight(Game.bobberPos.x,Game.bobberPos.z)>0.08){
+      showNotif('Bobber landed on shore — reel in and try again.','#ff8844');
+      clearLine(); Game.state='idle'; return;
     }
+    // Splash and start waiting
+    spawnSplash(Game.bobberPos); spawnRipple(Game.bobberPos,true);
+    sendAction('cast',{x:Game.bobberPos.x,z:Game.bobberPos.z});
+    const dist=camera.position.distanceTo(Game.bobberPos);
+    document.getElementById('line-indicator').style.display='block';
+    document.getElementById('line-dist').textContent=Math.round(dist)+' ft';
+    document.getElementById('depth-fill').style.width='15%';
+    // Schedule bite: 5–30 seconds
+    const hotspot=sampleHeatmap(Game.bobberPos.x,Game.bobberPos.z);
+    let biteSpeedMul=0.5+hotspot*1.5;
+    if(Game.premiumBaitTimer>0) biteSpeedMul*=1.5;
+    if(Game.syncPissActive) biteSpeedMul*=2;
+    if(Game.luckyLureCasts>0){biteSpeedMul*=1.5;Game.luckyLureCasts--;}
+    const biteDelay=Math.max(5000,Math.min(30000,(5000+Math.random()*25000)/biteSpeedMul));
+    // Nibbles for feedback
+    const numNibbles=1+Math.floor(Math.random()*3);
+    for(let i=0;i<numNibbles;i++){
+      const t=biteDelay*(0.25+i*0.22);
+      if(t<biteDelay-1500) setTimeout(()=>{if(Game.state==='waiting')showNibble();},t);
+    }
+    Game.biteTimer=setTimeout(triggerBite,biteDelay);
   }
-  
-  Game.biteTimer=setTimeout(triggerBite,biteDelay);
 }
 
 // ─── NIBBLE → BITE SYSTEM ─────────────────────────────────────────────────────
@@ -7207,270 +7232,174 @@ function showNibble(){
 function triggerBite(){
   if(Game.state!=='waiting') return;
   Game.state='bite';
+  // Pick the fish at bite time
+  Game.fightFish=rFish();
   document.getElementById('nibble-indicator').style.display='none';
   document.getElementById('bite-indicator').style.display='flex';
   spawnRipple(Game.bobberPos,true);
   spawnBubbles(Game.bobberPos,12);
   triggerScreenShake(.05,.35);
-  // Bigger visual: flash the border of the screen
   document.body.style.boxShadow='inset 0 0 60px rgba(255,215,0,0.4)';
   setTimeout(()=>{document.body.style.boxShadow='none';},400);
-  
-  // Dramatic bobber dunk animation
+  // Bobber dunk
   if(bobberGroup){
-    const origY=bobberGroup.position.y;
-    bobberGroup.position.y=origY-0.15;
-    setTimeout(()=>{ if(bobberGroup) bobberGroup.position.y=origY-0.08; },150);
-    setTimeout(()=>{ if(bobberGroup) bobberGroup.position.y=origY-0.12; },300);
+    bobberGroup.position.y=0.06-0.18;
+    setTimeout(()=>{if(bobberGroup)bobberGroup.position.y=0.06-0.08;},180);
+    setTimeout(()=>{if(bobberGroup)bobberGroup.position.y=0.06-0.14;},360);
+    setTimeout(()=>{if(bobberGroup)bobberGroup.position.y=0.06;},540);
   }
-  
-  // Auto-reel after brief pause and start hook-set minigame
+  // Auto-miss if player ignores for 8s
   Game._biteTimeout=setTimeout(()=>{
     if(Game.state==='bite'){
       document.getElementById('bite-indicator').style.display='none';
-      startHookSet();
+      showNotif('The fish got away — too slow!','#ff8844');
+      Game.catchStreak=0; updateStreakUI();
+      clearLine(); Game.state='idle';
     }
-  }, 800);
+  },8000);
 }
 
-// ─── HOOK-SET MINIGAME ────────────────────────────────────────────────────────
-function startHookSet(){
+// ─── FIGHT MINIGAME ────────────────────────────────────────────────────────────
+// Player clicks LMB on bite → fight starts.
+// A cursor drifts LEFT continuously. Holding LMB pushes it RIGHT.
+// Must keep cursor inside the green zone for `requiredTime` seconds.
+// Rare fish: zone moves. Fall off left edge → fish escapes.
+function startFightMinigame(){
   if(Game.state!=='bite') return;
   clearTimeout(Game._biteTimeout);
   document.getElementById('bite-indicator').style.display='none';
   triggerScreenShake(.04,.25);
-  // Pick the fish now
-  Game.fightFish=rFish();
-  const diff=getFishDifficulty(Game.fightFish);
-  const cfg=DIFF_CONFIG[diff];
-  Game.hookset.active=true;
-  Game.hookset.needle=0;
-  Game.hookset.needleDir=1;
-  Game.hookset.speed=cfg.hookSpeed;
-  // Sweet spot: random position, width based on difficulty (Rod Magnet shrinks 30%)
-  let sw=cfg.sweetW;
-  if(Game.shopItems.rodMagnet>0) sw=Math.max(5,sw*0.7);
-  Game.hookset.sweetWidth=sw;
-  Game.hookset.sweetLeft=15+Math.random()*(85-sw-15);
-  Game.state='hookset';
-  const hs=document.getElementById('hookset-ui');
-  hs.style.display='flex';
-  document.getElementById('hookset-sweetspot').style.left=Game.hookset.sweetLeft+'%';
-  document.getElementById('hookset-sweetspot').style.width=Game.hookset.sweetWidth+'%';
-  document.getElementById('hookset-needle').style.left='0%';
-  showNotif('🪝 SET THE HOOK! Press SPACE in the green!','#ffd700');
-}
 
-function updateHookSet(dt){
-  if(Game.state!=='hookset'||!Game.hookset.active) return;
-  Game.hookset.needle+=Game.hookset.speed*dt*100;
-  if(Game.hookset.needle>=100){
-    // Missed — needle went past
-    Game.hookset.active=false;
-    document.getElementById('hookset-ui').style.display='none';
-    showNotif('❌ Missed the hook set! Fish escaped!','#ff8844');
-    Game.catchStreak=0;
-    updateStreakUI();
-    clearLine(); Game.state='idle';
-    return;
-  }
-  document.getElementById('hookset-needle').style.left=Game.hookset.needle+'%';
-}
-
-function attemptHookSet(){
-  if(Game.state!=='hookset'||!Game.hookset.active) return;
-  Game.hookset.active=false;
-  document.getElementById('hookset-ui').style.display='none';
-  const n=Game.hookset.needle;
-  const inSweet=n>=Game.hookset.sweetLeft&&n<=Game.hookset.sweetLeft+Game.hookset.sweetWidth;
-  if(inSweet){
-    // Calculate how centered the hit is
-    const center=Game.hookset.sweetLeft+Game.hookset.sweetWidth/2;
-    const dist=Math.abs(n-center)/(Game.hookset.sweetWidth/2);
-    if(dist<0.3){
-      showNotif('⭐ PERFECT HOOK SET!','#ffd700');
-      triggerScreenShake(.06,.4);
-      startReelMinigame('perfect');
-    } else {
-      showNotif('✓ Good hook set!','#88dd88');
-      triggerScreenShake(.04,.3);
-      startReelMinigame('good');
-    }
-  } else {
-    // Weak hook — still hooked but fish has more stamina
-    showNotif('⚠️ Weak hook... fish has more fight!','#ffaa44');
-    startReelMinigame('weak');
-  }
-}
-
-// ─── REEL MINIGAME ────────────────────────────────────────────────────────────
-function startReelMinigame(hookQuality){
   const fish=Game.fightFish;
   const diff=getFishDifficulty(fish);
-  const cfg=DIFF_CONFIG[diff];
-  Game.state='reeling';
-  Game.combatPhase='reel-minigame';
-  const rg=Game.reelGame;
-  rg.active=true;
-  rg.cursor=50;
-  rg.fishPos=30+Math.random()*40;
-  rg.sweetLeft=rg.fishPos-cfg.reelSweet/2;
-  rg.sweetWidth=cfg.reelSweet;
-  rg.fishStamina=100*(hookQuality==='perfect'?0.7:hookQuality==='good'?0.85:1.0)*cfg.staminaMul;
-  rg.tension=0;
-  rg.progress=0;
-  rg.fishDir=Math.random()>0.5?1:-1;
-  rg.fishSpeed=cfg.fishSpd;
-  rg.reeling=false;
-  rg.difficulty=diff;
-  rg.escapeTimer=cfg.escapeTime;
-  rg.fishMoveTimer=0;
-  rg.fishDashTimer=2+Math.random()*3;
-  rg.dashActive=false;
-  // Show reel UI
+  const CFGS={
+    easy:     {drift:14,zoneW:40,reqTime:1.5,moving:false},
+    medium:   {drift:22,zoneW:28,reqTime:2.5,moving:false},
+    hard:     {drift:30,zoneW:20,reqTime:3.5,moving:true},
+    legendary:{drift:40,zoneW:13,reqTime:5.0,moving:true}
+  };
+  const cfg=CFGS[diff]||CFGS.medium;
+  const fg=Game.fightGame;
+  fg.active=true;
+  fg.cursor=85; // start right so player has time to react
+  fg.zone.width=cfg.zoneW;
+  fg.zone.left=50-cfg.zoneW/2; // centered
+  fg.zoneMoving=cfg.moving;
+  fg.zoneDir=Math.random()>0.5?1:-1;
+  fg.zoneSpeed=cfg.moving?10+Math.random()*8:0;
+  fg.inZoneTime=0;
+  fg.requiredTime=cfg.reqTime;
+  fg.driftSpeed=cfg.drift;
+  fg.lmbHeld=false;
+  fg.fish=fish;
+  Game.state='fighting';
+  Game.combatPhase='fight-minigame';
+
+  // UI
   const ui=document.getElementById('reel-ui');
   ui.style.display='flex';
   document.getElementById('reel-fish-emoji').textContent=fish.emoji;
-  document.getElementById('reel-fish-name').textContent=fish.name+' — "'+fish.taunt+'"';
+  document.getElementById('reel-fish-name').textContent=fish.name;
   const diffEl=document.getElementById('reel-difficulty');
   diffEl.textContent=diff.toUpperCase();
   diffEl.className='diff-'+diff;
-  document.getElementById('reel-stamina-fill').style.width='100%';
+  document.getElementById('reel-stamina-fill').style.width='0%';
   document.getElementById('reel-tension-fill').style.width='0%';
   document.getElementById('reel-progress-fill').style.width='0%';
-  document.getElementById('reel-zone-fish').textContent=fish.emoji;
-  // Spawn 3D fish mesh near bobber
+  document.getElementById('reel-zone-fish').style.display='none';
+  document.getElementById('reel-hint').textContent='Hold LMB — keep the bar in the GREEN zone!';
+
+  // 3D fish
   if(Game.fishMesh){scene.remove(Game.fishMesh);}
   const geo=new THREE.ConeGeometry(.3,.9,8);geo.rotateZ(-Math.PI/2);
   Game.fishMesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:fish.color}));
-  Game.fishMesh.position.copy(Game.bobberPos);Game.fishMesh.position.y=-0.5;
+  Game.fishMesh.position.copy(Game.bobberPos);
+  Game.fishMesh.position.y=-0.5;
   scene.add(Game.fishMesh);
-  showNotif('🎣 '+fish.emoji+' '+fish.name+' ON THE LINE! Hold R to reel!','#ffd700');
+
+  showNotif('🎣 '+fish.emoji+' '+fish.name+'! Hold LMB to reel!','#ffd700');
   sendAction('hookfish',{fishName:fish.name,emoji:fish.emoji});
 }
 
-function updateReelMinigame(dt){
-  if(Game.state!=='reeling'||!Game.reelGame.active) return;
-  const rg=Game.reelGame;
-  const cfg=DIFF_CONFIG[rg.difficulty];
-  
-  // Fish AI movement
-  rg.fishMoveTimer+=dt;
-  rg.fishDashTimer-=dt;
-  
-  // Periodic direction changes
-  if(rg.fishMoveTimer>1.5+Math.random()*2){
-    rg.fishMoveTimer=0;
-    rg.fishDir=Math.random()>0.5?1:-1;
+function updateFightMinigame(dt){
+  if(Game.state!=='fighting'||!Game.fightGame.active) return;
+  const fg=Game.fightGame;
+
+  // Zone movement for rare/hard fish
+  if(fg.zoneMoving){
+    fg.zone.left+=fg.zoneDir*fg.zoneSpeed*dt;
+    if(fg.zone.left<4){fg.zone.left=4;fg.zoneDir=1;fg.zoneSpeed=8+Math.random()*14;}
+    if(fg.zone.left+fg.zone.width>96){fg.zone.left=96-fg.zone.width;fg.zoneDir=-1;fg.zoneSpeed=8+Math.random()*14;}
   }
-  
-  // Occasional dash (fish surges)
-  if(rg.fishDashTimer<=0&&!rg.dashActive){
-    rg.dashActive=true;
-    rg.fishDir=Math.random()>0.5?1:-1;
-    showNotif('🐟 The fish surges!','#ffaa44');
-    triggerScreenShake(.03,.15);
-    setTimeout(()=>{rg.dashActive=false;rg.fishDashTimer=3+Math.random()*4;},800+Math.random()*600);
+
+  // Vary drift speed slightly for feel
+  if(Math.random()<dt*0.6){
+    fg.driftSpeed+=(Math.random()-0.5)*6;
+    fg.driftSpeed=Math.max(8,Math.min(50,fg.driftSpeed));
   }
-  
-  const moveSpd=rg.dashActive?rg.fishSpeed*2.5:rg.fishSpeed;
-  rg.fishPos+=rg.fishDir*moveSpd*dt*30;
-  rg.fishPos=Math.max(5,Math.min(95,rg.fishPos));
-  // Sweet spot follows fish
-  rg.sweetLeft=Math.max(0,Math.min(100-rg.sweetWidth,rg.fishPos-rg.sweetWidth/2));
-  
-  // Cursor movement: rises when reeling, falls when not
-  if(rg.reeling){
-    rg.cursor+=dt*60;
-    // Tension increases when reeling AND fish is outside sweet spot
-    const cursorInSweet=rg.cursor>=rg.sweetLeft&&rg.cursor<=rg.sweetLeft+rg.sweetWidth;
-    if(cursorInSweet){
-      rg.tension=Math.max(0,rg.tension-dt*20);
-      rg.fishStamina-=dt*cfg.drainRate*(rg.dashActive?0.3:1);
-      rg.progress=Math.min(100,rg.progress+dt*8);
-    } else {
-      rg.tension+=dt*cfg.tensionRate*40;
-      rg.fishStamina-=dt*cfg.drainRate*0.3;
-      rg.progress=Math.max(0,rg.progress-dt*3);
-    }
+
+  // Cursor physics
+  if(fg.lmbHeld){
+    fg.cursor+=fg.driftSpeed*1.9*dt; // reel right
   } else {
-    rg.cursor-=dt*35;
-    rg.tension=Math.max(0,rg.tension-dt*15);
-    rg.progress=Math.max(0,rg.progress-dt*2);
-    // Fish regains stamina slowly when not reeling
-    rg.fishStamina=Math.min(100,rg.fishStamina+dt*2);
+    fg.cursor-=fg.driftSpeed*dt;     // drift left
   }
-  rg.cursor=Math.max(0,Math.min(100,rg.cursor));
-  rg.fishStamina=Math.max(0,rg.fishStamina);
-  
-  // Escape timer for harder fish
-  rg.escapeTimer-=dt;
-  
-  // Update UI
-  document.getElementById('reel-zone-sweet').style.left=rg.sweetLeft+'%';
-  document.getElementById('reel-zone-sweet').style.width=rg.sweetWidth+'%';
-  document.getElementById('reel-zone-cursor').style.left=Math.max(0,Math.min(97,rg.cursor))+'%';
-  document.getElementById('reel-zone-fish').style.left=Math.max(0,Math.min(92,rg.fishPos))+'%';
-  document.getElementById('reel-stamina-fill').style.width=rg.fishStamina+'%';
-  document.getElementById('reel-tension-fill').style.width=Math.min(100,rg.tension)+'%';
-  document.getElementById('reel-progress-fill').style.width=rg.progress+'%';
-  
-  // Update 3D fish mesh
+  fg.cursor=Math.max(-5,Math.min(105,fg.cursor)); // allow slight overflow
+
+  // In-zone check
+  const inZone=fg.cursor>=fg.zone.left&&fg.cursor<=fg.zone.left+fg.zone.width;
+  if(inZone){
+    fg.inZoneTime+=dt;
+  } else {
+    fg.inZoneTime=Math.max(0,fg.inZoneTime-dt*0.6);
+  }
+  const progress=Math.min(100,(fg.inZoneTime/fg.requiredTime)*100);
+
+  // 3D fish movement
   if(Game.fishMesh){
     Game.fishMesh.position.y=-0.5+Math.sin(elapsed*3)*0.2;
-    Game.fishMesh.rotation.y+=dt*2*rg.fishDir;
     const pullDir=new THREE.Vector3().subVectors(camera.position,Game.fishMesh.position).normalize();
-    Game.fishMesh.position.addScaledVector(pullDir,rg.reeling?dt*0.5:-dt*0.2);
+    Game.fishMesh.position.addScaledVector(pullDir,fg.lmbHeld?dt*0.4:-dt*0.15);
   }
-  
-  // Win condition: fish stamina depleted
-  if(rg.fishStamina<=0){
-    winReelMinigame();
-    return;
-  }
-  
-  // Lose: tension too high (line snaps)
-  if(rg.tension>=100){
-    rg.active=false;
-    document.getElementById('reel-ui').style.display='none';
-    showNotif('💥 LINE SNAPPED! Too much tension!','#ff8844');
-    triggerScreenShake(.08,.4);
-    Game.catchStreak=0;
-    updateStreakUI();
-    if(Game.fishMesh){scene.remove(Game.fishMesh);Game.fishMesh=null;}
-    clearLine(); Game.state='idle'; Game.combatPhase='none';
-    return;
-  }
-  
-  // Lose: escape timer
-  if(rg.escapeTimer<=0){
-    rg.active=false;
-    document.getElementById('reel-ui').style.display='none';
-    showNotif('😱 '+Game.fightFish.name+' escaped! "'+Game.fightFish.taunt+'"','#ff8844');
-    Game.catchStreak=0;
-    updateStreakUI();
-    if(Game.fishMesh){scene.remove(Game.fishMesh);Game.fishMesh=null;}
-    clearLine(); Game.state='idle'; Game.combatPhase='none';
-    return;
-  }
-}
 
-function winReelMinigame(){
-  Game.reelGame.active=false;
-  document.getElementById('reel-ui').style.display='none';
-  showNotif('🎉 '+Game.fightFish.emoji+' '+Game.fightFish.name+' is EXHAUSTED!','#ffd700');
-  triggerScreenShake(.08,.5);
-  // For legendary fish, go to brawl phase. Otherwise, land it!
-  if(Game.reelGame.difficulty==='legendary'&&Math.random()<0.5){
-    showNotif('🥊 '+Game.fightFish.name+' won\'t go down easy! BRAWL TIME!','#ff8844');
-    startPhase2Brawl();
-  } else {
-    // Skip brawl — land the fish directly
+  // UI
+  const clampedCursor=Math.max(0,Math.min(97,fg.cursor));
+  document.getElementById('reel-zone-sweet').style.left=fg.zone.left+'%';
+  document.getElementById('reel-zone-sweet').style.width=fg.zone.width+'%';
+  document.getElementById('reel-zone-cursor').style.left=clampedCursor+'%';
+  document.getElementById('reel-stamina-fill').style.width=progress+'%';
+  document.getElementById('reel-tension-fill').style.width=(inZone?0:Math.min(100,(1-(fg.inZoneTime/fg.requiredTime))*100))+'%';
+  document.getElementById('reel-progress-fill').style.width=progress+'%';
+
+  // WIN
+  if(fg.inZoneTime>=fg.requiredTime){
+    fg.active=false;
+    document.getElementById('reel-ui').style.display='none';
+    document.getElementById('reel-zone-fish').style.display='';
+    showNotif('🎉 '+fg.fish.emoji+' '+fg.fish.name+' reeled in!','#ffd700');
+    triggerScreenShake(.08,.5);
     if(Game.fishMesh){scene.remove(Game.fishMesh);Game.fishMesh=null;}
     Game.combatPhase='none';
     landFish();
+    return;
+  }
+
+  // LOSE — cursor fell off left edge
+  if(fg.cursor<=-5){
+    fg.active=false;
+    document.getElementById('reel-ui').style.display='none';
+    document.getElementById('reel-zone-fish').style.display='';
+    showNotif('😱 '+fg.fish.name+' escaped! Keep that line tight!','#ff8844');
+    Game.catchStreak=0; updateStreakUI();
+    if(Game.fishMesh){scene.remove(Game.fishMesh);Game.fishMesh=null;}
+    clearLine(); Game.state='idle'; Game.combatPhase='none';
   }
 }
+
+// Legacy stubs so old call sites don't crash
+function startReelMinigame(q){startFightMinigame();}
+function updateReelMinigame(dt){updateFightMinigame(dt);}
+function winReelMinigame(){}
 
 // ─── PHASE 2 BRAWL (legendary fish only) ──────────────────────────────────────
 function startPhase2Brawl(){
@@ -7638,13 +7567,12 @@ function reelIn(){
     // Already in reel minigame — ignore
     return;
   }
-  if(Game.state==='waiting') {
-    // Reel in without a fish
+  if(Game.state==='waiting'){
     showNotif('Reeled in — nothing on the line','#888');
     clearLine(); Game.state='idle';
-  } else if(Game.state==='reeling') {
-    landFish();
-  } else {
+  } else if(Game.state==='fighting'&&Game.fightGame.active){
+    // Already fighting
+  } else{
     clearLine(); Game.state='idle';
   }
 }
@@ -7657,7 +7585,7 @@ function fightYank(){if(Game.state==='reeling'){Game.reelGame.reeling=true;}}
 function winFight(){if(Game.combatPhase==='phase2-brawl')triggerFinisher();}
 function updateFightAI(dt){
   updateHookSet(dt);
-  updateReelMinigame(dt);
+  // updateReelMinigame handled directly in animate loop now
   updateBrawl(dt);
 }
 function startBreachQTE(){}
@@ -7754,10 +7682,20 @@ function landFish(){
 function clearLine(){
   if(lineMesh){scene.remove(lineMesh);lineMesh=null;}
   if(bobberGroup){scene.remove(bobberGroup);bobberGroup=null;}
-  removeNewLine(); // Remove the new fishing line
+  removeNewLine();
   Game.lineOut=false;
+  Game.bobberInFlight=false;
+  Game.bobberVelocity.set(0,0,0);
+  Game.fightGame.active=false;
+  Game.fightGame.lmbHeld=false;
+  clearTimeout(Game.biteTimer);
   document.getElementById('line-indicator').style.display='none';
   document.getElementById('depth-fill').style.width='0%';
+  document.getElementById('reel-ui').style.display='none';
+  document.getElementById('hookset-ui').style.display='none';
+  document.getElementById('bite-indicator').style.display='none';
+  document.getElementById('nibble-indicator').style.display='none';
+  document.getElementById('reel-zone-fish').style.display='';
 }
 
 function dismissCatch(){
@@ -8018,7 +7956,9 @@ function animate(){
   updateAtmosphericParticles(dt);
   
   animateRod(elapsed);
-  if(Game.state==='fighting'||Game.state==='hookset'||Game.state==='reeling') updateFightAI(dt);
+  updateBobberPhysics(dt);
+  if(Game.state==='fighting') updateFightMinigame(dt);
+  if(Game.state==='hookset') updateFightAI(dt);
   if(Game.state==='brawling'){
     updateBrawl(dt);
     if(Math.random()<0.001) fishEscapeBrawl();
@@ -8028,9 +7968,9 @@ function animate(){
   drawMinimap();
   updateLureIndicator();
   updateFishingHint();
-  // Keep line visible during ALL fishing states (waiting, bite, hookset, reeling, fighting, brawling)
-  if(lineMesh&&bobberGroup){
-    const fishingStates=['waiting','bite','hookset','reeling','fighting','brawling'];
+  // Keep line visible during ALL fishing states
+  if(lineMesh&&bobberGroup&&!Game.bobberInFlight){
+    const fishingStates=['waiting','bite','fighting','brawling'];
     if(Game.lineOut||fishingStates.includes(Game.state)){
       const target=Game.fishMesh?Game.fishMesh.position:Game.bobberPos;
       updateLine(target);
@@ -8126,14 +8066,14 @@ function animate(){
   causticsPlane.position.x=camera.position.x;
   causticsPlane.position.z=camera.position.z;
 
-  // Bobber
-  if(bobberGroup&&Game.lineOut){
+  // Bobber — skip float animation while in-flight (physics handles position)
+  if(bobberGroup&&Game.lineOut&&!Game.bobberInFlight){
     Game.bobberAnimT+=dt;
     const biting=Game.state==='bite'||Game.state==='fighting';
     bobberGroup.position.y=.04+Math.sin(Game.bobberAnimT*1.4)*.022+(biting?Math.sin(Game.bobberAnimT*14)*.1:0);
     bobberGroup.rotation.x=Math.sin(Game.bobberAnimT*2)*.12;
     updateLine(bobberGroup.position);
-    updateNewLine(); // Update the new fishing line
+    updateNewLine();
     Game.bobberPos.copy(bobberGroup.position);
     if(Math.random()<.04) spawnBubbles(Game.bobberPos,2);
   }
@@ -9413,19 +9353,17 @@ function updateFishingHint(){
   let hint='';
   
   if(Game.state==='idle'&&!Game.lineOut){
-    hint='HOLD LEFT CLICK to charge cast, release to throw';
+    hint='HOLD LEFT CLICK to charge cast — look up for longer arc';
   } else if(Game.state==='casting'){
-    hint='Release LEFT CLICK to cast — aim with mouse';
+    hint='Release LEFT CLICK to cast — aim with mouse, look up for arc';
+  } else if(Game.state==='waiting'&&Game.bobberInFlight){
+    hint='Bobber in flight...';
   } else if(Game.state==='waiting'){
-    hint='Waiting for a bite... automatic reel when fish bites!';
+    hint='Waiting for a bite... (5–30 seconds)';
   } else if(Game.state==='bite'){
-    hint='FISH ON! Auto-reeling in... get ready for minigame!';
-  } else if(Game.state==='hookset'){
-    hint='Press SPACE when needle is in the GREEN zone!';
-  } else if(Game.state==='reeling'){
-    hint='HOLD R to reel — keep cursor in the green zone!';
+    hint='🐟 FISH ON! Click LEFT MOUSE BUTTON to fight!';
   } else if(Game.state==='fighting'){
-    hint='Keep the bar in the sweet spot! Hold R to reel in!';
+    hint='Hold LMB to reel — keep the bar in the GREEN zone!';
   } else if(Game.state==='brawling'){
     hint='WASD to dodge, F to punch, R to pin, SPACE to parry!';
   } else if(Game.state==='finisher'){
