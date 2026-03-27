@@ -350,12 +350,12 @@
   <div class="sub">CLICK TO BEGIN · WASD MOVE · P PISS · O SHIT · COLLECT RODS FOR EXPONENTIAL FISH</div>
 </div>
 
-<div id="xp-panel" class="panel" style="position:fixed;top:16px;right:230px;padding:10px 16px;display:flex;flex-direction:column;gap:4px;">
-  <div style="font-size:10px;letter-spacing:2px;color:var(--gold);">LEVEL <span id="player-level">1</span></div>
-  <div style="width:120px;height:8px;background:rgba(0,0,0,0.5);border:1px solid var(--border);">
-    <div id="xp-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4a90ff,#ffd700);transition:width 0.3s;"></div>
+<div id="xp-panel" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:4px 12px;background:rgba(8,16,28,0.6);backdrop-filter:blur(4px);border:1px solid rgba(201,168,76,0.2);border-radius:2px;z-index:140;">
+  <div style="font-size:9px;letter-spacing:1px;color:var(--gold);">LVL <span id="player-level">1</span></div>
+  <div style="width:150px;height:6px;background:rgba(0,0,0,0.4);border:1px solid rgba(201,168,76,0.15);border-radius:3px;">
+    <div id="xp-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4a90ff,#ffd700);transition:width 0.3s;border-radius:2px;"></div>
   </div>
-  <div style="font-size:9px;color:rgba(200,220,230,0.6);"><span id="player-xp">0</span>/<span id="xp-next">100</span> XP</div>
+  <div style="font-size:8px;color:rgba(200,220,230,0.5);"><span id="player-xp">0</span>/<span id="xp-next">100</span></div>
 </div>
 
 <div id="weather-panel" class="panel" style="position:fixed;bottom:180px;left:16px;padding:8px 14px;font-size:12px;">
