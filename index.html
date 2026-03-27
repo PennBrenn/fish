@@ -865,6 +865,41 @@
 }
 </style>
 
+<style>
+#bait-shop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;width:460px;max-height:520px;overflow-y:auto;padding:20px 28px;border:2px solid var(--gold);z-index:310;background:linear-gradient(135deg,#1a1410,#2a1a10);}
+#bait-shop h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--gold);margin-bottom:4px;}
+#bait-shop .shop-sub{font-size:10px;color:rgba(200,210,230,0.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+#bait-shop .shop-currency{font-size:13px;color:var(--gold);margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:8px;}
+.shop-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid rgba(201,168,76,0.15);margin-bottom:6px;cursor:pointer;transition:background .2s,border-color .2s;}
+.shop-item:hover{background:rgba(201,168,76,0.1);border-color:var(--gold);}
+.shop-item .si-emoji{font-size:20px;width:28px;text-align:center;}
+.shop-item .si-info{flex:1;}
+.shop-item .si-name{font-size:12px;color:var(--cream);font-weight:700;}
+.shop-item .si-desc{font-size:9px;color:rgba(200,210,230,0.5);}
+.shop-item .si-cost{font-size:11px;color:var(--gold);font-weight:700;white-space:nowrap;}
+#leaderboard-panel{position:fixed;top:140px;right:12px;display:none;width:260px;padding:10px 14px;z-index:200;transform-origin:top right;transform:scale(var(--ui-scale));}
+#leaderboard-panel h3{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+.lb-row{display:flex;gap:6px;font-size:9px;color:#99aabb;padding:2px 0;}
+.lb-row.me{color:var(--gold);font-weight:700;}
+.lb-row span:first-child{width:18px;text-align:right;}
+.lb-row span:nth-child(2){flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-row span:nth-child(3){width:50px;text-align:right;}
+.lb-row span:nth-child(4){width:30px;text-align:right;}
+.lb-row span:nth-child(5){width:30px;text-align:right;}
+#chat-input-wrap{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);display:none;z-index:320;}
+#chat-input{width:320px;padding:8px 14px;background:var(--ui-bg);border:1px solid var(--border);color:var(--cream);font-family:'Courier Prime',monospace;font-size:12px;outline:none;backdrop-filter:blur(8px);}
+.chat-bubble{position:fixed;padding:6px 12px;background:rgba(255,255,255,0.92);color:#111;font-family:'Courier Prime',monospace;font-size:11px;border-radius:10px;pointer-events:none;z-index:400;transition:opacity 0.8s;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis;}
+.chat-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid rgba(255,255,255,0.92);}
+#raid-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:350;display:none;}
+#raid-flash{position:absolute;inset:0;opacity:0;transition:opacity 0.15s;}
+#raid-siren{position:absolute;inset:0;opacity:0;box-shadow:inset 0 0 80px 20px red;animation:sirenFlash 0.4s infinite alternate;}
+@keyframes sirenFlash{0%{box-shadow:inset 0 0 80px 20px rgba(255,0,0,0.3);}100%{box-shadow:inset 0 0 80px 20px rgba(0,0,255,0.3);}}
+#raid-announce{position:absolute;top:30%;left:50%;transform:translateX(-50%);font-family:'Playfair Display',serif;font-size:22px;color:white;text-align:center;text-shadow:0 0 20px rgba(0,0,0,0.8);opacity:0;transition:opacity 0.5s;white-space:nowrap;}
+#rod-offer-prompt{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);display:none;padding:16px 24px;border:2px solid var(--gold);z-index:310;background:var(--ui-bg);text-align:center;backdrop-filter:blur(8px);}
+#rod-offer-prompt .rop-title{font-size:14px;color:var(--gold);margin-bottom:8px;}
+#rod-offer-prompt .rop-hint{font-size:10px;color:rgba(200,210,230,0.5);}
+</style>
+
 <div id="line-indicator" class="panel">
   <div style="font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;">LINE OUT</div>
   <div id="line-dist">0 ft</div>
@@ -1033,6 +1068,36 @@
   Aim your cast with the mouse — watch for nibbles then STRIKE!<br>
   Find <span>🎣</span> rods scattered around — more rods = exponential fish!
 </div>
+
+<div id="bait-shop" class="panel">
+  <h2>⚓ BAIT SHOP</h2>
+  <div class="shop-sub">SPEND YOUR POUNDS</div>
+  <div class="shop-currency">💰 <span id="shop-balance">0.0</span> lbs earned</div>
+  <div id="shop-items"></div>
+  <div style="text-align:center;font-size:10px;color:rgba(200,210,230,0.4);margin-top:10px;">Press $ to close</div>
+</div>
+
+<div id="leaderboard-panel" class="panel">
+  <h3>🏆 LEADERBOARD</h3>
+  <div id="lb-rows"></div>
+</div>
+
+<div id="chat-input-wrap">
+  <input id="chat-input" type="text" maxlength="60" placeholder="Say something...">
+</div>
+
+<div id="raid-overlay">
+  <div id="raid-flash"></div>
+  <div id="raid-siren"></div>
+  <div id="raid-announce"></div>
+</div>
+
+<div id="rod-offer-prompt" class="panel">
+  <div class="rop-title" id="rop-title"></div>
+  <div class="rop-hint">Tab = Accept &nbsp; Esc = Decline</div>
+</div>
+
+<div id="chat-bubbles-container"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -1439,7 +1504,11 @@ function rFish(){
     return true;
   });
   
-  const r=Math.random()*weatherMod; 
+  // Heatmap rarity modifier
+  const hmHot=sampleHeatmap(Game.bobberPos.x,Game.bobberPos.z);
+  const hmRarityMul=0.8+hmHot*0.4;
+  const luckyMul=Game.luckyLureCasts>0?2.0:1.0;
+  const r=Math.random()*weatherMod*hmRarityMul*luckyMul; 
   let c=0; 
   for(const f of validFish){
     let rarityMod=1.0;
@@ -1669,6 +1738,35 @@ const Game = {
   phantomLine:null,
   timeAnomalyRadio:false,
   undeadFish:[],
+  // ── Feature state ──
+  heatmap:null,
+  heatmapDriftTimer:0,
+  fishFinderActive:false,
+  fishFinderTimer:0,
+  fishFinderMesh:null,
+  shopOpen:false,
+  shopItems:{fishFinder:0,premiumBait:0,disguise:0,scanner:0,rodMagnet:0,luckyLure:0,coolerUpgrade:false},
+  premiumBaitTimer:0,
+  luckyLureCasts:0,
+  leaderboard:[],
+  leaderboardOpen:false,
+  leaderboardTimer:0,
+  chatOpen:false,
+  chatBubbles:{},
+  syncPiss:{active:false,timer:0,partnerPissing:false,partnerTimestamp:0},
+  syncPissActive:false,
+  syncPissTimer:0,
+  rodOffer:null,
+  rodOfferTimeout:null,
+  fartSync:{myFartTime:0,partnerFartTime:0,cooldown:0},
+  stationarySystem:{lastPosition:null,timer:0,warningGiven:false,raidTriggered:false,raidCooldown:0,disguiseActive:false,scannerActive:false,scannerWarned:false},
+  raidActive:false,
+  raidMeshes:[],
+  invertedControls:false,
+  invertedControlsTimer:0,
+  frozenTimer:0,
+  fishInvisibleTimer:0,
+  wipeCatchLogTimer:0,
 };
 
 // ─── RENDERER ──────────────────────────────────────────────────────────────────
@@ -4776,6 +4874,11 @@ function sendPlayerState(){
     username:Game.playerUsername
   };
   
+  state.lbs=parseFloat(Game.totalWeight.toFixed(1));
+  state.catches=Game.caughtCount;
+  state.species=Game.seenSpecies.size;
+  state.pissCount=Game.pissCount;
+
   if(MP.isHost){
     Object.values(MP.connections).forEach(conn=>{
       conn.send({type:'hostPlayer',x:state.x,y:state.y,z:state.z,rotY:state.rotY,state:state.state,username:state.username});
@@ -4788,6 +4891,12 @@ function sendPlayerState(){
         weather:Game.weather,
         rainIntensity:Game.rainIntensity
       });
+    });
+
+    // Broadcast leaderboard
+    updateLeaderboard();
+    Object.values(MP.connections).forEach(conn=>{
+      conn.send({type:'remoteAction',id:'host',actionType:'leaderboardData',entries:Game.leaderboard});
     });
   } else{
     if(MP.connections['host']&&MP.connections['host'].open){
@@ -4823,7 +4932,6 @@ function handleRemoteAction(id,data){
   } else if(data.actionType==='punch'){
     showNotif('👊 '+id+' punched a fish!','#ff8844');
   } else if(data.actionType==='spawnBoat'){
-    // Spawn a visible boat for the remote player
     const boatG=new THREE.Group();
     const boatHull=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.4,3.5),new THREE.MeshLambertMaterial({color:0x6a4a2a}));
     boatHull.position.y=-0.1;boatG.add(boatHull);
@@ -4837,6 +4945,36 @@ function handleRemoteAction(id,data){
     scene.add(boatG);
     if(MP.remotePlayers[id]) MP.remotePlayers[id].boat=boatG;
     showNotif('🚣 '+id+' spawned a boat!','#88ddff');
+  } else if(data.actionType==='pissStart'){
+    Game.syncPiss.partnerPissing=true;
+    Game.syncPiss.partnerTimestamp=data.timestamp||Date.now();
+    checkSyncPiss();
+    setTimeout(()=>{Game.syncPiss.partnerPissing=false;},8000);
+  } else if(data.actionType==='fartSync'){
+    Game.fartSync.partnerFartTime=data.timestamp||Date.now();
+    checkFartSync();
+  } else if(data.actionType==='chatBubble'){
+    showChatBubble(id,data.msg||'');
+  } else if(data.actionType==='rodOffer'){
+    const rp=MP.remotePlayers[id];
+    const uname=rp&&rp.username?rp.username:id;
+    showRodOffer({fromId:id,fromUsername:uname,fishName:data.fishName,fishEmoji:data.fishEmoji,staminaRemaining:data.staminaRemaining});
+  } else if(data.actionType==='rodAccepted'){
+    Game.state='idle';Game.reelGame.active=false;
+    document.getElementById('reel-ui').style.display='none';
+    showNotif('🤝 Rod passed! +25 XP','#44dd88');
+    Game.playerXP+=25;
+  } else if(data.actionType==='rodDeclined'){
+    showNotif('Rod offer declined','#888');
+  } else if(data.actionType==='raidAlert'){
+    showNotif('🚨 '+(data.username||id)+' is being raided by the '+(data.agency||'???')+'!','#ff4040');
+  } else if(data.actionType==='syncPissTriggered'){
+    if(!Game.syncPissActive){
+      Game.syncPissActive=true;Game.syncPissTimer=30;
+      showNotif('💛💛 SYNCHRONIZED GOLDEN SHOWER! Fish love it! 30s bonus!','#ffd700');
+    }
+  } else if(data.actionType==='leaderboardData'){
+    if(data.entries) Game.leaderboard=data.entries;
   }
 }
 
@@ -5767,6 +5905,8 @@ function drinkWarmBeverage(){
 function startPissing(){
   if(Game.isPissing||Game.pissLevel<.1) return;
   Game.isPissing=true;
+  sendAction('pissStart',{timestamp:Date.now()});
+  checkSyncPiss();
 }
 function stopPissing(){Game.isPissing=false;}
 
@@ -5903,9 +6043,30 @@ document.addEventListener('keydown',e=>{
     keys.d=true;
     if(Game.state==='brawling') brawlDodge('RIGHT');
   }
+  // Chat input intercepts all keys when open
+  if(Game.chatOpen){
+    if(e.code==='Enter'){e.preventDefault();sendChatMessage(document.getElementById('chat-input').value);return;}
+    if(e.code==='Escape'){e.preventDefault();closeChatInput();return;}
+    return;
+  }
+  // Freeze blocks movement keys
+  if(Game.frozenTimer>0&&['KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code)){e.preventDefault();return;}
+  if(e.code==='Enter'&&!Game.chatOpen){e.preventDefault();openChatInput();return;}
+  if(e.code==='Tab'){
+    e.preventDefault();
+    if(Game.rodOffer){acceptRodOffer();return;}
+    if(Game.state==='reeling'){offerRod();return;}
+    toggleLeaderboard();return;
+  }
+  if(e.code==='Digit4'&&e.shiftKey){e.preventDefault();toggleBaitShop();return;}
+  // Quick emotes (only when chat closed)
+  if(!Game.chatOpen&&QUICK_EMOTES[e.code]&&!e.shiftKey){
+    showChatBubble('local',QUICK_EMOTES[e.code]);
+    sendAction('chatBubble',{msg:QUICK_EMOTES[e.code]});
+  }
   if(e.code==='KeyP') startPissing();
   if(e.code==='KeyO'&&!Game.isShitting) Game.isShitting=true;
-  if(e.code==='KeyG') spawnFartCloud();
+  if(e.code==='KeyG'){spawnFartCloud();Game.fartSync.myFartTime=Date.now();sendAction('fartSync',{timestamp:Date.now()});checkFartSync();}
   if(e.code==='Space'){
     e.preventDefault();
     if(Game.state==='bite') startHookSet();
@@ -5948,6 +6109,8 @@ document.addEventListener('keydown',e=>{
   }
   if(e.code==='Escape'){
     e.preventDefault();
+    if(Game.shopOpen){toggleBaitShop();return;}
+    if(Game.rodOffer){declineRodOffer();return;}
     togglePause();
   }
   if(e.code==='KeyC'){
@@ -6080,11 +6243,16 @@ function movePlayer(dt){
     return;
   }
   
+  // Freeze blocks all movement
+  if(Game.frozenTimer>0) return;
+
   let spd=5*dt;
   const dir=new THREE.Vector3();
   const kb=Game.scrambledKeys;
   if(keys[kb.w]) dir.z-=1; if(keys[kb.s]) dir.z+=1;
   if(keys[kb.a]) dir.x-=1; if(keys[kb.d]) dir.x+=1;
+  // CIA inverted controls
+  if(Game.invertedControls){dir.x*=-1;dir.z*=-1;}
   if(dir.length()){
     dir.normalize().applyEuler(new THREE.Euler(0,camera.rotation.y,0,'YXZ'));
 
@@ -6309,8 +6477,13 @@ function releaseCast(){
   document.getElementById('line-indicator').style.display='block';
   document.getElementById('line-dist').textContent=Math.round(dist)+' ft';
   document.getElementById('depth-fill').style.width='15%';
-  // Schedule first nibble then real bite
-  const nibbleDelay=1500+Math.random()*3000;
+  // Schedule first nibble then real bite — modified by heatmap, premiumBait, syncPiss
+  const hotspot=sampleHeatmap(land.x,land.z);
+  let biteSpeedMul=0.5+hotspot*1.5;
+  if(Game.premiumBaitTimer>0) biteSpeedMul*=1.5;
+  if(Game.syncPissActive) biteSpeedMul*=2;
+  const nibbleDelay=(1500+Math.random()*3000)/biteSpeedMul;
+  if(Game.luckyLureCasts>0) Game.luckyLureCasts--;
   Game.nibbleTimer=setTimeout(()=>startNibbleSequence(biteBonus),nibbleDelay);
 }
 
@@ -7055,6 +7228,17 @@ function animate(){
   
   updateMultiplayerSync(dt);
   
+  // ── New feature updates ──
+  driftHeatmap(dt);
+  updateFishFinder(dt);
+  updateSyncPiss(dt);
+  updateFartSyncCooldown(dt);
+  updateStationaryCheck(dt);
+  updateRaidEffects(dt);
+  updateChatBubblePositions();
+  Game.leaderboardTimer+=dt;
+  if(Game.leaderboardTimer>=5){Game.leaderboardTimer=0;renderLeaderboard();}
+
   updatePostProcessing();
   spawnAtmosphericParticles();
   updateAtmosphericParticles(dt);
@@ -7536,6 +7720,477 @@ function spawnRemotePlayerV2(id){
   };
 }
 
+// ─── FEATURE 1: FISH HEATMAP ──────────────────────────────────────────────────
+function initHeatmap(){
+  const rng=seededRng(Game.worldSeed*19+77);
+  const w=20,h=20,grid=[];
+  for(let i=0;i<w*h;i++) grid.push(rng());
+  Game.heatmap={grid,width:w,height:h,worldSize:200};
+}
+function driftHeatmap(dt){
+  Game.heatmapDriftTimer+=dt;
+  if(Game.heatmapDriftTimer<180) return;
+  Game.heatmapDriftTimer=0;
+  const hm=Game.heatmap;if(!hm) return;
+  for(let i=0;i<hm.grid.length;i++){
+    hm.grid[i]=Math.max(0,Math.min(1,hm.grid[i]+(Math.random()-.5)*.15));
+  }
+}
+function sampleHeatmap(wx,wz){
+  const hm=Game.heatmap;if(!hm) return 0.5;
+  const hs=hm.worldSize/2;
+  const gx=Math.floor(((wx+hs)/hm.worldSize)*hm.width);
+  const gz=Math.floor(((wz+hs)/hm.worldSize)*hm.height);
+  const cx=Math.max(0,Math.min(hm.width-1,gx));
+  const cz=Math.max(0,Math.min(hm.height-1,gz));
+  return hm.grid[cz*hm.width+cx];
+}
+function shiftHeatmapToward(wx,wz,amount,dur){
+  const hm=Game.heatmap;if(!hm) return;
+  const hs=hm.worldSize/2;
+  const gx=Math.max(0,Math.min(hm.width-1,Math.floor(((wx+hs)/hm.worldSize)*hm.width)));
+  const gz=Math.max(0,Math.min(hm.height-1,Math.floor(((wz+hs)/hm.worldSize)*hm.height)));
+  const idx=gz*hm.width+gx;
+  const orig=hm.grid[idx];
+  hm.grid[idx]=Math.min(1,hm.grid[idx]+amount);
+  if(dur>0) setTimeout(()=>{hm.grid[idx]=orig;},dur*1000);
+}
+function updateFishFinder(dt){
+  if(!Game.fishFinderActive) return;
+  Game.fishFinderTimer-=dt;
+  if(Game.fishFinderTimer<=0){
+    Game.fishFinderActive=false;
+    if(Game.fishFinderMesh){scene.remove(Game.fishFinderMesh);Game.fishFinderMesh=null;}
+    showNotif('🐟 Fish Finder expired','#888');
+    return;
+  }
+  if(!Game.fishFinderMesh){
+    const geo=new THREE.RingGeometry(12,15,32);
+    const mat=new THREE.MeshBasicMaterial({color:0x44ff44,transparent:true,opacity:0.35,side:THREE.DoubleSide});
+    Game.fishFinderMesh=new THREE.Mesh(geo,mat);
+    Game.fishFinderMesh.rotation.x=-Math.PI/2;
+    scene.add(Game.fishFinderMesh);
+  }
+  Game.fishFinderMesh.position.set(camera.position.x,0.15,camera.position.z);
+  const hot=sampleHeatmap(camera.position.x,camera.position.z);
+  let col;
+  if(hot>0.6) col=new THREE.Color(0x22cc44);
+  else if(hot>0.3) col=new THREE.Color(0xddcc22);
+  else col=new THREE.Color(0xcc3322);
+  Game.fishFinderMesh.material.color.copy(col);
+  Game.fishFinderMesh.material.opacity=0.25+Math.sin(performance.now()*0.003)*0.1;
+}
+
+// ─── FEATURE 2: BAIT SHOP ────────────────────────────────────────────────────
+const SHOP_ITEMS=[
+  {id:'fishFinder',name:'Fish Finder',emoji:'🐟',cost:50,desc:'Reveals local heatmap glow for 5 min',consumable:true},
+  {id:'premiumBait',name:'Premium Bait',emoji:'🎣',cost:30,desc:'+50% bite rate for 10 min',consumable:true},
+  {id:'disguise',name:'Government Disguise',emoji:'🕵️',cost:75,desc:'Delays agency raid timer by +3 min',consumable:true},
+  {id:'scanner',name:'Police Scanner',emoji:'📻',cost:40,desc:'Warns 60s before raid',consumable:true},
+  {id:'rodMagnet',name:'Rod Magnet',emoji:'🧲',cost:60,desc:'Pulls fish, shrinks sweet spot 30%',consumable:true},
+  {id:'luckyLure',name:'Lucky Lure',emoji:'🍀',cost:45,desc:'2× legendary chance for 5 casts',consumable:true},
+  {id:'coolerUpgrade',name:'Cooler Upgrade',emoji:'🧊',cost:80,desc:'Doubles fish inventory capacity',consumable:false},
+];
+function renderShopItems(){
+  const el=document.getElementById('shop-items');
+  el.innerHTML='';
+  SHOP_ITEMS.forEach(item=>{
+    if(item.id==='coolerUpgrade'&&Game.shopItems.coolerUpgrade) return;
+    const d=document.createElement('div');d.className='shop-item';
+    d.innerHTML=`<div class="si-emoji">${item.emoji}</div><div class="si-info"><div class="si-name">${item.name}</div><div class="si-desc">${item.desc}</div></div><div class="si-cost">${item.cost} lbs</div>`;
+    d.onclick=()=>purchaseShopItem(item);
+    el.appendChild(d);
+  });
+}
+function purchaseShopItem(item){
+  if(Game.totalWeight<item.cost){
+    showNotif('❌ Not enough lbs!','#ff4040');return;
+  }
+  Game.totalWeight-=item.cost;
+  document.getElementById('total-weight').textContent=Game.totalWeight.toFixed(1);
+  document.getElementById('shop-balance').textContent=Game.totalWeight.toFixed(1);
+  showNotif('✅ Purchased '+item.name+'!','#44dd88');
+  applyShopItem(item.id);
+}
+function applyShopItem(id){
+  if(id==='fishFinder'){Game.fishFinderActive=true;Game.fishFinderTimer=300;showNotif('🐟 Fish Finder active for 5 min','#44dd88');}
+  else if(id==='premiumBait'){Game.premiumBaitTimer=600;showNotif('🎣 Premium Bait active for 10 min','#44dd88');}
+  else if(id==='disguise'){Game.stationarySystem.disguiseActive=true;showNotif('🕵️ Disguise active — raid delayed +3 min','#44dd88');}
+  else if(id==='scanner'){Game.stationarySystem.scannerActive=true;showNotif('📻 Police Scanner active','#44dd88');}
+  else if(id==='rodMagnet'){Game.shopItems.rodMagnet++;showNotif('🧲 Rod Magnet equipped','#44dd88');}
+  else if(id==='luckyLure'){Game.luckyLureCasts+=5;showNotif('🍀 Lucky Lure — 5 casts with 2× legendary','#44dd88');}
+  else if(id==='coolerUpgrade'){Game.shopItems.coolerUpgrade=true;Game.inventoryCapacity*=2;showNotif('🧊 Cooler Upgraded! Capacity doubled to '+Game.inventoryCapacity,'#44dd88');}
+}
+function toggleBaitShop(){
+  Game.shopOpen=!Game.shopOpen;
+  const el=document.getElementById('bait-shop');
+  if(Game.shopOpen){
+    el.style.display='block';
+    document.getElementById('shop-balance').textContent=Game.totalWeight.toFixed(1);
+    renderShopItems();
+  } else{
+    el.style.display='none';
+  }
+}
+
+// ─── FEATURE 3: SESSION LEADERBOARD ──────────────────────────────────────────
+function updateLeaderboard(){
+  const myEntry={id:'local',username:Game.playerUsername,lbs:parseFloat(Game.totalWeight.toFixed(1)),catches:Game.caughtCount,species:Game.seenSpecies.size,pissCount:Game.pissCount};
+  Game.leaderboard=Game.leaderboard.filter(e=>e.id!=='local');
+  Game.leaderboard.push(myEntry);
+  Game.leaderboard.sort((a,b)=>b.lbs-a.lbs);
+}
+function renderLeaderboard(){
+  if(!Game.leaderboardOpen) return;
+  const el=document.getElementById('lb-rows');
+  const connected=typeof MP!=='undefined'&&MP.peer&&Object.keys(MP.connections).length>0;
+  if(!connected){
+    el.innerHTML='<div style="font-size:9px;color:#666;padding:4px 0;">🎣 SOLO MODE</div>';
+  } else{
+    el.innerHTML='';
+  }
+  updateLeaderboard();
+  Game.leaderboard.forEach((e,i)=>{
+    const row=document.createElement('div');
+    row.className='lb-row'+(e.id==='local'?' me':'');
+    const crown=i===0?'👑 ':'';
+    const syncIcon=(Game.syncPissActive&&(e.id==='local'||e.partnerPissing))?'💛':'';
+    row.innerHTML=`<span>${i+1}</span><span>${crown}${e.username}${syncIcon}</span><span>${e.lbs} lbs</span><span>${e.catches}</span><span>${e.species}</span>`;
+    el.appendChild(row);
+  });
+}
+function toggleLeaderboard(){
+  Game.leaderboardOpen=!Game.leaderboardOpen;
+  document.getElementById('leaderboard-panel').style.display=Game.leaderboardOpen?'block':'none';
+  if(Game.leaderboardOpen) renderLeaderboard();
+}
+
+// ─── FEATURE 4: CHAT BUBBLES ─────────────────────────────────────────────────
+function openChatInput(){
+  if(Game.chatOpen) return;
+  Game.chatOpen=true;
+  const wrap=document.getElementById('chat-input-wrap');
+  wrap.style.display='block';
+  const inp=document.getElementById('chat-input');
+  inp.value='';
+  inp.focus();
+}
+function closeChatInput(){
+  Game.chatOpen=false;
+  document.getElementById('chat-input-wrap').style.display='none';
+  document.getElementById('chat-input').blur();
+}
+function sendChatMessage(msg){
+  if(!msg||!msg.trim()) return;
+  msg=msg.trim().substring(0,60);
+  showChatBubble('local',msg);
+  sendAction('chatBubble',{msg});
+  closeChatInput();
+}
+function showChatBubble(playerId,msg){
+  const container=document.getElementById('chat-bubbles-container');
+  if(Game.chatBubbles[playerId]){
+    Game.chatBubbles[playerId].el.remove();
+    clearTimeout(Game.chatBubbles[playerId].timeout);
+  }
+  const el=document.createElement('div');
+  el.className='chat-bubble';
+  el.textContent=msg;
+  container.appendChild(el);
+  const timeout=setTimeout(()=>{
+    el.style.opacity='0';
+    setTimeout(()=>{el.remove();delete Game.chatBubbles[playerId];},800);
+  },4000);
+  Game.chatBubbles[playerId]={el,timeout};
+}
+function updateChatBubblePositions(){
+  if(Game.chatBubbles['local']&&Game.chatBubbles['local'].el){
+    const pos=new THREE.Vector3(camera.position.x,camera.position.y+0.8,camera.position.z);
+    pos.project(camera);
+    const x=(pos.x*0.5+0.5)*innerWidth;
+    const y=(-pos.y*0.5+0.5)*innerHeight-60;
+    Game.chatBubbles['local'].el.style.left=x+'px';
+    Game.chatBubbles['local'].el.style.top=Math.max(10,y)+'px';
+  }
+  Object.entries(MP.remotePlayers||{}).forEach(([id,rp])=>{
+    if(!Game.chatBubbles[id]||!Game.chatBubbles[id].el) return;
+    const pos=rp.mesh.position.clone();
+    pos.y+=2.5;
+    pos.project(camera);
+    if(pos.z>1){Game.chatBubbles[id].el.style.display='none';return;}
+    Game.chatBubbles[id].el.style.display='';
+    const x=(pos.x*0.5+0.5)*innerWidth;
+    const y=(-pos.y*0.5+0.5)*innerHeight;
+    Game.chatBubbles[id].el.style.left=x+'px';
+    Game.chatBubbles[id].el.style.top=Math.max(10,y)+'px';
+  });
+}
+const QUICK_EMOTES={Digit1:'🐟 Nice catch!',Digit2:'💛 Pissing...',Digit3:'😤 Come on fish!',Digit4:'🤙 Let\'s go!',Digit5:'💀 I\'m dying'};
+
+// ─── FEATURE 5: SYNCHRONIZED PISS BONUS ──────────────────────────────────────
+function checkSyncPiss(){
+  if(!Game.isPissing||!Game.syncPiss.partnerPissing) return;
+  const diff=Math.abs(Date.now()-Game.syncPiss.partnerTimestamp);
+  if(diff<3000&&!Game.syncPissActive){
+    Game.syncPissActive=true;
+    Game.syncPissTimer=30;
+    showNotif('💛💛 SYNCHRONIZED GOLDEN SHOWER! Fish love it! 30s bonus!','#ffd700');
+    triggerScreenShake(.06,.4);
+    sendAction('syncPissTriggered',{});
+  }
+}
+function updateSyncPiss(dt){
+  if(!Game.syncPissActive) return;
+  Game.syncPissTimer-=dt;
+  if(Game.syncPissTimer<=0){
+    Game.syncPissActive=false;
+    showNotif('💛 Sync piss bonus expired','#888');
+  }
+}
+
+// ─── FEATURE 6: PASS THE ROD ─────────────────────────────────────────────────
+function offerRod(){
+  if(Game.state!=='reeling'||!Game.reelGame.active) return;
+  const nearest=findNearestPlayer(20);
+  if(!nearest){showNotif('No player nearby to pass rod','#888');return;}
+  sendAction('rodOffer',{
+    fishName:Game.fightFish?Game.fightFish.name:'Unknown',
+    fishEmoji:Game.fightFish?Game.fightFish.emoji:'🐟',
+    staminaRemaining:Game.reelGame.fishStamina,
+    fromId:'local'
+  });
+  showNotif('🎣 Offering rod to '+nearest.id+'...','#88ddff');
+}
+function findNearestPlayer(maxDist){
+  let best=null,bestD=maxDist;
+  Object.entries(MP.remotePlayers||{}).forEach(([id,rp])=>{
+    const d=rp.mesh.position.distanceTo(camera.position);
+    if(d<bestD){bestD=d;best={id,rp};}
+  });
+  return best;
+}
+function showRodOffer(data){
+  Game.rodOffer=data;
+  const el=document.getElementById('rod-offer-prompt');
+  document.getElementById('rop-title').textContent='🎣 '+data.fromUsername+' offers rod! '+data.fishEmoji+' '+data.fishName;
+  el.style.display='block';
+  Game.rodOfferTimeout=setTimeout(()=>{
+    el.style.display='none';Game.rodOffer=null;
+    showNotif('Rod offer timed out','#888');
+  },10000);
+}
+function acceptRodOffer(){
+  if(!Game.rodOffer) return;
+  clearTimeout(Game.rodOfferTimeout);
+  document.getElementById('rod-offer-prompt').style.display='none';
+  sendAction('rodAccepted',{fromId:Game.rodOffer.fromId});
+  Game.state='reeling';
+  Game.reelGame.active=true;
+  Game.reelGame.fishStamina=Math.max(5,Game.rodOffer.staminaRemaining*0.85);
+  Game.reelGame.tension=0;
+  Game.reelGame.progress=0;
+  Game.fightFish={name:Game.rodOffer.fishName,emoji:Game.rodOffer.fishEmoji,rarity:0.1,minW:1,maxW:10};
+  document.getElementById('reel-ui').style.display='block';
+  showNotif('🤝 Rod received! Good luck!','#44dd88');
+  Game.rodOffer=null;
+}
+function declineRodOffer(){
+  if(!Game.rodOffer) return;
+  clearTimeout(Game.rodOfferTimeout);
+  document.getElementById('rod-offer-prompt').style.display='none';
+  sendAction('rodDeclined',{fromId:Game.rodOffer.fromId});
+  Game.rodOffer=null;
+}
+
+// ─── FEATURE 7: FART HERDING ─────────────────────────────────────────────────
+function checkFartSync(){
+  if(Game.fartSync.cooldown>0) return;
+  const diff=Math.abs(Game.fartSync.myFartTime-Game.fartSync.partnerFartTime);
+  if(diff<5000&&Game.fartSync.myFartTime>0&&Game.fartSync.partnerFartTime>0){
+    Game.fartSync.cooldown=60;
+    Game.fartSync.myFartTime=0;Game.fartSync.partnerFartTime=0;
+    const mid=new THREE.Vector3();
+    const nearest=findNearestPlayer(200);
+    if(nearest){
+      mid.copy(camera.position).add(nearest.rp.mesh.position).multiplyScalar(0.5);
+    } else{
+      mid.copy(camera.position);
+    }
+    shiftHeatmapToward(mid.x,mid.z,0.3,45);
+    showNotif('💨💨 COMBINED FART CLOUD — Fish herded toward midpoint!','#88aa44');
+    triggerScreenShake(.04,.3);
+    for(let i=0;i<12;i++){
+      const p=new THREE.Mesh(new THREE.SphereGeometry(.15,6,6),new THREE.MeshBasicMaterial({color:0x88aa44,transparent:true,opacity:.4}));
+      p.position.set(camera.position.x+(Math.random()-.5)*2,camera.position.y-0.5,camera.position.z+(Math.random()-.5)*2);
+      scene.add(p);
+      const target=mid.clone();
+      Game.fartParts.push({mesh:p,life:0,maxLife:3,vel:new THREE.Vector3((target.x-p.position.x)*0.3,0.2,(target.z-p.position.z)*0.3)});
+    }
+  }
+}
+function updateFartSyncCooldown(dt){
+  if(Game.fartSync.cooldown>0) Game.fartSync.cooldown=Math.max(0,Game.fartSync.cooldown-dt);
+}
+
+// ─── FEATURE 8: GOVERNMENT AGENCY RAIDS ──────────────────────────────────────
+const AGENCIES=[
+  {name:'IRS',emoji:'💼',color:'#4444ff',announcement:'💼 IRS AUDIT! "We noticed some... irregularities in your fish income."',effect:'taxFish',duration:0,vehicles:3},
+  {name:'ATF',emoji:'🔫',color:'#884400',announcement:'🔫 ATF RAID! "Those rods look FULLY AUTOMATIC to us."',effect:'confiscateRods',duration:0,vehicles:4},
+  {name:'CIA',emoji:'🕶️',color:'#222222',announcement:'🕶️ CIA OPERATION! "We\'ve been watching you. Now we\'re inside your head."',effect:'invertControls',duration:120,vehicles:2},
+  {name:'ICE',emoji:'🧊',color:'#00aaff',announcement:'🧊 ICE RAID! "Nobody moves. NOBODY."',effect:'freeze',duration:30,vehicles:5},
+  {name:'FBI',emoji:'🏛️',color:'#003366',announcement:'🏛️ FBI INVESTIGATION! "Your catch log has been subpoenaed."',effect:'wipeCatchLog',duration:60,vehicles:6},
+  {name:'DEA',emoji:'🌿',color:'#006600',announcement:'🌿 DEA OPERATION! "Is that... bait? Or something else?"',effect:'fishInvisible',duration:180,vehicles:3},
+  {name:'NSA',emoji:'📡',color:'#440044',announcement:'📡 NSA SURVEILLANCE! "Your coordinates have been... shared."',effect:'broadcastLocation',duration:0,vehicles:1},
+  {name:'FEMA',emoji:'🌪️',color:'#ff6600',announcement:'🌪️ FEMA EMERGENCY DECLARATION! "Please evacuate immediately." (they do nothing)',effect:'fakeTornado',duration:20,vehicles:8},
+];
+function updateStationaryCheck(dt){
+  const ss=Game.stationarySystem;
+  if(ss.raidCooldown>0){ss.raidCooldown-=dt;return;}
+  if(Game.raidActive) return;
+  if(!ss.lastPosition){ss.lastPosition=camera.position.clone();return;}
+  const moved=camera.position.distanceTo(ss.lastPosition)>10;
+  if(moved){ss.timer=0;ss.warningGiven=false;ss.scannerWarned=false;ss.lastPosition=camera.position.clone();return;}
+  ss.timer+=dt;
+  const threshold=300+(ss.disguiseActive?180:0);
+  const warnTime=threshold-60;
+  if(ss.timer>=warnTime&&!ss.warningGiven){
+    ss.warningGiven=true;
+    if(ss.scannerActive&&!ss.scannerWarned){
+      ss.scannerWarned=true;
+      showNotif('📻 POLICE SCANNER: Federal activity detected. 60 seconds.','#ff8844');
+    } else{
+      showNotif('👁️ You\'ve been in one spot too long... they\'re watching.','#ff8844');
+    }
+  }
+  if(ss.timer>=threshold){
+    ss.timer=0;ss.warningGiven=false;ss.scannerWarned=false;
+    ss.disguiseActive=false;
+    triggerRaid();
+  }
+}
+function triggerRaid(){
+  if(Game.raidActive) return;
+  Game.raidActive=true;
+  const agency=AGENCIES[Math.floor(Math.random()*AGENCIES.length)];
+  const overlay=document.getElementById('raid-overlay');
+  overlay.style.display='block';
+  const flash=document.getElementById('raid-flash');
+  flash.style.background=agency.color;flash.style.opacity='0.6';
+  setTimeout(()=>{flash.style.opacity='0';},500);
+  const siren=document.getElementById('raid-siren');
+  siren.style.opacity='0.5';
+  const announce=document.getElementById('raid-announce');
+  announce.textContent=agency.announcement;announce.style.opacity='1';
+  triggerScreenShake(.15,.8);
+  showNotif(agency.announcement,agency.color);
+  sendAction('raidAlert',{agency:agency.name,username:Game.playerUsername});
+  const meshes=[];
+  for(let v=0;v<agency.vehicles;v++){
+    const angle=Math.random()*Math.PI*2;
+    const spawnDist=40;
+    const sx=camera.position.x+Math.cos(angle)*spawnDist;
+    const sz=camera.position.z+Math.sin(angle)*spawnDist;
+    const suv=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.6,2.4),new THREE.MeshLambertMaterial({color:0x111111}));
+    body.position.y=0.5;suv.add(body);
+    const hl=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.15,0.05),new THREE.MeshBasicMaterial({color:0xffffff}));
+    hl.position.set(-0.3,0.5,1.2);suv.add(hl);
+    const hr=hl.clone();hr.position.x=0.3;suv.add(hr);
+    suv.position.set(sx,0,sz);
+    suv.lookAt(camera.position.x,0,camera.position.z);
+    scene.add(suv);meshes.push(suv);
+    for(let a=0;a<2;a++){
+      const agent=new THREE.Group();
+      const torso=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,1.4),new THREE.MeshLambertMaterial({color:0x333333}));
+      torso.position.y=0.7;agent.add(torso);
+      const head=new THREE.Mesh(new THREE.SphereGeometry(0.12),new THREE.MeshLambertMaterial({color:0x666666}));
+      head.position.y=1.5;agent.add(head);
+      agent.position.set(sx+(a-0.5)*1.5,0,sz);
+      scene.add(agent);meshes.push(agent);
+    }
+  }
+  Game.raidMeshes=meshes;
+  const driveInterval=setInterval(()=>{
+    meshes.forEach(m=>{
+      const dx=camera.position.x-m.position.x;
+      const dz=camera.position.z-m.position.z;
+      const d=Math.sqrt(dx*dx+dz*dz);
+      if(d>5){
+        m.position.x+=dx/d*15*0.016;
+        m.position.z+=dz/d*15*0.016;
+      }
+    });
+  },16);
+  applyRaidEffect(agency);
+  const cleanupTime=(agency.duration||10)*1000+5000;
+  setTimeout(()=>{
+    clearInterval(driveInterval);
+    meshes.forEach(m=>scene.remove(m));
+    Game.raidMeshes=[];
+    overlay.style.display='none';
+    siren.style.opacity='0';announce.style.opacity='0';
+    Game.raidActive=false;
+    Game.stationarySystem.raidCooldown=180;
+    showNotif('🚗 Agents departing...','#888');
+  },Math.min(cleanupTime,30000));
+}
+function applyRaidEffect(agency){
+  const e=agency.effect;
+  if(e==='taxFish'){
+    const tax=Game.totalWeight*0.3;
+    Game.totalWeight=Math.max(0,Game.totalWeight-tax);
+    document.getElementById('total-weight').textContent=Game.totalWeight.toFixed(1);
+    showNotif('💼 IRS seized '+tax.toFixed(1)+' lbs of fish income!','#ff4040');
+  } else if(e==='confiscateRods'){
+    const seized=Math.max(0,Game.rods-1);
+    Game.rods=1;
+    document.getElementById('rod-count').textContent=Game.rods;
+    showNotif('🔫 ATF confiscated '+seized+' rods!','#ff4040');
+  } else if(e==='invertControls'){
+    Game.invertedControls=true;
+    Game.invertedControlsTimer=agency.duration;
+    showNotif('🕶️ Controls inverted for '+agency.duration+'s!','#ff4040');
+  } else if(e==='freeze'){
+    Game.frozenTimer=agency.duration;
+    showNotif('🧊 FROZEN for '+agency.duration+' seconds!','#00aaff');
+  } else if(e==='wipeCatchLog'){
+    Game.wipeCatchLogTimer=agency.duration;
+    showNotif('🏛️ Catch log subpoenaed! Temporarily wiped!','#ff4040');
+  } else if(e==='fishInvisible'){
+    Game.fishInvisibleTimer=agency.duration;
+    Game.fishSchools.forEach(s=>s.mesh.visible=false);
+    showNotif('🌿 All fish invisible for '+agency.duration+'s!','#006600');
+  } else if(e==='broadcastLocation'){
+    sendAction('chatBubble',{msg:'📡 NSA LEAK: '+Game.playerUsername+' is at ('+Math.round(camera.position.x)+', '+Math.round(camera.position.z)+')'});
+    showNotif('📡 Your location was broadcast to all players!','#ff4040');
+  } else if(e==='fakeTornado'){
+    showNotif('🌪️ TORNADO WARNING','#ff6600');
+    triggerScreenShake(.2,agency.duration);
+  }
+}
+function updateRaidEffects(dt){
+  if(Game.invertedControlsTimer>0){
+    Game.invertedControlsTimer-=dt;
+    if(Game.invertedControlsTimer<=0){Game.invertedControls=false;showNotif('🕶️ Controls restored','#44dd88');}
+  }
+  if(Game.frozenTimer>0){
+    Game.frozenTimer-=dt;
+    if(Game.frozenTimer<=0) showNotif('🧊 Unfrozen!','#44dd88');
+  }
+  if(Game.premiumBaitTimer>0) Game.premiumBaitTimer-=dt;
+  if(Game.wipeCatchLogTimer>0){
+    Game.wipeCatchLogTimer-=dt;
+    if(Game.wipeCatchLogTimer<=0) showNotif('🏛️ Catch log restored','#44dd88');
+  }
+  if(Game.fishInvisibleTimer>0){
+    Game.fishInvisibleTimer-=dt;
+    if(Game.fishInvisibleTimer<=0){
+      Game.fishSchools.forEach(s=>s.mesh.visible=true);
+      showNotif('🌿 Fish visible again','#44dd88');
+    }
+  }
+}
+
 // ─── SEEDED RANDOM ────────────────────────────────────────────────────────────
 function seededRandom(seed){
   let s=seed;
@@ -7554,6 +8209,7 @@ lockOverlay.addEventListener('click',()=>{
 });
 
 initializeStarterInventory();
+initHeatmap();
 checkContinueButton();
 
 const sensSlider=document.getElementById('sens-slider');
