@@ -3206,9 +3206,9 @@ function startTornado(){
 
 // ─── LINE TENSION SYSTEM ───────────────────────────────────────────────────────
 function updateLineTension(dt){
-  if(Game.state!=='fighting'&&Game.state!=='brawling') return;
+  if(Game.state!=='minigame'&&Game.state!=='brawling') return;
   
-  if(Game.state==='fighting'){
+  if(Game.state==='minigame'){
     Game.lineTension+=dt*8;
     if(Math.random()<0.05) Game.lineTension+=5;
   }
@@ -3443,7 +3443,7 @@ function updateStillness(dt){
 
 // ─── ROD MAINTENANCE ───────────────────────────────────────────────────────────
 function degradeEquipment(dt){
-  if(Game.state==='fighting'||Game.state==='brawling'){
+  if(Game.state==='minigame'||Game.state==='brawling'){
     Game.lineDurability=Math.max(0,Game.lineDurability-dt*2);
     Game.reelCondition=Math.max(0,Game.reelCondition-dt*0.5);
   }
@@ -5508,7 +5508,7 @@ function updateRemotePlayers(dt){
     
     if(rp.state==='casting'){
       rp.rod.rotation.x=Math.PI/4+Math.sin(Date.now()*0.01)*0.3;
-    } else if(rp.state==='fighting'||rp.state==='reeling'){
+    } else if(rp.state==='minigame'||rp.state==='hooked'){
       rp.rod.rotation.x=Math.PI/6+Math.sin(Date.now()*0.005)*0.15;
     } else{
       rp.rod.rotation.x+=(Math.PI/4-rp.rod.rotation.x)*0.1;
@@ -5654,7 +5654,7 @@ function handleRemoteAction(id,data){
     const uname=rp&&rp.username?rp.username:id;
     showRodOffer({fromId:id,fromUsername:uname,fishName:data.fishName,fishEmoji:data.fishEmoji,staminaRemaining:data.staminaRemaining});
   } else if(data.actionType==='rodAccepted'){
-    Game.state='idle';Game.reelGame.active=false;
+    Game.state='idle';Game.fightGame.active=false;
     document.getElementById('reel-ui').style.display='none';
     showNotif('🤝 Rod passed! +25 XP','#44dd88');
     Game.playerXP+=25;
@@ -6177,7 +6177,7 @@ function updateUIDisplays(){
   document.getElementById('player-xp').textContent=Game.playerXP;
   document.getElementById('xp-bar').style.width=(Game.playerXP/Game.xpToNextLevel*100)+'%';
   
-  if(Game.state==='fighting'||Game.state==='brawling'){
+  if(Game.state==='minigame'||Game.state==='brawling'){
     document.getElementById('line-tension-panel').style.display='block';
     document.getElementById('tension-bar').style.width=(Game.lineTension/Game.maxTension*100)+'%';
   } else{
@@ -6764,7 +6764,7 @@ document.addEventListener('keydown',e=>{
   if(e.code==='Tab'){
     e.preventDefault();
     if(Game.rodOffer){acceptRodOffer();return;}
-    if(Game.state==='reeling'){offerRod();return;}
+    if(Game.state==='minigame'){offerRod();return;}
     toggleLeaderboard();return;
   }
   if(e.code==='Digit4'&&e.shiftKey){e.preventDefault();toggleBaitShop();return;}
@@ -6797,9 +6797,8 @@ document.addEventListener('keydown',e=>{
     if(Game.state==='brawling') brawlParry();
   }
   if(e.code==='KeyR'){
-    if(Game.state==='reeling'&&Game.reelGame.active) Game.reelGame.reeling=true;
-    else if(Game.state==='brawling') brawlPin();
-    else if(Game.lineOut&&Game.state==='waiting') reelIn();
+    if(Game.state==='brawling') brawlPin();
+    else if(Game.lineOut&&(Game.state==='waiting'||Game.state==='hooked')) reelIn();
   }
   if(e.code==='KeyF'){
     if(Game.state==='brawling') brawlPunch();
@@ -6919,7 +6918,7 @@ document.addEventListener('keyup',e=>{
   if(e.code==='KeyD') keys.d=false;
   if(e.code==='KeyP') stopPissing();
   if(e.code==='KeyR'){
-    if(Game.reelGame.active) Game.reelGame.reeling=false;
+    // R key released — no action needed for new system
   }
   if(e.code==='ShiftLeft'||e.code==='ShiftRight'){
     keys.Shift=false;
@@ -7714,8 +7713,8 @@ function animateRod(t){
     heldRodGroup.position.y=Math.sin(t*8)*Game.power*.02;
   }
   else if(s==='waiting'){heldRodGroup.rotation.x=.18+Math.sin(t*.9)*.022;heldRodGroup.rotation.z=Math.sin(t*.55)*.012;heldRodGroup.position.y=0;}
-  else if(s==='bite'){heldRodGroup.rotation.x=.28+Math.sin(t*10)*.12;heldRodGroup.rotation.z=Math.sin(t*7)*.06;heldRodGroup.position.y=Math.sin(t*12)*.03;}
-  else if(s==='fighting'){heldRodGroup.rotation.x=.1+Math.sin(t*5)*.15;heldRodGroup.rotation.z=Math.sin(t*4)*.1;heldRodGroup.position.y=Math.sin(t*6)*.04;}
+  else if(s==='hooked'){heldRodGroup.rotation.x=.28+Math.sin(t*10)*.12;heldRodGroup.rotation.z=Math.sin(t*7)*.06;heldRodGroup.position.y=Math.sin(t*12)*.03;}
+  else if(s==='minigame'){heldRodGroup.rotation.x=.1+Math.sin(t*5)*.15;heldRodGroup.rotation.z=Math.sin(t*4)*.1;heldRodGroup.position.y=Math.sin(t*6)*.04;}
   else{heldRodGroup.rotation.x=0;heldRodGroup.rotation.z=0;heldRodGroup.position.y=0;}
 }
 
@@ -8105,7 +8104,7 @@ function animate(){
     r.mesh.scale.setScalar(.05+p*3.5);r.mesh.material.opacity=(1-p)*.55;
     if(r.life>=r.maxLife){scene.remove(r.mesh);ripplePool.splice(i,1);}
   }
-  if((Game.state==='waiting'||Game.state==='bite'||Game.state==='fighting')&&Math.random()<.012) spawnRipple(Game.bobberPos);
+  if((Game.state==='waiting'||Game.state==='hooked'||Game.state==='minigame')&&Math.random()<.012) spawnRipple(Game.bobberPos);
 
   // Splashes
   for(let i=splashPool.length-1;i>=0;i--){
@@ -8901,13 +8900,13 @@ function updateSyncPiss(dt){
 
 // ─── FEATURE 6: PASS THE ROD ─────────────────────────────────────────────────
 function offerRod(){
-  if(Game.state!=='reeling'||!Game.reelGame.active) return;
+  if(Game.state!=='minigame'||!Game.fightGame.active) return;
   const nearest=findNearestPlayer(20);
   if(!nearest){showNotif('No player nearby to pass rod','#888');return;}
   sendAction('rodOffer',{
     fishName:Game.fightFish?Game.fightFish.name:'Unknown',
     fishEmoji:Game.fightFish?Game.fightFish.emoji:'🐟',
-    staminaRemaining:Game.reelGame.fishStamina,
+    staminaRemaining:0,
     fromId:'local'
   });
   showNotif('🎣 Offering rod to '+nearest.id+'...','#88ddff');
@@ -8935,11 +8934,11 @@ function acceptRodOffer(){
   clearTimeout(Game.rodOfferTimeout);
   document.getElementById('rod-offer-prompt').style.display='none';
   sendAction('rodAccepted',{fromId:Game.rodOffer.fromId});
-  Game.state='reeling';
-  Game.reelGame.active=true;
-  Game.reelGame.fishStamina=Math.max(5,Game.rodOffer.staminaRemaining*0.85);
-  Game.reelGame.tension=0;
-  Game.reelGame.progress=0;
+  Game.state='minigame';
+  Game.fightGame.active=true;
+  Game.fightGame.cursor=50;
+  Game.fightGame.inZoneTime=0;
+  Game.fightGame.outZoneTime=0;
   Game.fightFish={name:Game.rodOffer.fishName,emoji:Game.rodOffer.fishEmoji,rarity:0.1,minW:1,maxW:10};
   document.getElementById('reel-ui').style.display='block';
   showNotif('🤝 Rod received! Good luck!','#44dd88');
@@ -9380,10 +9379,10 @@ function updateFishingHint(){
     hint='Bobber in flight...';
   } else if(Game.state==='waiting'){
     hint='Waiting for a bite... (5–30 seconds)';
-  } else if(Game.state==='bite'){
-    hint='🐟 FISH ON! Click LEFT MOUSE BUTTON to fight!';
-  } else if(Game.state==='fighting'){
-    hint='Hold LMB to reel — keep the bar in the GREEN zone!';
+  } else if(Game.state==='hooked'){
+    hint='🐟 HOOKED! Click to start the minigame!';
+  } else if(Game.state==='minigame'){
+    hint='Hold CLICK to push the bar RIGHT — keep it in the GREEN zone!';
   } else if(Game.state==='brawling'){
     hint='WASD to dodge, F to punch, R to pin, SPACE to parry!';
   } else if(Game.state==='finisher'){
