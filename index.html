@@ -717,6 +717,7 @@
     <label class="gfx-toggle"><input type="checkbox" id="gfx-reflections" checked onchange="toggleGraphicsSetting('reflections',this.checked)"> Water Reflections</label>
     <label class="gfx-toggle"><input type="checkbox" id="gfx-godrays" checked onchange="toggleGraphicsSetting('godrays',this.checked)"> God Rays</label>
     <label class="gfx-toggle"><input type="checkbox" id="gfx-lens" checked onchange="toggleGraphicsSetting('lensEffects',this.checked)"> Lens Effects</label>
+    <label class="gfx-toggle"><input type="checkbox" id="gfx-vegetation" checked onchange="toggleVegetation(this.checked)"> Trees, Bushes & Rocks</label>
   </div>
   
   <div style="margin-top:20px;">
@@ -2488,6 +2489,8 @@ function makeTree(x,by,z,s=1){
     fl.position.y=trunkH+l*leafH*.5; fl.castShadow=true; g.add(fl);
   }
   g.position.set(x,by,z); scene.add(g);
+  if(!Game.vegetation) Game.vegetation=[];
+  Game.vegetation.push(g);
 }
 
 function makeRock(x,y,z,s=1){
@@ -2497,6 +2500,8 @@ function makeRock(x,y,z,s=1){
   geo.computeVertexNormals();
   const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x606878,roughness:0.9,metalness:0.1,envMap:envMap}));
   m.position.set(x,y,z);m.rotation.set(Math.random(),Math.random(),Math.random());m.castShadow=true;scene.add(m);
+  if(!Game.vegetation) Game.vegetation=[];
+  Game.vegetation.push(m);
 }
 
 // ─── SEEDED NOISE SYSTEM ──────────────────────────────────────────────────────
@@ -6308,6 +6313,15 @@ function toggleGraphicsSetting(setting,value){
   applyGraphicsSettings();
 }
 
+function toggleVegetation(show){
+  Game.settings.showVegetation=show;
+  if(!Game.vegetation) return;
+  Game.vegetation.forEach(obj=>{
+    obj.visible=show;
+  });
+  showNotif(show?'🌲 Vegetation shown':'🌲 Vegetation hidden','#88dd88');
+}
+
 function setWaterQuality(quality){
   Game.settings.waterQuality=quality;
   applyGraphicsSettings();
@@ -6334,6 +6348,7 @@ function syncGraphicsUI(){
   document.getElementById('gfx-reflections').checked=Game.settings.reflections;
   document.getElementById('gfx-godrays').checked=Game.settings.godrays;
   document.getElementById('gfx-lens').checked=Game.settings.lensEffects;
+  document.getElementById('gfx-vegetation').checked=Game.settings.showVegetation!==false;
   document.getElementById('water-quality').value=Game.settings.waterQuality;
   document.getElementById('shadow-quality').value=Game.settings.shadowQuality;
   
