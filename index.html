@@ -7795,7 +7795,7 @@ function startFishingMinigame(){
   fg.cursor=50;
   fg.zone={left:50-zoneW/2,width:zoneW};
   fg.zoneDir=Math.random()>0.5?1:-1;
-  fg.zoneSpeed=15+Math.random()*20;
+  fg.zoneSpeed=6+Math.random()*8;
   fg.inZoneTime=0;
   fg.outZoneTime=0;
   fg.requiredTime=reqTime;
@@ -7829,10 +7829,10 @@ function updateFishingMinigame(dt){
 
   // Move capture zone randomly and smoothly
   fg.zone.left+=fg.zoneDir*fg.zoneSpeed*dt;
-  if(fg.zone.left<=5){fg.zone.left=5;fg.zoneDir=1;fg.zoneSpeed=15+Math.random()*20;}
-  if(fg.zone.left+fg.zone.width>=95){fg.zone.left=95-fg.zone.width;fg.zoneDir=-1;fg.zoneSpeed=15+Math.random()*20;}
+  if(fg.zone.left<=5){fg.zone.left=5;fg.zoneDir=1;fg.zoneSpeed=6+Math.random()*8;}
+  if(fg.zone.left+fg.zone.width>=95){fg.zone.left=95-fg.zone.width;fg.zoneDir=-1;fg.zoneSpeed=6+Math.random()*8;}
   // Occasionally change direction for unpredictability
-  if(Math.random()<dt*0.8){fg.zoneDir*=-1;fg.zoneSpeed=15+Math.random()*20;}
+  if(Math.random()<dt*0.3){fg.zoneDir*=-1;fg.zoneSpeed=6+Math.random()*8;}
 
   // Bar physics: pulled LEFT, click pushes RIGHT
   if(fg.lmbHeld){
@@ -7852,7 +7852,7 @@ function updateFishingMinigame(dt){
     fg.outZoneTime=Math.max(0,fg.outZoneTime-dt);
   } else {
     fg.outZoneTime+=dt;
-    fg.inZoneTime=Math.max(0,fg.inZoneTime-dt*3.0); // Drain 3x faster than fill
+    // Hold progress: do not decrease inZoneTime when outside the zone
   }
   
   const progress=Math.min(100,(fg.inZoneTime/fg.requiredTime)*100);
