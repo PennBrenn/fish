@@ -1248,7 +1248,7 @@
   <div class="fish-name" id="catch-name">Bass</div>
   <div class="fish-weight" id="catch-weight">2.4 lb</div>
   <div class="multi-catch" id="catch-multi" style="display:none"></div>
-  <div class="fish-record" id="catch-record" style="display:none">NEW RECORD!</div>
+  <div class="fish-record" id="catch-record" style="display:none">Thats the biggest pen- FISH ive ever seen!</div>
   <div class="dismiss">press any key to continue</div>
 </div>
 
@@ -1371,6 +1371,10 @@
 // ╚═══════════════════════════════════════════════════╝
 
 const FISH_DB = [
+  { name:'Femboy',   emoji:'penis', minW:1.2, maxW:8.5,  rarity:0.05, color:0x4a7c59, taunt:'~ughhgh yes... ~mhhgh ~ughhh', 
+    archetype:'balanced', combatHP:100, attackSpeed:0.5, attacks:['cum','cum'], special:'Twinkification', finisher:'Uses your thights as earmufs' },
+  { name:'Nigga',   emoji:'penis', minW:1.2, maxW:8.5,  rarity:0.05, color:0x4a7c59, taunt:'Niggification Completed', 
+    archetype:'balanced', combatHP:100, attackSpeed:5000, attacks:['steal your shit','cum in your wife'], special:'Niggafication', finisher:'segregation' },
   { name:'Largemouth Bass',   emoji:'🐟', minW:1.2, maxW:8.5,  rarity:0.13, color:0x4a7c59, taunt:'thought u were tough huh', 
     archetype:'balanced', combatHP:100, attackSpeed:1.0, attacks:['tail-sweep','fin-slap'], special:'Bass Drop', finisher:'The Largemouth Lockdown' },
   { name:'Rainbow Trout',     emoji:'🐠', minW:0.8, maxW:5.0,  rarity:0.12, color:0x6a9fb5, taunt:'ur not even a real angler',
@@ -7807,16 +7811,16 @@ function startFishingMinigame(){
   clearTimeout(Game._biteTimeout);
   const bi=document.getElementById('bite-indicator');if(bi)bi.style.display='none';
   triggerScreenShake(.04,.25);
-
+ // Difficulty to catch
   const fish=Game.fightFish;
   const diff=getFishDifficulty(fish);
-  const reqTime={easy:1,medium:1.5,hard:2.5,legendary:3}[diff]||1.5;
-  const driftSpd={easy:18,medium:24,hard:32,legendary:42}[diff]||24;
-  const zoneW={easy:35,medium:28,hard:20,legendary:14}[diff]||28;
+  const reqTime={easy:0.5,medium:1,hard:1.5,legendary:5}[diff]||1.5;
+  const driftSpd={easy:10,medium:20,hard:30,legendary:100}[diff]||24;
+  const zoneW={easy:50,medium:40,hard:30,legendary:5}[diff]||28;
 
   const fg=Game.fightGame;
   fg.active=true;
-  fg.cursor=50;
+  fg.cursor=100;
   fg.zone={left:50-zoneW/2,width:zoneW};
   fg.zoneDir=Math.random()>0.5?1:-1;
   fg.zoneSpeed=6+Math.random()*8;
