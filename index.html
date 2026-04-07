@@ -7807,9 +7807,9 @@ function startFishingMinigame(){
  // Difficulty to catch
   const fish=Game.fightFish;
   const diff=getFishDifficulty(fish);
-  const reqTime={easy:0.5,medium:1,hard:1.5,legendary:5}[diff]||1.5;
-  const driftSpd={easy:10,medium:20,hard:30,legendary:100}[diff]||24;
-  const zoneW={easy:50,medium:40,hard:30,legendary:5}[diff]||28;
+  const reqTime={easy:1,medium:1,hard:1,legendary:1}[diff]||1.5;
+  const driftSpd={easy:10,medium:20,hard:30,legendary:40}[diff]||24;
+  const zoneW={easy:50,medium:50,hard:50,legendary:50}[diff]||28;
 
   const fg=Game.fightGame;
   fg.active=true;
